@@ -1,3 +1,4 @@
+import { datasVencimento } from "@/lib/format";
 import type {
   GrupoGestao,
   Pagamento,
@@ -25,6 +26,7 @@ export interface MesFinanceiro {
   clausulasDetalhe: ClausulaDetalhe[];
   receitasAvulsas: number;
   custosFixos: number;
+  custosFixosManual: boolean;
   despesasAvulsas: number;
   receita: number;
   gasto: number;
@@ -35,18 +37,12 @@ function toDate(iso: string): Date {
   return new Date(iso + "T00:00:00");
 }
 
-function overlapDays(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date): number {
-  const start = aStart > bStart ? aStart : bStart;
-  const end = aEnd < bEnd ? aEnd : bEnd;
-  const dias = Math.round((end.getTime() - start.getTime()) / 86400000);
-  return Math.max(dias, 0);
-}
-
 export function calcTabelaMensal(
   grupos: GrupoGestao[],
   pagamentos: Pagamento[],
   lancamentos: LancamentoFinanceiro[],
-  custosFixosTotal: number
+  custosFixosAtual: number,
+  overridesCustosFixos: Map<string, number> = new Map()
 ): MesFinanceiro[] {
   const hoje = new Date(new Date().toDateString());
 
@@ -63,6 +59,24 @@ export function calcTabelaMensal(
     Math.min(...todasDatas.map((d) => d.getTime()))
   );
 
+  // Pré-calcula, para cada grupo, os meses em que uma mensalidade vence
+  // (um mês após o início, e a cada mês seguinte).
+  const receitaPorMes = new Map<string, ContribuicaoGrupo[]>();
+  for (const g of grupos) {
+    const inicioGrupo = toDate(g.data_inicio);
+    const fimGrupo = g.data_termino ? toDate(g.data_termino) : hoje;
+    for (const venc of datasVencimento(inicioGrupo, fimGrupo)) {
+      const chave = `${venc.getFullYear()}-${venc.getMonth()}`;
+      const lista = receitaPorMes.get(chave) ?? [];
+      lista.push({
+        grupoId: g.id,
+        nome: g.nome,
+        valor: Number(g.valor_mensal),
+      });
+      receitaPorMes.set(chave, lista);
+    }
+  }
+
   const meses: MesFinanceiro[] = [];
   let cursor = new Date(primeiraData.getFullYear(), primeiraData.getMonth(), 1);
   const fim = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
@@ -70,25 +84,10 @@ export function calcTabelaMensal(
   while (cursor <= fim) {
     const ano = cursor.getFullYear();
     const mesIdx = cursor.getMonth();
-    const inicioMes = new Date(ano, mesIdx, 1);
-    const fimMes = new Date(ano, mesIdx + 1, 1);
-    const diasNoMes = Math.round(
-      (fimMes.getTime() - inicioMes.getTime()) / 86400000
-    );
+    const chaveMes = `${ano}-${mesIdx}`;
 
-    let receitaEstimada = 0;
-    const gruposDetalhe: ContribuicaoGrupo[] = [];
-    for (const g of grupos) {
-      const inicioGrupo = toDate(g.data_inicio);
-      const fimGrupo = g.data_termino ? toDate(g.data_termino) : hoje;
-      const dias = overlapDays(inicioGrupo, fimGrupo, inicioMes, fimMes);
-      const valor = Number(g.valor_mensal) * (dias / diasNoMes);
-      receitaEstimada += valor;
-      if (valor > 0) {
-        gruposDetalhe.push({ grupoId: g.id, nome: g.nome, valor });
-      }
-    }
-    gruposDetalhe.sort((a, b) => b.valor - a.valor);
+    const gruposDetalhe = receitaPorMes.get(chaveMes) ?? [];
+    const receitaEstimada = gruposDetalhe.reduce((acc, g) => acc + g.valor, 0);
 
     const noMes = (d: Date) => d.getFullYear() === ano && d.getMonth() === mesIdx;
 
@@ -115,8 +114,12 @@ export function calcTabelaMensal(
       .filter((l) => l.tipo === "DESPESA" && noMes(toDate(l.data)))
       .reduce((acc, l) => acc + Number(l.valor), 0);
 
+    const chaveOverride = `${ano}-${mesIdx + 1}`;
+    const overrideCustosFixos = overridesCustosFixos.get(chaveOverride);
+    const custosFixos = overrideCustosFixos ?? custosFixosAtual;
+
     const receita = receitaEstimada + clausulas + receitasAvulsas;
-    const gasto = custosFixosTotal + despesasAvulsas;
+    const gasto = custosFixos + despesasAvulsas;
 
     meses.push({
       ano,
@@ -126,7 +129,8 @@ export function calcTabelaMensal(
       clausulas,
       clausulasDetalhe,
       receitasAvulsas,
-      custosFixos: custosFixosTotal,
+      custosFixos,
+      custosFixosManual: overrideCustosFixos !== undefined,
       despesasAvulsas,
       receita,
       gasto,

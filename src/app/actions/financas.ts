@@ -57,3 +57,25 @@ export async function removeLancamento(lancamentoId: string) {
   await supabase.from("lancamentos_financeiros").delete().eq("id", lancamentoId);
   revalidatePath("/financas");
 }
+
+export async function upsertCustoFixoMensal(
+  ano: number,
+  mes: number,
+  valor: number
+) {
+  const supabase = await createClient();
+  await supabase
+    .from("custos_fixos_mensais")
+    .upsert({ ano, mes, valor, updated_at: new Date().toISOString() });
+  revalidatePath("/financas");
+}
+
+export async function removeCustoFixoMensal(ano: number, mes: number) {
+  const supabase = await createClient();
+  await supabase
+    .from("custos_fixos_mensais")
+    .delete()
+    .eq("ano", ano)
+    .eq("mes", mes);
+  revalidatePath("/financas");
+}

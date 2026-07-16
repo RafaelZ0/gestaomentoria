@@ -13,6 +13,7 @@ export default async function FinancasPage() {
     { data: grupos },
     { data: custosFixos },
     { data: lancamentos },
+    { data: custosFixosMensaisOverrides },
   ] = await Promise.all([
     supabase.from("pagamentos").select("*"),
     supabase.from("grupos_gestao").select("*"),
@@ -22,6 +23,7 @@ export default async function FinancasPage() {
       .select("*")
       .order("data", { ascending: false })
       .order("created_at", { ascending: false }),
+    supabase.from("custos_fixos_mensais").select("*"),
   ]);
 
   const custosFixosMensais = (custosFixos ?? []).reduce(
@@ -29,11 +31,19 @@ export default async function FinancasPage() {
     0
   );
 
+  const overridesMap = new Map(
+    (custosFixosMensaisOverrides ?? []).map((o) => [
+      `${o.ano}-${o.mes}`,
+      Number(o.valor),
+    ])
+  );
+
   const tabelaMensal = calcTabelaMensal(
     grupos ?? [],
     pagamentos ?? [],
     lancamentos ?? [],
-    custosFixosMensais
+    custosFixosMensais,
+    overridesMap
   );
 
   const receitaTotal = tabelaMensal.reduce((acc, m) => acc + m.receita, 0);
@@ -95,15 +105,17 @@ export default async function FinancasPage() {
           Por mês
         </h2>
         <p className="mt-1 text-xs text-text-secondary">
-          Receita = faturamento estimado dos grupos ativos no mês + cláusulas
-          recebidas + receitas avulsas. Gasto = custos fixos atuais (
-          {formatBRL(custosFixosMensais)}) + despesas avulsas lançadas no mês.
-          Clique em um mês para ver a composição e editar os lançamentos.
+          Receita = mensalidades que venceram no mês (1 mês após a entrada de
+          cada grupo, e a cada mês seguinte) + cláusulas recebidas + receitas
+          avulsas. Gasto = custos fixos do mês (por padrão, o valor atual de{" "}
+          {formatBRL(custosFixosMensais)} — editável por mês) + despesas
+          avulsas lançadas no mês. Clique em um mês para ver a composição e
+          editar.
         </p>
         <TabelaMensalFinancas
           meses={tabelaMensal}
           lancamentos={lancamentos ?? []}
-          custosFixos={custosFixos ?? []}
+          custosFixosAtual={custosFixosMensais}
         />
       </section>
 

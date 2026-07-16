@@ -24,13 +24,40 @@ export function calcDuracaoDias(
   return Math.max(dias, 0);
 }
 
+export function addMonths(data: Date, meses: number): Date {
+  const alvo = new Date(data.getFullYear(), data.getMonth() + meses, 1);
+  const ultimoDiaDoMesAlvo = new Date(
+    alvo.getFullYear(),
+    alvo.getMonth() + 1,
+    0
+  ).getDate();
+  alvo.setDate(Math.min(data.getDate(), ultimoDiaDoMesAlvo));
+  return alvo;
+}
+
+// Datas em que a mensalidade vence: um mês após o início, e a cada mês
+// seguinte, até (e incluindo) `fim`.
+export function datasVencimento(dataInicio: Date, fim: Date): Date[] {
+  const vencimentos: Date[] = [];
+  let cursor = addMonths(dataInicio, 1);
+  while (cursor <= fim) {
+    vencimentos.push(cursor);
+    cursor = addMonths(cursor, 1);
+  }
+  return vencimentos;
+}
+
 export function calcFaturamentoEstimado(
   valorMensal: number,
   dataInicio: string,
   dataTermino: string | null
 ): number {
-  const dias = calcDuracaoDias(dataInicio, dataTermino);
-  return valorMensal * (dias / 30);
+  const inicio = new Date(dataInicio + "T00:00:00");
+  const fim = dataTermino
+    ? new Date(dataTermino + "T00:00:00")
+    : new Date(new Date().toDateString());
+  const qtdVencimentos = datasVencimento(inicio, fim).length;
+  return valorMensal * qtdVencimentos;
 }
 
 export function formatMesAno(ano: number, mes: number): string {

@@ -1,19 +1,23 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useState, useTransition } from "react";
 import { formatBRL, formatMesAno, formatDate } from "@/lib/format";
 import { LancamentosList } from "@/components/LancamentosList";
+import {
+  removeCustoFixoMensal,
+  upsertCustoFixoMensal,
+} from "@/app/actions/financas";
 import type { MesFinanceiro } from "@/lib/finance";
-import type { CustoFixo, LancamentoFinanceiro } from "@/lib/database.types";
+import type { LancamentoFinanceiro } from "@/lib/database.types";
 
 export function TabelaMensalFinancas({
   meses,
   lancamentos,
-  custosFixos,
+  custosFixosAtual,
 }: {
   meses: MesFinanceiro[];
   lancamentos: LancamentoFinanceiro[];
-  custosFixos: CustoFixo[];
+  custosFixosAtual: number;
 }) {
   const [expandido, setExpandido] = useState<string | null>(null);
 
@@ -52,6 +56,11 @@ export function TabelaMensalFinancas({
                   </td>
                   <td className="px-4 py-3 tabular-nums text-status-alert-text">
                     {formatBRL(m.gasto)}
+                    {m.custosFixosManual && (
+                      <span className="ml-1 text-xs text-text-secondary">
+                        (custo fixo editado)
+                      </span>
+                    )}
                   </td>
                   <td
                     className={`px-4 py-3 tabular-nums font-medium ${
@@ -78,7 +87,7 @@ export function TabelaMensalFinancas({
                                 key={g.grupoId}
                                 className="flex items-center justify-between text-text-secondary"
                               >
-                                <span>{g.nome} (valor mensal proporcional)</span>
+                                <span>{g.nome} (mensalidade vencida)</span>
                                 <span className="tabular-nums text-text-primary">
                                   {formatBRL(g.valor)}
                                 </span>
@@ -101,7 +110,8 @@ export function TabelaMensalFinancas({
                             {m.gruposDetalhe.length === 0 &&
                               m.clausulasDetalhe.length === 0 && (
                                 <li className="text-text-secondary">
-                                  Nenhum grupo ativo ou cláusula neste mês.
+                                  Nenhuma mensalidade vencida ou cláusula neste
+                                  mês.
                                 </li>
                               )}
                           </ul>
@@ -111,30 +121,22 @@ export function TabelaMensalFinancas({
                           <h3 className="font-display text-sm font-semibold text-text-primary">
                             De onde vem o gasto
                           </h3>
-                          <ul className="mt-2 space-y-1 text-sm">
-                            {custosFixos.map((c) => (
-                              <li
-                                key={c.id}
-                                className="flex items-center justify-between text-text-secondary"
-                              >
-                                <span>{c.nome} (custo fixo atual)</span>
-                                <span className="tabular-nums text-text-primary">
-                                  {formatBRL(Number(c.valor))}
-                                </span>
-                              </li>
-                            ))}
-                            {custosFixos.length === 0 && (
-                              <li className="text-text-secondary">
-                                Nenhum custo fixo cadastrado.
-                              </li>
-                            )}
-                          </ul>
-                          <a
-                            href="/custo-hora"
-                            className="mt-2 inline-block text-xs text-accent hover:text-accent-hover"
-                          >
-                            Editar custos fixos em Custo Hora →
-                          </a>
+                          <p className="mt-1 text-xs text-text-secondary">
+                            Custo fixo total deste mês. Por padrão segue o
+                            valor atual (
+                            {formatBRL(custosFixosAtual)}), mas pode ser
+                            ajustado para refletir o que você gastava naquele
+                            período.
+                          </p>
+                          <div className="mt-2">
+                            <CustoFixoMensalEditor
+                              ano={m.ano}
+                              mes={m.mes}
+                              valor={m.custosFixos}
+                              manual={m.custosFixosManual}
+                              valorAtual={custosFixosAtual}
+                            />
+                          </div>
                         </div>
                       </div>
 
@@ -167,5 +169,64 @@ export function TabelaMensalFinancas({
         </tbody>
       </table>
     </div>
+  );
+}
+
+function CustoFixoMensalEditor({
+  ano,
+  mes,
+  valor,
+  manual,
+  valorAtual,
+}: {
+  ano: number;
+  mes: number;
+  valor: number;
+  manual: boolean;
+  valorAtual: number;
+}) {
+  const [isPending, startTransition] = useTransition();
+
+  return (
+    <form
+      action={(formData) => {
+        const novoValor = Number(formData.get("valor") ?? 0);
+        startTransition(() => upsertCustoFixoMensal(ano, mes, novoValor));
+      }}
+      className="flex items-end gap-3"
+    >
+      <div className="flex-1">
+        <label className="mb-1 block text-xs text-text-secondary">
+          Custo fixo de {formatMesAno(ano, mes)} (R$)
+        </label>
+        <input
+          name="valor"
+          type="number"
+          step="0.01"
+          min="0"
+          defaultValue={valor}
+          className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-accent tabular-nums"
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={isPending}
+        className="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+      >
+        Salvar
+      </button>
+      {manual && (
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={() =>
+            startTransition(() => removeCustoFixoMensal(ano, mes))
+          }
+          className="rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-bg-surface-hover disabled:opacity-60"
+        >
+          Usar atual ({formatBRL(valorAtual)})
+        </button>
+      )}
+    </form>
   );
 }

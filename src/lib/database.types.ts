@@ -90,6 +90,13 @@ export type LancamentoFinanceiro = {
   created_at: string;
 };
 
+export type CustoFixoMensal = {
+  ano: number;
+  mes: number;
+  valor: number;
+  updated_at: string;
+};
+
 type Relationships = never[];
 
 export type Database = {
@@ -157,6 +164,13 @@ export type Database = {
         Insert: Partial<LancamentoFinanceiro> &
           Pick<LancamentoFinanceiro, "tipo" | "descricao" | "valor">;
         Update: Partial<LancamentoFinanceiro>;
+        Relationships: Relationships;
+      };
+      custos_fixos_mensais: {
+        Row: CustoFixoMensal;
+        Insert: Partial<CustoFixoMensal> &
+          Pick<CustoFixoMensal, "ano" | "mes" | "valor">;
+        Update: Partial<CustoFixoMensal>;
         Relationships: Relationships;
       };
     };
