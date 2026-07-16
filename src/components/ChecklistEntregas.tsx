@@ -1,8 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { toggleEntrega } from "@/app/actions/entregas";
-import { formatDate } from "@/lib/format";
+import { toggleEntrega, updateEntregaData } from "@/app/actions/entregas";
 
 export interface EntregaItem {
   id: string;
@@ -49,10 +48,18 @@ export function ChecklistEntregas({
             />
             {e.nome}
           </label>
-          {e.feito && e.data_feito && (
-            <span className="text-xs text-text-secondary">
-              {formatDate(e.data_feito)}
-            </span>
+          {e.feito && (
+            <input
+              type="date"
+              value={e.data_feito ?? ""}
+              disabled={isPending}
+              onChange={(ev) =>
+                startTransition(() =>
+                  updateEntregaData(grupoId, e.id, ev.target.value)
+                )
+              }
+              className="rounded-lg border border-border bg-bg-surface px-2 py-1 text-xs text-text-secondary outline-none focus:border-accent tabular-nums"
+            />
           )}
         </li>
       ))}

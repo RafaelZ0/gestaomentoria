@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { formatBRL } from "@/lib/format";
+import { calcFaturamentoEstimado, formatBRL } from "@/lib/format";
 import { LancamentosList } from "@/components/LancamentosList";
 
 export default async function FinancasPage() {
@@ -22,8 +22,14 @@ export default async function FinancasPage() {
       .order("created_at", { ascending: false }),
   ]);
 
-  const faturamentoGrupos = (pagamentos ?? []).reduce(
-    (acc, p) => acc + Number(p.valor),
+  const faturamentoGruposEstimado = (grupos ?? []).reduce(
+    (acc, g) =>
+      acc +
+      calcFaturamentoEstimado(
+        Number(g.valor_mensal),
+        g.data_inicio,
+        g.data_termino
+      ),
     0
   );
   const valorClausulas = (pagamentos ?? [])
@@ -37,7 +43,7 @@ export default async function FinancasPage() {
     .filter((l) => l.tipo === "DESPESA")
     .reduce((acc, l) => acc + Number(l.valor), 0);
 
-  const totalReceitas = faturamentoGrupos + receitasAvulsas;
+  const totalReceitas = faturamentoGruposEstimado + valorClausulas + receitasAvulsas;
   const margemAcumulada = totalReceitas - despesasAvulsas;
 
   const custosFixosMensais = (custosFixos ?? []).reduce(
@@ -92,10 +98,11 @@ export default async function FinancasPage() {
       </div>
 
       <p className="text-xs text-text-secondary">
-        Faturamento dos grupos: {formatBRL(faturamentoGrupos)} · Receitas
-        avulsas: {formatBRL(receitasAvulsas)}. Custos fixos mensais são um
-        valor de referência (não somado à margem acima, que reflete os
-        lançamentos avulsos ao longo do tempo).
+        Faturamento estimado dos grupos (valor mensal × tempo ativo):{" "}
+        {formatBRL(faturamentoGruposEstimado)} · Cláusulas recebidas:{" "}
+        {formatBRL(valorClausulas)} · Receitas avulsas:{" "}
+        {formatBRL(receitasAvulsas)}. Custos fixos mensais são um valor de
+        referência (não somado à margem acima).
       </p>
 
       <section>

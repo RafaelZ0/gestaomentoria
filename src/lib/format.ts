@@ -24,6 +24,15 @@ export function calcDuracaoDias(
   return Math.max(dias, 0);
 }
 
+export function calcFaturamentoEstimado(
+  valorMensal: number,
+  dataInicio: string,
+  dataTermino: string | null
+): number {
+  const dias = calcDuracaoDias(dataInicio, dataTermino);
+  return valorMensal * (dias / 30);
+}
+
 export function formatDuracao(dias: number): string {
   const meses = Math.floor(dias / 30);
   const diasRestantes = dias % 30;

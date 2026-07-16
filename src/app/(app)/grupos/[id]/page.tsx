@@ -1,5 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import { formatBRL, formatDate, calcDuracaoDias, formatDuracao } from "@/lib/format";
+import {
+  formatBRL,
+  formatDate,
+  calcDuracaoDias,
+  calcFaturamentoEstimado,
+  formatDuracao,
+} from "@/lib/format";
 import { trafegoPagoVariant, StatusBadge } from "@/components/StatusBadge";
 import { EditarGrupoForm } from "@/components/EditarGrupoForm";
 import { CancelarGrupoButton } from "@/components/CancelarGrupoModal";
@@ -27,12 +33,17 @@ export default async function GrupoOverviewPage({
 
   if (!grupo) return null;
 
-  const faturamentoGrupo = (pagamentos ?? []).reduce(
+  const recebidoRegistrado = (pagamentos ?? []).reduce(
     (acc, p) => acc + Number(p.valor),
     0
   );
 
   const duracaoDias = calcDuracaoDias(grupo.data_inicio, grupo.data_termino);
+  const faturamentoEstimado = calcFaturamentoEstimado(
+    Number(grupo.valor_mensal),
+    grupo.data_inicio,
+    grupo.data_termino
+  );
 
   type EntregaRow = {
     id: string;
@@ -55,7 +66,10 @@ export default async function GrupoOverviewPage({
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <InfoCard label="Valor mensal" value={formatBRL(Number(grupo.valor_mensal))} />
-        <InfoCard label="Faturamento do grupo" value={formatBRL(faturamentoGrupo)} />
+        <InfoCard
+          label="Faturamento estimado"
+          value={formatBRL(faturamentoEstimado)}
+        />
         <InfoCard label="Duração" value={formatDuracao(duracaoDias)} />
         <div className="rounded-xl border border-border bg-bg-surface p-5">
           <p className="text-sm text-text-secondary">Tráfego pago</p>
@@ -75,6 +89,9 @@ export default async function GrupoOverviewPage({
       <div className="text-sm text-text-secondary">
         Início em {formatDate(grupo.data_inicio)}
         {grupo.data_termino && <> · Encerrado em {formatDate(grupo.data_termino)}</>}
+        {recebidoRegistrado > 0 && (
+          <> · {formatBRL(recebidoRegistrado)} recebido em pagamentos registrados</>
+        )}
       </div>
 
       {grupo.observacoes && (

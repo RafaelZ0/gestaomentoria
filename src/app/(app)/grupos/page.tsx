@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { formatBRL, formatDate } from "@/lib/format";
+import { calcFaturamentoEstimado, formatBRL, formatDate } from "@/lib/format";
 import {
   StatusBadge,
   statusGrupoVariant,
@@ -12,22 +12,26 @@ const DIAS_SEM_SINAL_DE_VIDA = 30;
 export default async function GruposPage() {
   const supabase = await createClient();
 
-  const [{ data: grupos }, { data: pagamentos }, { data: reunioes }] =
-    await Promise.all([
-      supabase
-        .from("grupos_gestao")
-        .select("*")
-        .order("status", { ascending: true })
-        .order("nome", { ascending: true }),
-      supabase.from("pagamentos").select("*"),
-      supabase
-        .from("reunioes")
-        .select("*")
-        .order("data", { ascending: false }),
-    ]);
+  const [{ data: grupos }, { data: reunioes }] = await Promise.all([
+    supabase
+      .from("grupos_gestao")
+      .select("*")
+      .order("status", { ascending: true })
+      .order("nome", { ascending: true }),
+    supabase
+      .from("reunioes")
+      .select("*")
+      .order("data", { ascending: false }),
+  ]);
 
-  const faturamentoTotal = (pagamentos ?? []).reduce(
-    (acc, p) => acc + Number(p.valor),
+  const faturamentoTotal = (grupos ?? []).reduce(
+    (acc, g) =>
+      acc +
+      calcFaturamentoEstimado(
+        Number(g.valor_mensal),
+        g.data_inicio,
+        g.data_termino
+      ),
     0
   );
 
@@ -68,7 +72,7 @@ export default async function GruposPage() {
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-border bg-bg-surface p-6 sm:col-span-1">
-          <p className="text-sm text-text-secondary">Faturamento total</p>
+          <p className="text-sm text-text-secondary">Faturamento total (estimado)</p>
           <p className="mt-2 font-display text-4xl font-bold tabular-nums text-text-primary">
             {formatBRL(faturamentoTotal)}
           </p>
