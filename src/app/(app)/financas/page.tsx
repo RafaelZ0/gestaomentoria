@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { formatBRL, formatMesAno } from "@/lib/format";
+import { formatBRL } from "@/lib/format";
 import { calcTabelaMensal } from "@/lib/finance";
 import { LancamentosList } from "@/components/LancamentosList";
+import { TabelaMensalFinancas } from "@/components/TabelaMensalFinancas";
 
 export default async function FinancasPage() {
   const supabase = await createClient();
@@ -97,59 +98,18 @@ export default async function FinancasPage() {
           Receita = faturamento estimado dos grupos ativos no mês + cláusulas
           recebidas + receitas avulsas. Gasto = custos fixos atuais (
           {formatBRL(custosFixosMensais)}) + despesas avulsas lançadas no mês.
+          Clique em um mês para ver a composição e editar os lançamentos.
         </p>
-        <div className="mt-3 overflow-x-auto rounded-xl border border-border bg-bg-surface">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-border text-text-secondary">
-                <th className="px-4 py-3 font-medium">Mês</th>
-                <th className="px-4 py-3 font-medium">Receita</th>
-                <th className="px-4 py-3 font-medium">Gasto</th>
-                <th className="px-4 py-3 font-medium">Lucro</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tabelaMensal.map((m) => (
-                <tr
-                  key={`${m.ano}-${m.mes}`}
-                  className="border-b border-border last:border-0"
-                >
-                  <td className="px-4 py-3 font-medium text-text-primary">
-                    {formatMesAno(m.ano, m.mes)}
-                  </td>
-                  <td className="px-4 py-3 tabular-nums text-status-ok-text">
-                    {formatBRL(m.receita)}
-                  </td>
-                  <td className="px-4 py-3 tabular-nums text-status-alert-text">
-                    {formatBRL(m.gasto)}
-                  </td>
-                  <td
-                    className={`px-4 py-3 tabular-nums font-medium ${
-                      m.lucro >= 0 ? "text-text-primary" : "text-status-alert-text"
-                    }`}
-                  >
-                    {formatBRL(m.lucro)}
-                  </td>
-                </tr>
-              ))}
-              {tabelaMensal.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-4 py-8 text-center text-text-secondary"
-                  >
-                    Sem dados suficientes ainda para montar a tabela mensal.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <TabelaMensalFinancas
+          meses={tabelaMensal}
+          lancamentos={lancamentos ?? []}
+          custosFixos={custosFixos ?? []}
+        />
       </section>
 
       <section>
         <h2 className="font-display text-lg font-semibold text-text-primary">
-          Lançamentos
+          Todos os lançamentos
         </h2>
         <div className="mt-3">
           <LancamentosList lancamentos={lancamentos ?? []} />

@@ -4,11 +4,25 @@ import type {
   LancamentoFinanceiro,
 } from "@/lib/database.types";
 
+export interface ContribuicaoGrupo {
+  grupoId: string;
+  nome: string;
+  valor: number;
+}
+
+export interface ClausulaDetalhe {
+  grupoNome: string;
+  valor: number;
+  data: string;
+}
+
 export interface MesFinanceiro {
   ano: number;
   mes: number; // 1-12
   receitaEstimada: number;
+  gruposDetalhe: ContribuicaoGrupo[];
   clausulas: number;
+  clausulasDetalhe: ClausulaDetalhe[];
   receitasAvulsas: number;
   custosFixos: number;
   despesasAvulsas: number;
@@ -36,6 +50,8 @@ export function calcTabelaMensal(
 ): MesFinanceiro[] {
   const hoje = new Date(new Date().toDateString());
 
+  const gruposPorId = new Map(grupos.map((g) => [g.id, g]));
+
   const datasInicio = grupos.map((g) => toDate(g.data_inicio));
   const datasComPagamentos = pagamentos.map((p) => toDate(p.data));
   const datasComLancamentos = lancamentos.map((l) => toDate(l.data));
@@ -61,18 +77,35 @@ export function calcTabelaMensal(
     );
 
     let receitaEstimada = 0;
+    const gruposDetalhe: ContribuicaoGrupo[] = [];
     for (const g of grupos) {
       const inicioGrupo = toDate(g.data_inicio);
       const fimGrupo = g.data_termino ? toDate(g.data_termino) : hoje;
       const dias = overlapDays(inicioGrupo, fimGrupo, inicioMes, fimMes);
-      receitaEstimada += Number(g.valor_mensal) * (dias / diasNoMes);
+      const valor = Number(g.valor_mensal) * (dias / diasNoMes);
+      receitaEstimada += valor;
+      if (valor > 0) {
+        gruposDetalhe.push({ grupoId: g.id, nome: g.nome, valor });
+      }
     }
+    gruposDetalhe.sort((a, b) => b.valor - a.valor);
 
     const noMes = (d: Date) => d.getFullYear() === ano && d.getMonth() === mesIdx;
 
-    const clausulas = pagamentos
-      .filter((p) => p.tipo === "CLAUSULA_CANCELAMENTO" && noMes(toDate(p.data)))
-      .reduce((acc, p) => acc + Number(p.valor), 0);
+    const pagamentosClausulaDoMes = pagamentos.filter(
+      (p) => p.tipo === "CLAUSULA_CANCELAMENTO" && noMes(toDate(p.data))
+    );
+    const clausulas = pagamentosClausulaDoMes.reduce(
+      (acc, p) => acc + Number(p.valor),
+      0
+    );
+    const clausulasDetalhe: ClausulaDetalhe[] = pagamentosClausulaDoMes.map(
+      (p) => ({
+        grupoNome: gruposPorId.get(p.grupo_id)?.nome ?? "Grupo removido",
+        valor: Number(p.valor),
+        data: p.data,
+      })
+    );
 
     const receitasAvulsas = lancamentos
       .filter((l) => l.tipo === "RECEITA" && noMes(toDate(l.data)))
@@ -89,7 +122,9 @@ export function calcTabelaMensal(
       ano,
       mes: mesIdx + 1,
       receitaEstimada,
+      gruposDetalhe,
       clausulas,
+      clausulasDetalhe,
       receitasAvulsas,
       custosFixos: custosFixosTotal,
       despesasAvulsas,

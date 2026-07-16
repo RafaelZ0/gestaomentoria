@@ -1,11 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { calcFaturamentoEstimado, formatBRL, formatDate } from "@/lib/format";
-import {
-  StatusBadge,
-  statusGrupoVariant,
-  trafegoPagoVariant,
-} from "@/components/StatusBadge";
+import { calcFaturamentoEstimado, formatBRL } from "@/lib/format";
+import { GruposTable } from "@/components/GruposTable";
 
 const DIAS_SEM_SINAL_DE_VIDA = 30;
 
@@ -102,72 +98,7 @@ export default async function GruposPage() {
         </div>
       </div>
 
-      <div className="mt-8 overflow-x-auto rounded-xl border border-border bg-bg-surface">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-border text-text-secondary">
-              <th className="px-4 py-3 font-medium">Nome</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Tráfego pago</th>
-              <th className="px-4 py-3 font-medium">Valor mensal</th>
-              <th className="px-4 py-3 font-medium">Início</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {(grupos ?? []).map((g) => (
-              <tr
-                key={g.id}
-                className="border-b border-border last:border-0 hover:bg-bg-surface-hover"
-              >
-                <td className="px-4 py-3 font-medium text-text-primary">
-                  {g.nome}
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge
-                    label={g.status}
-                    variant={statusGrupoVariant(g.status)}
-                  />
-                </td>
-                <td className="px-4 py-3">
-                  {g.trafego_pago ? (
-                    <StatusBadge
-                      label={g.trafego_pago}
-                      variant={trafegoPagoVariant(g.trafego_pago)}
-                    />
-                  ) : (
-                    <span className="text-text-secondary">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-3 tabular-nums text-text-primary">
-                  {formatBRL(Number(g.valor_mensal))}
-                </td>
-                <td className="px-4 py-3 tabular-nums text-text-secondary">
-                  {formatDate(g.data_inicio)}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Link
-                    href={`/grupos/${g.id}`}
-                    className="text-accent hover:text-accent-hover"
-                  >
-                    Ver →
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {(grupos ?? []).length === 0 && (
-              <tr>
-                <td
-                  colSpan={6}
-                  className="px-4 py-8 text-center text-text-secondary"
-                >
-                  Nenhum grupo cadastrado ainda.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <GruposTable grupos={grupos ?? []} />
     </div>
   );
 }
