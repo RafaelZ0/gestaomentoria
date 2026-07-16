@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+:root {
+  --bg-base: #0b0e14;
+  --bg-surface: #12161f;
+  --bg-surface-hover: #171c28;
+  --border: #232838;
+  --accent: #6366f1;
+  --accent-hover: #7c7ff2;
+  --text-primary: #f4f5f7;
+  --text-secondary: #8b92a6;
+
+  --status-ok-bg: rgba(34, 197, 94, 0.12);
+  --status-ok-text: #4ade80;
+  --status-alert-bg: rgba(239, 68, 68, 0.12);
+  --status-alert-text: #f87171;
+  --status-warn-bg: rgba(245, 158, 11, 0.12);
+  --status-warn-text: #fbbf24;
+  --status-neutral-bg: rgba(139, 146, 166, 0.12);
+  --status-neutral-text: #8b92a6;
+  --status-accent-bg: rgba(99, 102, 241, 0.12);
+  --status-accent-text: #6366f1;
+}
+
+@theme inline {
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface-hover: var(--bg-surface-hover);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+
+  --color-status-ok-bg: var(--status-ok-bg);
+  --color-status-ok-text: var(--status-ok-text);
+  --color-status-alert-bg: var(--status-alert-bg);
+  --color-status-alert-text: var(--status-alert-text);
+  --color-status-warn-bg: var(--status-warn-bg);
+  --color-status-warn-text: var(--status-warn-text);
+  --color-status-neutral-bg: var(--status-neutral-bg);
+  --color-status-neutral-text: var(--status-neutral-text);
+  --color-status-accent-bg: var(--status-accent-bg);
+  --color-status-accent-text: var(--status-accent-text);
+
+  --font-display: var(--font-space-grotesk);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

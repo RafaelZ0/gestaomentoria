@@ -1,0 +1,61 @@
+"use client";
+
+import { useTransition } from "react";
+import { toggleEntrega } from "@/app/actions/entregas";
+import { formatDate } from "@/lib/format";
+
+export interface EntregaItem {
+  id: string;
+  nome: string;
+  feito: boolean;
+  data_feito: string | null;
+}
+
+export function ChecklistEntregas({
+  grupoId,
+  entregas,
+}: {
+  grupoId: string;
+  entregas: EntregaItem[];
+}) {
+  const [isPending, startTransition] = useTransition();
+
+  if (entregas.length === 0) {
+    return (
+      <p className="text-sm text-text-secondary">
+        Nenhum tipo de entrega cadastrado ainda.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="space-y-2">
+      {entregas.map((e) => (
+        <li
+          key={e.id}
+          className="flex items-center justify-between rounded-lg border border-border bg-bg-surface-hover px-4 py-3"
+        >
+          <label className="flex items-center gap-3 text-sm text-text-primary">
+            <input
+              type="checkbox"
+              checked={e.feito}
+              disabled={isPending}
+              onChange={(ev) =>
+                startTransition(() =>
+                  toggleEntrega(grupoId, e.id, ev.target.checked)
+                )
+              }
+              className="h-4 w-4 accent-[var(--accent)]"
+            />
+            {e.nome}
+          </label>
+          {e.feito && e.data_feito && (
+            <span className="text-xs text-text-secondary">
+              {formatDate(e.data_feito)}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
