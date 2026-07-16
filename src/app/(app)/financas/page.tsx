@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { calcFaturamentoEstimado, formatBRL } from "@/lib/format";
+import { formatBRL, formatMesAno } from "@/lib/format";
+import { calcTabelaMensal } from "@/lib/finance";
 import { LancamentosList } from "@/components/LancamentosList";
 
 export default async function FinancasPage() {
@@ -22,34 +23,25 @@ export default async function FinancasPage() {
       .order("created_at", { ascending: false }),
   ]);
 
-  const faturamentoGruposEstimado = (grupos ?? []).reduce(
-    (acc, g) =>
-      acc +
-      calcFaturamentoEstimado(
-        Number(g.valor_mensal),
-        g.data_inicio,
-        g.data_termino
-      ),
-    0
-  );
-  const valorClausulas = (pagamentos ?? [])
-    .filter((p) => p.tipo === "CLAUSULA_CANCELAMENTO")
-    .reduce((acc, p) => acc + Number(p.valor), 0);
-
-  const receitasAvulsas = (lancamentos ?? [])
-    .filter((l) => l.tipo === "RECEITA")
-    .reduce((acc, l) => acc + Number(l.valor), 0);
-  const despesasAvulsas = (lancamentos ?? [])
-    .filter((l) => l.tipo === "DESPESA")
-    .reduce((acc, l) => acc + Number(l.valor), 0);
-
-  const totalReceitas = faturamentoGruposEstimado + valorClausulas + receitasAvulsas;
-  const margemAcumulada = totalReceitas - despesasAvulsas;
-
   const custosFixosMensais = (custosFixos ?? []).reduce(
     (acc, c) => acc + Number(c.valor),
     0
   );
+
+  const tabelaMensal = calcTabelaMensal(
+    grupos ?? [],
+    pagamentos ?? [],
+    lancamentos ?? [],
+    custosFixosMensais
+  );
+
+  const receitaTotal = tabelaMensal.reduce((acc, m) => acc + m.receita, 0);
+  const gastoTotal = tabelaMensal.reduce((acc, m) => acc + m.gasto, 0);
+  const lucroAcumulado = receitaTotal - gastoTotal;
+
+  const valorClausulas = (pagamentos ?? [])
+    .filter((p) => p.tipo === "CLAUSULA_CANCELAMENTO")
+    .reduce((acc, p) => acc + Number(p.valor), 0);
 
   const gruposCancelados = (grupos ?? []).filter(
     (g) => g.status === "Inativo"
@@ -63,27 +55,27 @@ export default async function FinancasPage() {
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
           Visão consolidada da consultoria: faturamento dos grupos de gestão
-          somado a receitas e despesas avulsas.
+          somado a receitas e despesas avulsas, mês a mês.
         </p>
       </div>
 
       <div className="rounded-xl border border-border bg-bg-surface p-6">
-        <p className="text-sm text-text-secondary">Margem acumulada</p>
+        <p className="text-sm text-text-secondary">Lucro acumulado</p>
         <p
           className={`mt-2 font-display text-4xl font-bold tabular-nums ${
-            margemAcumulada >= 0 ? "text-text-primary" : "text-status-alert-text"
+            lucroAcumulado >= 0 ? "text-text-primary" : "text-status-alert-text"
           }`}
         >
-          {formatBRL(margemAcumulada)}
+          {formatBRL(lucroAcumulado)}
         </p>
         <p className="mt-1 text-xs text-text-secondary">
-          Total de receitas − despesas avulsas
+          Receita total − gasto total, somando todos os meses
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <InfoCard label="Total de receitas" value={formatBRL(totalReceitas)} />
-        <InfoCard label="Despesas avulsas" value={formatBRL(despesasAvulsas)} />
+        <InfoCard label="Receita total" value={formatBRL(receitaTotal)} />
+        <InfoCard label="Gasto total" value={formatBRL(gastoTotal)} />
         <InfoCard
           label="Custos fixos mensais"
           value={formatBRL(custosFixosMensais)}
@@ -97,13 +89,63 @@ export default async function FinancasPage() {
         />
       </div>
 
-      <p className="text-xs text-text-secondary">
-        Faturamento estimado dos grupos (valor mensal × tempo ativo):{" "}
-        {formatBRL(faturamentoGruposEstimado)} · Cláusulas recebidas:{" "}
-        {formatBRL(valorClausulas)} · Receitas avulsas:{" "}
-        {formatBRL(receitasAvulsas)}. Custos fixos mensais são um valor de
-        referência (não somado à margem acima).
-      </p>
+      <section>
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          Por mês
+        </h2>
+        <p className="mt-1 text-xs text-text-secondary">
+          Receita = faturamento estimado dos grupos ativos no mês + cláusulas
+          recebidas + receitas avulsas. Gasto = custos fixos atuais (
+          {formatBRL(custosFixosMensais)}) + despesas avulsas lançadas no mês.
+        </p>
+        <div className="mt-3 overflow-x-auto rounded-xl border border-border bg-bg-surface">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-border text-text-secondary">
+                <th className="px-4 py-3 font-medium">Mês</th>
+                <th className="px-4 py-3 font-medium">Receita</th>
+                <th className="px-4 py-3 font-medium">Gasto</th>
+                <th className="px-4 py-3 font-medium">Lucro</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tabelaMensal.map((m) => (
+                <tr
+                  key={`${m.ano}-${m.mes}`}
+                  className="border-b border-border last:border-0"
+                >
+                  <td className="px-4 py-3 font-medium text-text-primary">
+                    {formatMesAno(m.ano, m.mes)}
+                  </td>
+                  <td className="px-4 py-3 tabular-nums text-status-ok-text">
+                    {formatBRL(m.receita)}
+                  </td>
+                  <td className="px-4 py-3 tabular-nums text-status-alert-text">
+                    {formatBRL(m.gasto)}
+                  </td>
+                  <td
+                    className={`px-4 py-3 tabular-nums font-medium ${
+                      m.lucro >= 0 ? "text-text-primary" : "text-status-alert-text"
+                    }`}
+                  >
+                    {formatBRL(m.lucro)}
+                  </td>
+                </tr>
+              ))}
+              {tabelaMensal.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="px-4 py-8 text-center text-text-secondary"
+                  >
+                    Sem dados suficientes ainda para montar a tabela mensal.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section>
         <h2 className="font-display text-lg font-semibold text-text-primary">

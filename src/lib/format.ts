@@ -33,6 +33,14 @@ export function calcFaturamentoEstimado(
   return valorMensal * (dias / 30);
 }
 
+export function formatMesAno(ano: number, mes: number): string {
+  const nome = new Date(ano, mes - 1, 1).toLocaleDateString("pt-BR", {
+    month: "long",
+    year: "numeric",
+  });
+  return nome.charAt(0).toUpperCase() + nome.slice(1);
+}
+
 export function formatDuracao(dias: number): string {
   const meses = Math.floor(dias / 30);
   const diasRestantes = dias % 30;
