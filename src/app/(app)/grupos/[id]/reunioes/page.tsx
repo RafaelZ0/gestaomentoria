@@ -10,13 +10,35 @@ export default async function ReunioesPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: reunioes }, { data: entregasPendentes }] = await Promise.all([
+  const [
+    { data: mentoradosDoGrupo },
+    { data: mentoradosOutrosGrupos },
+    { data: responsaveis },
+    { data: reunioesProprias },
+    { data: participacoesExternas },
+    { data: entregasPendentes },
+  ] = await Promise.all([
+    supabase
+      .from("mentorados")
+      .select("id, nome")
+      .eq("grupo_id", id)
+      .order("nome"),
+    supabase
+      .from("mentorados")
+      .select("id, nome, grupo_id, grupos_gestao(nome)")
+      .neq("grupo_id", id)
+      .order("nome"),
+    supabase.from("responsaveis").select("*").order("nome"),
     supabase
       .from("reunioes")
       .select("*")
       .eq("grupo_id", id)
       .order("data", { ascending: false })
       .order("created_at", { ascending: false }),
+    supabase
+      .from("reuniao_participantes")
+      .select("reuniao_id, mentorados!inner(grupo_id)")
+      .eq("mentorados.grupo_id", id),
     supabase
       .from("entregas_grupo")
       .select("id, tipos_entrega(id, nome, ativo)")
@@ -33,20 +55,121 @@ export default async function ReunioesPage({
     .filter((e) => e.tipos_entrega?.ativo)
     .map((e) => ({ id: e.id, nome: e.tipos_entrega!.nome }));
 
+  type ParticipacaoExternaRow = { reuniao_id: string };
+
+  const idsProprias = new Set((reunioesProprias ?? []).map((r) => r.id));
+  const idsExternas = [
+    ...new Set(
+      ((participacoesExternas ?? []) as unknown as ParticipacaoExternaRow[])
+        .map((p) => p.reuniao_id)
+        .filter((rid) => !idsProprias.has(rid))
+    ),
+  ];
+
+  const { data: reunioesExternas } =
+    idsExternas.length > 0
+      ? await supabase.from("reunioes").select("*").in("id", idsExternas)
+      : { data: [] };
+
+  const reunioes = [...(reunioesProprias ?? []), ...(reunioesExternas ?? [])].sort(
+    (a, b) => b.data.localeCompare(a.data) || b.created_at.localeCompare(a.created_at)
+  );
+
+  const reuniaoIds = reunioes.map((r) => r.id);
+  const { data: todosParticipantes } =
+    reuniaoIds.length > 0
+      ? await supabase
+          .from("reuniao_participantes")
+          .select("reuniao_id, mentorados(id, nome, grupo_id, grupos_gestao(nome))")
+          .in("reuniao_id", reuniaoIds)
+      : { data: [] };
+
+  type ParticipanteRow = {
+    reuniao_id: string;
+    mentorados: {
+      id: string;
+      nome: string;
+      grupo_id: string;
+      grupos_gestao: { nome: string } | null;
+    } | null;
+  };
+
+  const participantesPorReuniao = new Map<
+    string,
+    { id: string; nome: string; grupoNome: string; deOutroGrupo: boolean }[]
+  >();
+  for (const p of (todosParticipantes ?? []) as unknown as ParticipanteRow[]) {
+    if (!p.mentorados) continue;
+    const lista = participantesPorReuniao.get(p.reuniao_id) ?? [];
+    lista.push({
+      id: p.mentorados.id,
+      nome: p.mentorados.nome,
+      grupoNome: p.mentorados.grupos_gestao?.nome ?? "",
+      deOutroGrupo: p.mentorados.grupo_id !== id,
+    });
+    participantesPorReuniao.set(p.reuniao_id, lista);
+  }
+
+  const responsavelPorId = new Map(
+    (responsaveis ?? []).map((r) => [r.id, r.nome])
+  );
+
+  type MentoradoOutroGrupo = {
+    id: string;
+    nome: string;
+    grupo_id: string;
+    grupos_gestao: { nome: string } | null;
+  };
+
+  const mentoradosOutrosGruposFormatado = (
+    (mentoradosOutrosGrupos ?? []) as unknown as MentoradoOutroGrupo[]
+  ).map((m) => ({
+    id: m.id,
+    nome: m.nome,
+    grupoNome: m.grupos_gestao?.nome ?? "",
+  }));
+
   return (
     <div className="space-y-6">
-      <NovaReuniaoForm grupoId={id} entregasPendentes={pendentes} />
+      <NovaReuniaoForm
+        grupoId={id}
+        entregasPendentes={pendentes}
+        mentoradosDoGrupo={mentoradosDoGrupo ?? []}
+        mentoradosOutrosGrupos={mentoradosOutrosGruposFormatado}
+        responsaveis={responsaveis ?? []}
+      />
 
       <ul className="space-y-3">
-        {(reunioes ?? []).map((r) => (
-          <li key={r.id} className="rounded-xl border border-border bg-bg-surface p-5">
-            <p className="text-sm font-medium text-text-primary">{formatDate(r.data)}</p>
-            <p className="mt-2 whitespace-pre-wrap text-sm text-text-secondary">
-              {r.resumo}
-            </p>
-          </li>
-        ))}
-        {(reunioes ?? []).length === 0 && (
+        {reunioes.map((r) => {
+          const participantes = participantesPorReuniao.get(r.id) ?? [];
+          return (
+            <li key={r.id} className="rounded-xl border border-border bg-bg-surface p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-medium text-text-primary">{formatDate(r.data)}</p>
+                {r.responsavel_id && (
+                  <span className="rounded-full bg-bg-surface-hover px-2 py-0.5 text-xs text-text-secondary">
+                    Conduzida por {responsavelPorId.get(r.responsavel_id) ?? "—"}
+                  </span>
+                )}
+              </div>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-text-secondary">
+                {r.resumo}
+              </p>
+              {participantes.length > 0 && (
+                <p className="mt-3 text-xs text-text-secondary">
+                  Participantes:{" "}
+                  {participantes
+                    .map(
+                      (p) =>
+                        p.nome + (p.deOutroGrupo && p.grupoNome ? ` (${p.grupoNome})` : "")
+                    )
+                    .join(", ")}
+                </p>
+              )}
+            </li>
+          );
+        })}
+        {reunioes.length === 0 && (
           <p className="text-sm text-text-secondary">
             Nenhuma reunião registrada ainda.
           </p>

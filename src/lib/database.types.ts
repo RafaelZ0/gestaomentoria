@@ -34,7 +34,19 @@ export type Reuniao = {
   grupo_id: string;
   data: string;
   resumo: string;
+  responsavel_id: string | null;
   created_at: string;
+};
+
+export type Responsavel = {
+  id: string;
+  nome: string;
+  created_at: string;
+};
+
+export type ReuniaoParticipante = {
+  reuniao_id: string;
+  mentorado_id: string;
 };
 
 export type EntregaGrupo = {
@@ -126,6 +138,18 @@ export type Database = {
         Row: Reuniao;
         Insert: Partial<Reuniao> & Pick<Reuniao, "grupo_id" | "resumo">;
         Update: Partial<Reuniao>;
+        Relationships: Relationships;
+      };
+      responsaveis: {
+        Row: Responsavel;
+        Insert: Partial<Responsavel> & Pick<Responsavel, "nome">;
+        Update: Partial<Responsavel>;
+        Relationships: Relationships;
+      };
+      reuniao_participantes: {
+        Row: ReuniaoParticipante;
+        Insert: ReuniaoParticipante;
+        Update: Partial<ReuniaoParticipante>;
         Relationships: Relationships;
       };
       entregas_grupo: {
