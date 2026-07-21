@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { addMentorado, removeMentorado } from "@/app/actions/grupos";
+import { addMentorado, removeMentorado, updateMentorado } from "@/app/actions/grupos";
 import type { Mentorado } from "@/lib/database.types";
 
 export function MentoradosList({
@@ -21,26 +21,7 @@ export function MentoradosList({
       )}
       <ul className="space-y-2">
         {mentorados.map((m) => (
-          <li
-            key={m.id}
-            className="flex items-center justify-between rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm"
-          >
-            <div>
-              <span className="text-text-primary">{m.nome}</span>
-              {m.telefone && (
-                <span className="ml-2 text-text-secondary">{m.telefone}</span>
-              )}
-            </div>
-            <button
-              disabled={isPending}
-              onClick={() =>
-                startTransition(() => removeMentorado(grupoId, m.id))
-              }
-              className="text-text-secondary hover:text-status-alert-text"
-            >
-              Remover
-            </button>
-          </li>
+          <MentoradoRow key={m.id} grupoId={grupoId} mentorado={m} />
         ))}
       </ul>
 
@@ -93,5 +74,59 @@ export function MentoradosList({
         </button>
       )}
     </div>
+  );
+}
+
+function MentoradoRow({
+  grupoId,
+  mentorado,
+}: {
+  grupoId: string;
+  mentorado: Mentorado;
+}) {
+  const [isPending, startTransition] = useTransition();
+  const [nome, setNome] = useState(mentorado.nome);
+  const [telefone, setTelefone] = useState(mentorado.telefone ?? "");
+
+  function salvar(novoNome: string, novoTelefone: string) {
+    if (!novoNome.trim()) {
+      setNome(mentorado.nome);
+      return;
+    }
+    if (novoNome === mentorado.nome && novoTelefone === (mentorado.telefone ?? "")) {
+      return;
+    }
+    startTransition(() =>
+      updateMentorado(grupoId, mentorado.id, novoNome, novoTelefone)
+    );
+  }
+
+  return (
+    <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm">
+      <div className="flex flex-1 gap-3">
+        <input
+          value={nome}
+          disabled={isPending}
+          onChange={(e) => setNome(e.target.value)}
+          onBlur={() => salvar(nome, telefone)}
+          className="flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text-primary outline-none hover:border-border focus:border-accent"
+        />
+        <input
+          value={telefone}
+          placeholder="Telefone"
+          disabled={isPending}
+          onChange={(e) => setTelefone(e.target.value)}
+          onBlur={() => salvar(nome, telefone)}
+          className="w-40 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text-secondary outline-none hover:border-border focus:border-accent"
+        />
+      </div>
+      <button
+        disabled={isPending}
+        onClick={() => startTransition(() => removeMentorado(grupoId, mentorado.id))}
+        className="text-text-secondary hover:text-status-alert-text"
+      >
+        Remover
+      </button>
+    </li>
   );
 }

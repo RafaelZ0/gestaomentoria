@@ -6,6 +6,7 @@ import {
   statusGrupoVariant,
 } from "@/components/StatusBadge";
 import { GrupoTabs } from "@/components/GrupoTabs";
+import { NomeGrupoField } from "@/components/NomeGrupoField";
 
 export default async function GrupoLayout({
   children,
@@ -32,9 +33,7 @@ export default async function GrupoLayout({
       </Link>
 
       <div className="mt-2 flex items-center gap-3">
-        <h1 className="font-display text-2xl font-semibold text-text-primary">
-          {grupo.nome}
-        </h1>
+        <NomeGrupoField grupoId={grupo.id} nome={grupo.nome} />
         <StatusBadge label={grupo.status} variant={statusGrupoVariant(grupo.status)} />
       </div>
 

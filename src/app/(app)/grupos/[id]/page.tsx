@@ -6,11 +6,13 @@ import {
   calcFaturamentoEstimado,
   formatDuracao,
 } from "@/lib/format";
-import { EditarGrupoForm } from "@/components/EditarGrupoForm";
 import { CancelarGrupoButton } from "@/components/CancelarGrupoModal";
 import { ChecklistEntregas } from "@/components/ChecklistEntregas";
 import { MentoradosList } from "@/components/MentoradosList";
 import { TrafegoCard } from "@/components/TrafegoCard";
+import { ValorMensalCard } from "@/components/ValorMensalCard";
+import { DataInicioField } from "@/components/DataInicioField";
+import { ObservacoesField } from "@/components/ObservacoesField";
 
 export default async function GrupoOverviewPage({
   params,
@@ -65,7 +67,7 @@ export default async function GrupoOverviewPage({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <InfoCard label="Valor mensal" value={formatBRL(Number(grupo.valor_mensal))} />
+        <ValorMensalCard grupoId={grupo.id} valorMensal={Number(grupo.valor_mensal)} />
         <InfoCard
           label="Faturamento estimado"
           value={formatBRL(faturamentoEstimado)}
@@ -84,22 +86,16 @@ export default async function GrupoOverviewPage({
       </div>
 
       <div className="text-sm text-text-secondary">
-        Início em {formatDate(grupo.data_inicio)}
+        <DataInicioField grupoId={grupo.id} dataInicio={grupo.data_inicio} />
         {grupo.data_termino && <> · Encerrado em {formatDate(grupo.data_termino)}</>}
         {recebidoRegistrado > 0 && (
           <> · {formatBRL(recebidoRegistrado)} recebido em pagamentos registrados</>
         )}
       </div>
 
-      {grupo.observacoes && (
-        <div className="rounded-xl border border-border bg-bg-surface p-5">
-          <p className="text-sm text-text-secondary">Observações</p>
-          <p className="mt-1 text-sm text-text-primary">{grupo.observacoes}</p>
-        </div>
-      )}
+      <ObservacoesField grupoId={grupo.id} observacoes={grupo.observacoes} />
 
       <div className="flex gap-2">
-        <EditarGrupoForm grupo={grupo} />
         <CancelarGrupoButton
           grupoId={grupo.id}
           status={grupo.status}

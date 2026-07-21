@@ -90,95 +90,60 @@ export function CustosFixosList({ custos }: { custos: CustoFixo[] }) {
 }
 
 function CustoFixoRow({ custo }: { custo: CustoFixo }) {
-  const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [nome, setNome] = useState(custo.nome);
+  const [valor, setValor] = useState(String(custo.valor));
 
-  if (!editing) {
-    return (
-      <li className="flex items-center justify-between rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm">
-        <span className="text-text-primary">{custo.nome}</span>
-        <div className="flex items-center gap-4">
-          <span className="tabular-nums text-text-primary">
-            {formatBRL(Number(custo.valor))}
-          </span>
-          <button
-            onClick={() => setEditing(true)}
-            className="text-text-secondary hover:text-text-primary"
-          >
-            Editar
-          </button>
-          <button
-            disabled={isPending}
-            onClick={() =>
-              startTransition(() => removeCustoFixo(custo.id))
-            }
-            className="text-text-secondary hover:text-status-alert-text"
-          >
-            Remover
-          </button>
-        </div>
-      </li>
-    );
+  function salvar(novoNome: string, novoValor: string) {
+    if (!novoNome.trim() || !novoValor) return;
+    if (novoNome === custo.nome && Number(novoValor) === Number(custo.valor)) return;
+    setError(null);
+    const formData = new FormData();
+    formData.set("nome", novoNome);
+    formData.set("valor", novoValor);
+    startTransition(async () => {
+      try {
+        await updateCustoFixo(custo.id, formData);
+      } catch (e) {
+        if (e instanceof Error) setError(e.message);
+      }
+    });
   }
 
   return (
-    <li className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3">
+    <li className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm">
       {error && (
-        <div className="mb-2 rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+        <div className="mb-2 rounded-lg bg-status-alert-bg px-3 py-2 text-xs text-status-alert-text">
           {error}
         </div>
       )}
-      <form
-        action={(formData) => {
-          setError(null);
-          startTransition(async () => {
-            try {
-              await updateCustoFixo(custo.id, formData);
-              setEditing(false);
-            } catch (e) {
-              if (e instanceof Error) setError(e.message);
-            }
-          });
-        }}
-        className="flex items-end gap-3"
-      >
-        <div className="flex-1">
-          <label className="mb-1 block text-sm text-text-secondary">Nome</label>
-          <input
-            name="nome"
-            defaultValue={custo.nome}
-            required
-            className={inputClass}
-          />
-        </div>
-        <div className="w-40">
-          <label className="mb-1 block text-sm text-text-secondary">Valor (R$)</label>
-          <input
-            name="valor"
-            type="number"
-            step="0.01"
-            min="0"
-            defaultValue={custo.valor}
-            required
-            className={`${inputClass} tabular-nums`}
-          />
-        </div>
-        <button
-          type="submit"
+      <div className="flex items-center gap-3">
+        <input
+          value={nome}
           disabled={isPending}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
-        >
-          Salvar
-        </button>
+          onChange={(e) => setNome(e.target.value)}
+          onBlur={() => salvar(nome, valor)}
+          className="flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text-primary outline-none hover:border-border focus:border-accent"
+        />
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          value={valor}
+          disabled={isPending}
+          onChange={(e) => setValor(e.target.value)}
+          onBlur={() => salvar(nome, valor)}
+          className="w-28 rounded-lg border border-transparent bg-transparent px-2 py-1 text-right tabular-nums text-text-primary outline-none hover:border-border focus:border-accent"
+        />
         <button
-          type="button"
-          onClick={() => setEditing(false)}
-          className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-bg-surface-hover"
+          disabled={isPending}
+          onClick={() => startTransition(() => removeCustoFixo(custo.id))}
+          className="text-text-secondary hover:text-status-alert-text"
         >
-          Cancelar
+          Remover
         </button>
-      </form>
+      </div>
     </li>
   );
 }

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { TrafegoPago, StatusGrupo } from "@/lib/database.types";
+import type { TrafegoPago } from "@/lib/database.types";
 
 export async function createGrupo(formData: FormData) {
   const supabase = await createClient();
@@ -54,32 +54,21 @@ export async function createGrupo(formData: FormData) {
   redirect(`/grupos/${grupo.id}`);
 }
 
-export async function updateGrupo(grupoId: string, formData: FormData) {
+export async function updateGrupoCampo(
+  grupoId: string,
+  campo: "nome" | "data_inicio" | "valor_mensal" | "observacoes",
+  valor: string
+) {
   const supabase = await createClient();
 
-  const nome = String(formData.get("nome") ?? "").trim();
-  const data_inicio = String(formData.get("data_inicio") ?? "");
-  const valor_mensal = Number(formData.get("valor_mensal") ?? 0);
-  const observacoes = String(formData.get("observacoes") ?? "").trim() || null;
-  const status = (formData.get("status") as StatusGrupo) || "Ativo";
+  const updates =
+    campo === "valor_mensal"
+      ? { valor_mensal: Number(valor) }
+      : campo === "observacoes"
+        ? { observacoes: valor.trim() || null }
+        : { [campo]: valor };
 
-  const { data: grupoAtual } = await supabase
-    .from("grupos_gestao")
-    .select("status, data_termino")
-    .eq("id", grupoId)
-    .single();
-
-  let data_termino = grupoAtual?.data_termino ?? null;
-  if (status === "Inativo" && grupoAtual?.status !== "Inativo") {
-    data_termino = new Date().toISOString().slice(0, 10);
-  } else if (status === "Ativo") {
-    data_termino = null;
-  }
-
-  await supabase
-    .from("grupos_gestao")
-    .update({ nome, data_inicio, valor_mensal, observacoes, status, data_termino })
-    .eq("id", grupoId);
+  await supabase.from("grupos_gestao").update(updates).eq("id", grupoId);
 
   revalidatePath(`/grupos/${grupoId}`);
   revalidatePath("/grupos");
@@ -163,5 +152,19 @@ export async function addMentorado(grupoId: string, formData: FormData) {
 export async function removeMentorado(grupoId: string, mentoradoId: string) {
   const supabase = await createClient();
   await supabase.from("mentorados").delete().eq("id", mentoradoId);
+  revalidatePath(`/grupos/${grupoId}`);
+}
+
+export async function updateMentorado(
+  grupoId: string,
+  mentoradoId: string,
+  nome: string,
+  telefone: string
+) {
+  const supabase = await createClient();
+  await supabase
+    .from("mentorados")
+    .update({ nome: nome.trim(), telefone: telefone.trim() || null })
+    .eq("id", mentoradoId);
   revalidatePath(`/grupos/${grupoId}`);
 }
