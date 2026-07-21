@@ -13,7 +13,7 @@ export async function createTipoEntrega(formData: FormData) {
 
   const { data: tipo, error } = await supabase
     .from("tipos_entrega")
-    .insert({ nome })
+    .insert({ nome, status_desde: new Date().toISOString().slice(0, 10) })
     .select("*")
     .single();
 
@@ -35,9 +35,16 @@ export async function createTipoEntrega(formData: FormData) {
 
 export async function toggleTipoEntregaAtivo(
   tipoId: string,
-  ativo: boolean
+  ativo: boolean,
+  statusDesde?: string
 ) {
   const supabase = await createClient();
-  await supabase.from("tipos_entrega").update({ ativo }).eq("id", tipoId);
+  await supabase
+    .from("tipos_entrega")
+    .update({
+      ativo,
+      status_desde: statusDesde || new Date().toISOString().slice(0, 10),
+    })
+    .eq("id", tipoId);
   revalidatePath("/tipos-entrega");
 }

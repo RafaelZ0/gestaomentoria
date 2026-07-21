@@ -15,6 +15,9 @@ export function CancelarGrupoButton({
 }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [dataCancelamento, setDataCancelamento] = useState(
+    new Date().toISOString().slice(0, 10)
+  );
 
   if (status === "Inativo") {
     return (
@@ -59,12 +62,24 @@ export function CancelarGrupoButton({
               será registrado automaticamente.
             </p>
 
+            <div className="mt-4">
+              <label className="mb-1 block text-sm text-text-secondary">
+                Data do cancelamento
+              </label>
+              <input
+                type="date"
+                value={dataCancelamento}
+                onChange={(e) => setDataCancelamento(e.target.value)}
+                className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+              />
+            </div>
+
             <div className="mt-6 flex flex-col gap-2">
               <button
                 disabled={isPending}
                 onClick={() =>
                   startTransition(async () => {
-                    await cancelarGrupo(grupoId, true);
+                    await cancelarGrupo(grupoId, true, dataCancelamento);
                     setOpen(false);
                   })
                 }
@@ -76,7 +91,7 @@ export function CancelarGrupoButton({
                 disabled={isPending}
                 onClick={() =>
                   startTransition(async () => {
-                    await cancelarGrupo(grupoId, false);
+                    await cancelarGrupo(grupoId, false, dataCancelamento);
                     setOpen(false);
                   })
                 }

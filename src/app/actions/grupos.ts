@@ -89,12 +89,14 @@ export async function updateTrafego(grupoId: string, formData: FormData) {
   const supabase = await createClient();
 
   const trafego_pago = (formData.get("trafego_pago") as TrafegoPago) || null;
+  const trafego_pago_desde =
+    String(formData.get("trafego_pago_desde") ?? "").trim() || null;
   const valorInvestidoRaw = String(formData.get("valor_investido_dia") ?? "").trim();
   const valor_investido_dia = valorInvestidoRaw ? Number(valorInvestidoRaw) : null;
 
   await supabase
     .from("grupos_gestao")
-    .update({ trafego_pago, valor_investido_dia })
+    .update({ trafego_pago, trafego_pago_desde, valor_investido_dia })
     .eq("id", grupoId);
 
   revalidatePath(`/grupos/${grupoId}`);
@@ -103,7 +105,8 @@ export async function updateTrafego(grupoId: string, formData: FormData) {
 
 export async function cancelarGrupo(
   grupoId: string,
-  aplicarClausula: boolean
+  aplicarClausula: boolean,
+  dataCancelamento?: string
 ) {
   const supabase = await createClient();
 
@@ -113,17 +116,17 @@ export async function cancelarGrupo(
     .eq("id", grupoId)
     .single();
 
-  const hoje = new Date().toISOString().slice(0, 10);
+  const data = dataCancelamento || new Date().toISOString().slice(0, 10);
 
   await supabase
     .from("grupos_gestao")
-    .update({ status: "Inativo", data_termino: hoje })
+    .update({ status: "Inativo", data_termino: data })
     .eq("id", grupoId);
 
   if (aplicarClausula && grupo) {
     await supabase.from("pagamentos").insert({
       grupo_id: grupoId,
-      data: hoje,
+      data,
       valor: grupo.valor_mensal,
       tipo: "CLAUSULA_CANCELAMENTO",
       observacao: "Parcela da cláusula de cancelamento",

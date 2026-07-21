@@ -74,6 +74,7 @@ export default async function GrupoOverviewPage({
         <TrafegoCard
           grupoId={grupo.id}
           trafegoPago={grupo.trafego_pago}
+          trafegoPagoDesde={grupo.trafego_pago_desde}
           valorInvestidoDia={
             grupo.valor_investido_dia !== null
               ? Number(grupo.valor_investido_dia)

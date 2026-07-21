@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { createTipoEntrega, toggleTipoEntregaAtivo } from "@/app/actions/tiposEntrega";
+import { formatDate } from "@/lib/format";
 import type { TipoEntrega } from "@/lib/database.types";
 
 export function TiposEntregaList({ tipos }: { tipos: TipoEntrega[] }) {
@@ -69,21 +70,40 @@ export function TiposEntregaList({ tipos }: { tipos: TipoEntrega[] }) {
 
 function TipoItem({ tipo }: { tipo: TipoEntrega }) {
   const [isPending, startTransition] = useTransition();
+  const [statusDesde, setStatusDesde] = useState(
+    tipo.status_desde ?? new Date().toISOString().slice(0, 10)
+  );
 
   return (
-    <li className="flex items-center justify-between rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm">
-      <span className={tipo.ativo ? "text-text-primary" : "text-text-secondary"}>
-        {tipo.nome}
-      </span>
-      <button
-        disabled={isPending}
-        onClick={() =>
-          startTransition(() => toggleTipoEntregaAtivo(tipo.id, !tipo.ativo))
-        }
-        className="text-text-secondary hover:text-text-primary"
-      >
-        {tipo.ativo ? "Desativar" : "Reativar"}
-      </button>
+    <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm">
+      <div>
+        <span className={tipo.ativo ? "text-text-primary" : "text-text-secondary"}>
+          {tipo.nome}
+        </span>
+        <span className="ml-2 text-xs text-text-secondary">
+          {tipo.ativo ? "ativo" : "inativo"} desde {formatDate(statusDesde)}
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          type="date"
+          value={statusDesde}
+          disabled={isPending}
+          onChange={(e) => setStatusDesde(e.target.value)}
+          className="rounded-lg border border-border bg-bg-surface px-2 py-1 text-xs text-text-primary outline-none focus:border-accent"
+        />
+        <button
+          disabled={isPending}
+          onClick={() =>
+            startTransition(() =>
+              toggleTipoEntregaAtivo(tipo.id, !tipo.ativo, statusDesde)
+            )
+          }
+          className="whitespace-nowrap text-text-secondary hover:text-text-primary"
+        >
+          {tipo.ativo ? "Desativar" : "Reativar"}
+        </button>
+      </div>
     </li>
   );
 }

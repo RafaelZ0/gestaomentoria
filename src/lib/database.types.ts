@@ -9,6 +9,7 @@ export type GrupoGestao = {
   status: StatusGrupo;
   data_termino: string | null;
   trafego_pago: TrafegoPago | null;
+  trafego_pago_desde: string | null;
   valor_mensal: number;
   valor_investido_dia: number | null;
   observacoes: string | null;
@@ -27,6 +28,7 @@ export type TipoEntrega = {
   id: string;
   nome: string;
   ativo: boolean;
+  status_desde: string | null;
 };
 
 export type Reuniao = {
