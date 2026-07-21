@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { formatDate } from "@/lib/format";
 import { NovaReuniaoForm } from "@/components/NovaReuniaoForm";
+import { ReuniaoItem } from "@/components/ReuniaoItem";
 
 export default async function ReunioesPage({
   params,
@@ -140,35 +140,19 @@ export default async function ReunioesPage({
       />
 
       <ul className="space-y-3">
-        {reunioes.map((r) => {
-          const participantes = participantesPorReuniao.get(r.id) ?? [];
-          return (
-            <li key={r.id} className="rounded-xl border border-border bg-bg-surface p-5">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-medium text-text-primary">{formatDate(r.data)}</p>
-                {r.responsavel_id && (
-                  <span className="rounded-full bg-bg-surface-hover px-2 py-0.5 text-xs text-text-secondary">
-                    Conduzida por {responsavelPorId.get(r.responsavel_id) ?? "—"}
-                  </span>
-                )}
-              </div>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-text-secondary">
-                {r.resumo}
-              </p>
-              {participantes.length > 0 && (
-                <p className="mt-3 text-xs text-text-secondary">
-                  Participantes:{" "}
-                  {participantes
-                    .map(
-                      (p) =>
-                        p.nome + (p.deOutroGrupo && p.grupoNome ? ` (${p.grupoNome})` : "")
-                    )
-                    .join(", ")}
-                </p>
-              )}
-            </li>
-          );
-        })}
+        {reunioes.map((r) => (
+          <ReuniaoItem
+            key={r.id}
+            reuniao={r}
+            participantes={participantesPorReuniao.get(r.id) ?? []}
+            responsavelNome={
+              r.responsavel_id ? responsavelPorId.get(r.responsavel_id) : undefined
+            }
+            mentoradosDoGrupo={mentoradosDoGrupo ?? []}
+            mentoradosOutrosGrupos={mentoradosOutrosGruposFormatado}
+            responsaveis={responsaveis ?? []}
+          />
+        ))}
         {reunioes.length === 0 && (
           <p className="text-sm text-text-secondary">
             Nenhuma reunião registrada ainda.
