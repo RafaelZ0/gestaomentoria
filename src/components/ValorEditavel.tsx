@@ -59,9 +59,13 @@ export function ValorEditavel({
               if (e.key === "Enter") salvar();
               if (e.key === "Escape") cancelar();
             }}
-            className="w-24 min-w-0 rounded-lg border border-border bg-bg-surface-hover px-2 py-1 font-display text-lg font-semibold tabular-nums text-text-primary outline-none"
+            className="w-28 shrink-0 rounded-lg border border-border bg-bg-surface-hover px-2 py-1 font-display text-lg font-semibold tabular-nums text-text-primary outline-none"
           />
-          {sufixo && <span className="text-xs text-text-secondary">{sufixo}</span>}
+          {sufixo && (
+            <span className="shrink-0 text-xs text-text-secondary">{sufixo}</span>
+          )}
+        </div>
+        <div className="mt-2 flex items-center gap-2">
           <button
             type="button"
             disabled={isPending}
