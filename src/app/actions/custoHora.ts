@@ -45,23 +45,13 @@ export async function removeCustoFixo(custoId: string) {
 export async function updateCustoHoraConfig(formData: FormData) {
   const supabase = await createClient();
 
-  const horas_atendimento_mes = Number(
-    formData.get("horas_atendimento_mes") ?? 0
-  );
-  const percentual_ociosidade = Number(
-    formData.get("percentual_ociosidade") ?? 0
-  );
   const percentual_fator_avaliacao = Number(
     formData.get("percentual_fator_avaliacao") ?? 0
   );
 
   await supabase
     .from("custo_hora_config")
-    .update({
-      horas_atendimento_mes,
-      percentual_ociosidade,
-      percentual_fator_avaliacao,
-    })
+    .update({ percentual_fator_avaliacao })
     .eq("id", 1);
 
   revalidatePath("/custo-hora");

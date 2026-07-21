@@ -58,24 +58,29 @@ export async function removeLancamento(lancamentoId: string) {
   revalidatePath("/financas");
 }
 
-export async function upsertCustoFixoMensal(
+export async function addCustoMensalItem(
   ano: number,
   mes: number,
+  nome: string,
   valor: number
 ) {
+  const nomeLimpo = nome.trim();
+  if (!nomeLimpo || !valor) {
+    throw new Error("Preencha nome e valor do custo.");
+  }
+
   const supabase = await createClient();
   await supabase
-    .from("custos_fixos_mensais")
-    .upsert({ ano, mes, valor, updated_at: new Date().toISOString() });
+    .from("custos_fixos_mensais_itens")
+    .insert({ ano, mes, nome: nomeLimpo, valor });
   revalidatePath("/financas");
 }
 
-export async function removeCustoFixoMensal(ano: number, mes: number) {
+export async function removeCustoMensalItem(itemId: string) {
   const supabase = await createClient();
   await supabase
-    .from("custos_fixos_mensais")
+    .from("custos_fixos_mensais_itens")
     .delete()
-    .eq("ano", ano)
-    .eq("mes", mes);
+    .eq("id", itemId);
   revalidatePath("/financas");
 }

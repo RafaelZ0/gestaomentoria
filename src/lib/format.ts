@@ -35,11 +35,15 @@ export function addMonths(data: Date, meses: number): Date {
   return alvo;
 }
 
-// Datas em que a mensalidade vence: um mês após o início, e a cada mês
-// seguinte, até (e incluindo) `fim`.
+// Datas em que a mensalidade vence: na própria data de início (pagamento de
+// entrada), e a cada mês seguinte, até (e incluindo) `fim`.
 export function datasVencimento(dataInicio: Date, fim: Date): Date[] {
   const vencimentos: Date[] = [];
-  let cursor = addMonths(dataInicio, 1);
+  let cursor = new Date(
+    dataInicio.getFullYear(),
+    dataInicio.getMonth(),
+    dataInicio.getDate()
+  );
   while (cursor <= fim) {
     vencimentos.push(cursor);
     cursor = addMonths(cursor, 1);

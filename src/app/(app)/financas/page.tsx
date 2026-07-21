@@ -13,7 +13,7 @@ export default async function FinancasPage() {
     { data: grupos },
     { data: custosFixos },
     { data: lancamentos },
-    { data: custosFixosMensaisOverrides },
+    { data: custosFixosMensaisItens },
   ] = await Promise.all([
     supabase.from("pagamentos").select("*"),
     supabase.from("grupos_gestao").select("*"),
@@ -23,7 +23,10 @@ export default async function FinancasPage() {
       .select("*")
       .order("data", { ascending: false })
       .order("created_at", { ascending: false }),
-    supabase.from("custos_fixos_mensais").select("*"),
+    supabase
+      .from("custos_fixos_mensais_itens")
+      .select("*")
+      .order("created_at", { ascending: true }),
   ]);
 
   const custosFixosMensais = (custosFixos ?? []).reduce(
@@ -31,19 +34,23 @@ export default async function FinancasPage() {
     0
   );
 
-  const overridesMap = new Map(
-    (custosFixosMensaisOverrides ?? []).map((o) => [
-      `${o.ano}-${o.mes}`,
-      Number(o.valor),
-    ])
-  );
+  const itensCustosFixosMensaisMap = new Map<
+    string,
+    { id: string; nome: string; valor: number }[]
+  >();
+  for (const item of custosFixosMensaisItens ?? []) {
+    const chave = `${item.ano}-${item.mes}`;
+    const lista = itensCustosFixosMensaisMap.get(chave) ?? [];
+    lista.push({ id: item.id, nome: item.nome, valor: Number(item.valor) });
+    itensCustosFixosMensaisMap.set(chave, lista);
+  }
 
   const tabelaMensal = calcTabelaMensal(
     grupos ?? [],
     pagamentos ?? [],
     lancamentos ?? [],
     custosFixosMensais,
-    overridesMap
+    itensCustosFixosMensaisMap
   );
 
   const receitaTotal = tabelaMensal.reduce((acc, m) => acc + m.receita, 0);
@@ -90,7 +97,7 @@ export default async function FinancasPage() {
         <InfoCard
           label="Custos fixos mensais"
           value={formatBRL(custosFixosMensais)}
-          hint="ver Custo Hora"
+          hint="Editar custo por grupo"
           href="/custo-hora"
         />
         <InfoCard
@@ -105,12 +112,12 @@ export default async function FinancasPage() {
           Por mês
         </h2>
         <p className="mt-1 text-xs text-text-secondary">
-          Receita = mensalidades que venceram no mês (1 mês após a entrada de
+          Receita = mensalidades que venceram no mês (pagamento na entrada de
           cada grupo, e a cada mês seguinte) + cláusulas recebidas + receitas
           avulsas. Gasto = custos fixos do mês (por padrão, o valor atual de{" "}
-          {formatBRL(custosFixosMensais)} — editável por mês) + despesas
-          avulsas lançadas no mês. Clique em um mês para ver a composição e
-          editar.
+          {formatBRL(custosFixosMensais)} — substituível por itens lançados à
+          mão naquele mês) + despesas avulsas lançadas no mês. Clique em um
+          mês para ver a composição e editar.
         </p>
         <TabelaMensalFinancas
           meses={tabelaMensal}

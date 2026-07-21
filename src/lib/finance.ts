@@ -17,6 +17,12 @@ export interface ClausulaDetalhe {
   data: string;
 }
 
+export interface CustoFixoMensalItemDetalhe {
+  id: string;
+  nome: string;
+  valor: number;
+}
+
 export interface MesFinanceiro {
   ano: number;
   mes: number; // 1-12
@@ -27,6 +33,7 @@ export interface MesFinanceiro {
   receitasAvulsas: number;
   custosFixos: number;
   custosFixosManual: boolean;
+  custosFixosItens: CustoFixoMensalItemDetalhe[];
   despesasAvulsas: number;
   receita: number;
   gasto: number;
@@ -42,7 +49,7 @@ export function calcTabelaMensal(
   pagamentos: Pagamento[],
   lancamentos: LancamentoFinanceiro[],
   custosFixosAtual: number,
-  overridesCustosFixos: Map<string, number> = new Map()
+  itensCustosFixosMensais: Map<string, CustoFixoMensalItemDetalhe[]> = new Map()
 ): MesFinanceiro[] {
   const hoje = new Date(new Date().toDateString());
 
@@ -115,8 +122,11 @@ export function calcTabelaMensal(
       .reduce((acc, l) => acc + Number(l.valor), 0);
 
     const chaveOverride = `${ano}-${mesIdx + 1}`;
-    const overrideCustosFixos = overridesCustosFixos.get(chaveOverride);
-    const custosFixos = overrideCustosFixos ?? custosFixosAtual;
+    const custosFixosItens = itensCustosFixosMensais.get(chaveOverride) ?? [];
+    const custosFixosManual = custosFixosItens.length > 0;
+    const custosFixos = custosFixosManual
+      ? custosFixosItens.reduce((acc, i) => acc + i.valor, 0)
+      : custosFixosAtual;
 
     const receita = receitaEstimada + clausulas + receitasAvulsas;
     const gasto = custosFixos + despesasAvulsas;
@@ -130,7 +140,8 @@ export function calcTabelaMensal(
       clausulasDetalhe,
       receitasAvulsas,
       custosFixos,
-      custosFixosManual: overrideCustosFixos !== undefined,
+      custosFixosManual,
+      custosFixosItens,
       despesasAvulsas,
       receita,
       gasto,

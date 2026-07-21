@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { TrafegoPago } from "@/lib/database.types";
+import type { TrafegoPago, StatusGrupo } from "@/lib/database.types";
 
 export async function createGrupo(formData: FormData) {
   const supabase = await createClient();
@@ -59,13 +59,42 @@ export async function updateGrupo(grupoId: string, formData: FormData) {
 
   const nome = String(formData.get("nome") ?? "").trim();
   const data_inicio = String(formData.get("data_inicio") ?? "");
-  const trafego_pago = (formData.get("trafego_pago") as TrafegoPago) || null;
   const valor_mensal = Number(formData.get("valor_mensal") ?? 0);
   const observacoes = String(formData.get("observacoes") ?? "").trim() || null;
+  const status = (formData.get("status") as StatusGrupo) || "Ativo";
+
+  const { data: grupoAtual } = await supabase
+    .from("grupos_gestao")
+    .select("status, data_termino")
+    .eq("id", grupoId)
+    .single();
+
+  let data_termino = grupoAtual?.data_termino ?? null;
+  if (status === "Inativo" && grupoAtual?.status !== "Inativo") {
+    data_termino = new Date().toISOString().slice(0, 10);
+  } else if (status === "Ativo") {
+    data_termino = null;
+  }
 
   await supabase
     .from("grupos_gestao")
-    .update({ nome, data_inicio, trafego_pago, valor_mensal, observacoes })
+    .update({ nome, data_inicio, valor_mensal, observacoes, status, data_termino })
+    .eq("id", grupoId);
+
+  revalidatePath(`/grupos/${grupoId}`);
+  revalidatePath("/grupos");
+}
+
+export async function updateTrafego(grupoId: string, formData: FormData) {
+  const supabase = await createClient();
+
+  const trafego_pago = (formData.get("trafego_pago") as TrafegoPago) || null;
+  const valorInvestidoRaw = String(formData.get("valor_investido_dia") ?? "").trim();
+  const valor_investido_dia = valorInvestidoRaw ? Number(valorInvestidoRaw) : null;
+
+  await supabase
+    .from("grupos_gestao")
+    .update({ trafego_pago, valor_investido_dia })
     .eq("id", grupoId);
 
   revalidatePath(`/grupos/${grupoId}`);

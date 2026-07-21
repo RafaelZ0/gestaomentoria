@@ -10,6 +10,7 @@ export type GrupoGestao = {
   data_termino: string | null;
   trafego_pago: TrafegoPago | null;
   valor_mensal: number;
+  valor_investido_dia: number | null;
   observacoes: string | null;
   created_at: string;
   updated_at: string;
@@ -73,8 +74,6 @@ export type CustoFixo = {
 
 export type CustoHoraConfig = {
   id: number;
-  horas_atendimento_mes: number;
-  percentual_ociosidade: number;
   percentual_fator_avaliacao: number;
 };
 
@@ -90,11 +89,13 @@ export type LancamentoFinanceiro = {
   created_at: string;
 };
 
-export type CustoFixoMensal = {
+export type CustoFixoMensalItem = {
+  id: string;
   ano: number;
   mes: number;
+  nome: string;
   valor: number;
-  updated_at: string;
+  created_at: string;
 };
 
 type Relationships = never[];
@@ -166,11 +167,11 @@ export type Database = {
         Update: Partial<LancamentoFinanceiro>;
         Relationships: Relationships;
       };
-      custos_fixos_mensais: {
-        Row: CustoFixoMensal;
-        Insert: Partial<CustoFixoMensal> &
-          Pick<CustoFixoMensal, "ano" | "mes" | "valor">;
-        Update: Partial<CustoFixoMensal>;
+      custos_fixos_mensais_itens: {
+        Row: CustoFixoMensalItem;
+        Insert: Partial<CustoFixoMensalItem> &
+          Pick<CustoFixoMensalItem, "ano" | "mes" | "nome" | "valor">;
+        Update: Partial<CustoFixoMensalItem>;
         Relationships: Relationships;
       };
     };

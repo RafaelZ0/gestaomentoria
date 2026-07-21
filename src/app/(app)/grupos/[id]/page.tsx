@@ -6,11 +6,11 @@ import {
   calcFaturamentoEstimado,
   formatDuracao,
 } from "@/lib/format";
-import { trafegoPagoVariant, StatusBadge } from "@/components/StatusBadge";
 import { EditarGrupoForm } from "@/components/EditarGrupoForm";
 import { CancelarGrupoButton } from "@/components/CancelarGrupoModal";
 import { ChecklistEntregas } from "@/components/ChecklistEntregas";
 import { MentoradosList } from "@/components/MentoradosList";
+import { TrafegoCard } from "@/components/TrafegoCard";
 
 export default async function GrupoOverviewPage({
   params,
@@ -71,19 +71,15 @@ export default async function GrupoOverviewPage({
           value={formatBRL(faturamentoEstimado)}
         />
         <InfoCard label="Duração" value={formatDuracao(duracaoDias)} />
-        <div className="rounded-xl border border-border bg-bg-surface p-5">
-          <p className="text-sm text-text-secondary">Tráfego pago</p>
-          <div className="mt-2">
-            {grupo.trafego_pago ? (
-              <StatusBadge
-                label={grupo.trafego_pago}
-                variant={trafegoPagoVariant(grupo.trafego_pago)}
-              />
-            ) : (
-              <span className="text-text-secondary">—</span>
-            )}
-          </div>
-        </div>
+        <TrafegoCard
+          grupoId={grupo.id}
+          trafegoPago={grupo.trafego_pago}
+          valorInvestidoDia={
+            grupo.valor_investido_dia !== null
+              ? Number(grupo.valor_investido_dia)
+              : null
+          }
+        />
       </div>
 
       <div className="text-sm text-text-secondary">

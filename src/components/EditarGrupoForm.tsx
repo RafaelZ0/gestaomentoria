@@ -61,13 +61,10 @@ export function EditarGrupoForm({ grupo }: { grupo: GrupoGestao }) {
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-sm text-text-secondary">Tráfego pago</label>
-        <select name="trafego_pago" defaultValue={grupo.trafego_pago ?? ""} className={inputClass}>
-          <option value="">—</option>
-          <option value="SIM">SIM</option>
-          <option value="NÃO">NÃO</option>
-          <option value="PARADO">PARADO</option>
-          <option value="EM IMPLEMENTAÇÃO">EM IMPLEMENTAÇÃO</option>
+        <label className="mb-1 block text-sm text-text-secondary">Status</label>
+        <select name="status" defaultValue={grupo.status} className={inputClass}>
+          <option value="Ativo">Ativo</option>
+          <option value="Inativo">Inativo</option>
         </select>
       </div>
       <div>
