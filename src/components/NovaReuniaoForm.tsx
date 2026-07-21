@@ -24,6 +24,7 @@ export function NovaReuniaoForm({
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [entregaFoiFeita, setEntregaFoiFeita] = useState<"sim" | "nao" | null>(null);
 
   if (!open) {
     return (
@@ -91,24 +92,51 @@ export function NovaReuniaoForm({
       {entregasPendentes.length > 0 && (
         <div>
           <p className="mb-2 text-sm text-text-secondary">
-            Entregas feitas nesta reunião (opcional)
+            Alguma entrega foi feita nesta reunião?
           </p>
-          <div className="space-y-2">
-            {entregasPendentes.map((e) => (
-              <label
-                key={e.id}
-                className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
-              >
-                <input
-                  type="checkbox"
-                  name="entrega_feita"
-                  value={e.id}
-                  className="h-4 w-4 accent-[var(--accent)]"
-                />
-                {e.nome}
-              </label>
-            ))}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setEntregaFoiFeita("sim")}
+              className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                entregaFoiFeita === "sim"
+                  ? "border-accent bg-accent text-white"
+                  : "border-border text-text-secondary hover:bg-bg-surface-hover"
+              }`}
+            >
+              Sim
+            </button>
+            <button
+              type="button"
+              onClick={() => setEntregaFoiFeita("nao")}
+              className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                entregaFoiFeita === "nao"
+                  ? "border-accent bg-accent text-white"
+                  : "border-border text-text-secondary hover:bg-bg-surface-hover"
+              }`}
+            >
+              Não
+            </button>
           </div>
+
+          {entregaFoiFeita === "sim" && (
+            <div className="mt-3 space-y-2">
+              {entregasPendentes.map((e) => (
+                <label
+                  key={e.id}
+                  className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+                >
+                  <input
+                    type="checkbox"
+                    name="entrega_feita"
+                    value={e.id}
+                    className="h-4 w-4 accent-[var(--accent)]"
+                  />
+                  {e.nome}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
