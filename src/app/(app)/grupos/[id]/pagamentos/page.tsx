@@ -63,7 +63,7 @@ export default async function PagamentosPage({
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-text-secondary">Total pago</p>
-          <p className="font-display text-2xl font-bold tabular-nums text-text-primary">
+          <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-text-primary">
             {formatBRL(total)}
           </p>
           <p className="mt-1 text-xs text-text-secondary">

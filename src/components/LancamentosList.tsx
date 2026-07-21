@@ -67,7 +67,7 @@ export function LancamentosList({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-bg-surface-hover"
+              className="btn-secondary"
             >
               Cancelar
             </button>
@@ -92,7 +92,7 @@ function LancamentoFields({
 }) {
   return (
     <>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm text-text-secondary">Tipo</label>
           <select
@@ -125,7 +125,7 @@ function LancamentoFields({
           className={inputClass}
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm text-text-secondary">
             Categoria (opcional)
@@ -232,7 +232,7 @@ function LancamentoRow({ lancamento }: { lancamento: LancamentoFinanceiro }) {
           <button
             type="button"
             onClick={() => setEditing(false)}
-            className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-bg-surface-hover"
+            className="btn-secondary"
           >
             Cancelar
           </button>

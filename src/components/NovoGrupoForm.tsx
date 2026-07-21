@@ -45,7 +45,7 @@ export function NovoGrupoForm() {
           />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Data de início" htmlFor="data_inicio">
             <input
               id="data_inicio"
@@ -104,7 +104,10 @@ export function NovoGrupoForm() {
         </div>
 
         {mentorados.map((key, i) => (
-          <div key={key} className="grid grid-cols-[1fr_1fr_auto] gap-3 items-end">
+          <div
+            key={key}
+            className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+          >
             <Field label="Nome" htmlFor={`mentorado_nome_${key}`}>
               <input
                 id={`mentorado_nome_${key}`}

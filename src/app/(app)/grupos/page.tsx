@@ -55,7 +55,7 @@ export default async function GruposPage() {
   return (
     <div className="max-w-6xl">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-text-primary">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
           Grupos de gestão
         </h1>
         <Link
@@ -67,15 +67,15 @@ export default async function GruposPage() {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-bg-surface p-6 sm:col-span-1">
+        <div className="card-hero rounded-xl border border-border bg-bg-surface p-6 sm:col-span-1">
           <p className="text-sm text-text-secondary">Faturamento total (estimado)</p>
-          <p className="mt-2 font-display text-4xl font-bold tabular-nums text-text-primary">
+          <p className="mt-2 font-display text-4xl font-bold tracking-tight tabular-nums text-text-primary">
             {formatBRL(faturamentoTotal)}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-bg-surface p-6">
           <p className="text-sm text-text-secondary">Grupos ativos</p>
-          <p className="mt-2 font-display text-2xl font-semibold tabular-nums text-text-primary">
+          <p className="mt-2 font-display text-2xl font-semibold tracking-tight tabular-nums text-text-primary">
             {ativos.length}{" "}
             <span className="text-base font-normal text-text-secondary">
               / {(grupos ?? []).length}
@@ -87,7 +87,7 @@ export default async function GruposPage() {
             Sem sinal de vida (+{DIAS_SEM_SINAL_DE_VIDA}d)
           </p>
           <p
-            className={`mt-2 font-display text-2xl font-semibold tabular-nums ${
+            className={`mt-2 font-display text-2xl font-semibold tracking-tight tabular-nums ${
               semSinalDeVida.length > 0
                 ? "text-status-warn-text"
                 : "text-text-primary"

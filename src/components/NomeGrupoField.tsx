@@ -25,7 +25,7 @@ export function NomeGrupoField({
           setValor(nome);
         }
       }}
-      className="min-w-0 flex-1 bg-transparent font-display text-2xl font-semibold text-text-primary outline-none focus:border-b focus:border-accent"
+      className="min-w-0 flex-1 bg-transparent font-display text-3xl font-semibold tracking-tight text-text-primary outline-none focus:border-b focus:border-accent"
     />
   );
 }

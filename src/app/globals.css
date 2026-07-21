@@ -8,7 +8,9 @@
   --accent: #6366f1;
   --accent-hover: #7c7ff2;
   --text-primary: #f4f5f7;
-  --text-secondary: #8b92a6;
+  --text-secondary: #a8b0c4;
+  /* tom antigo de --text-secondary, reservado para metadados realmente terciários */
+  --text-tertiary: #8b92a6;
 
   --status-ok-bg: rgba(34, 197, 94, 0.12);
   --status-ok-text: #4ade80;
@@ -31,6 +33,7 @@
   --color-accent-hover: var(--accent-hover);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
 
   --color-status-ok-bg: var(--status-ok-bg);
   --color-status-ok-text: var(--status-ok-text);
@@ -59,4 +62,69 @@ body {
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Anel de foco translúcido, padronizado para inputs, selects e textareas
+   (inclusive o outline nativo do <select>, que antes destoava). */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* Remove as setas nativas de incremento/decremento dos inputs numéricos que
+   ainda restam em formulários (o padrão de card-herói editável usa
+   input type="text" com inputMode decimal e não precisa disso). */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Sombra sutil para destacar o card-herói (ex: Lucro acumulado) dos demais
+   cards da mesma tela. */
+.card-hero {
+  box-shadow:
+    0 20px 40px -24px rgba(0, 0, 0, 0.55),
+    0 0 0 1px var(--border);
+}
+
+/* Botão secundário (ex: "Cancelar"): a borda em --border sozinha tem baixo
+   contraste sobre bg-surface/bg-surface-hover, então soma um fundo sutil em
+   repouso para dar affordance de botão mesmo sem foco/hover. */
+.btn-secondary {
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background-color: var(--bg-surface-hover);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--text-secondary);
+  transition:
+    color 150ms,
+    border-color 150ms,
+    background-color 150ms;
+}
+
+.btn-secondary:hover {
+  color: var(--text-primary);
+  border-color: var(--text-tertiary);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.6;
 }

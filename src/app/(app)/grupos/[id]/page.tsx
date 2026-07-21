@@ -128,7 +128,7 @@ function InfoCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-border bg-bg-surface p-5">
       <p className="text-sm text-text-secondary">{label}</p>
-      <p className="mt-2 font-display text-xl font-semibold tabular-nums text-text-primary">
+      <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text-primary">
         {value}
       </p>
     </div>

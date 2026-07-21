@@ -60,7 +60,7 @@ export function MentoradosList({
           <button
             type="button"
             onClick={() => setAdding(false)}
-            className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-bg-surface-hover"
+            className="btn-secondary"
           >
             Cancelar
           </button>

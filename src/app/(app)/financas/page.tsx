@@ -68,7 +68,7 @@ export default async function FinancasPage() {
   return (
     <div className="max-w-5xl space-y-8">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-text-primary">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
           Finanças
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
@@ -77,10 +77,10 @@ export default async function FinancasPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-border bg-bg-surface p-6">
+      <div className="card-hero rounded-xl border border-border bg-bg-surface p-6">
         <p className="text-sm text-text-secondary">Lucro acumulado</p>
         <p
-          className={`mt-2 font-display text-4xl font-bold tabular-nums ${
+          className={`mt-2 font-display text-4xl font-bold tracking-tight tabular-nums ${
             lucroAcumulado >= 0 ? "text-text-primary" : "text-status-alert-text"
           }`}
         >
@@ -152,7 +152,7 @@ function InfoCard({
   return (
     <div className="rounded-xl border border-border bg-bg-surface p-5">
       <p className="text-sm text-text-secondary">{label}</p>
-      <p className="mt-2 font-display text-xl font-semibold tabular-nums text-text-primary">
+      <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text-primary">
         {value}
       </p>
       {hint &&

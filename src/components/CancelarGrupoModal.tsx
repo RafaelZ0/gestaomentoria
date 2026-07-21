@@ -28,7 +28,7 @@ export function CancelarGrupoButton({
           })
         }
         disabled={isPending}
-        className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-bg-surface-hover disabled:opacity-60"
+        className="btn-secondary"
       >
         {isPending ? "Reativando…" : "Reativar grupo"}
       </button>
@@ -102,7 +102,7 @@ export function CancelarGrupoButton({
               <button
                 disabled={isPending}
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-4 py-2 text-sm text-text-secondary hover:text-text-primary"
+                className="btn-secondary"
               >
                 Voltar
               </button>
