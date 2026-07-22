@@ -9,17 +9,18 @@ const DIAS_SEM_SINAL_DE_VIDA = 30;
 export default async function GruposPage() {
   const supabase = await createClient();
 
-  const [{ data: grupos }, { data: reunioes }] = await Promise.all([
-    supabase
-      .from("grupos_gestao")
-      .select("*")
-      .order("status", { ascending: true })
-      .order("nome", { ascending: true }),
-    supabase
-      .from("reunioes")
-      .select("grupo_id, data")
-      .order("data", { ascending: false }),
-  ]);
+  const [{ data: grupos }, { data: reunioes }, { data: participantes }] =
+    await Promise.all([
+      supabase
+        .from("grupos_gestao")
+        .select("*")
+        .order("status", { ascending: true })
+        .order("nome", { ascending: true }),
+      supabase.from("reunioes").select("id, grupo_id, data"),
+      supabase
+        .from("reuniao_participantes")
+        .select("reuniao_id, mentorados(grupo_id)"),
+    ]);
 
   const faturamentoTotal = (grupos ?? []).reduce(
     (acc, g) =>
@@ -32,10 +33,26 @@ export default async function GruposPage() {
     0
   );
 
+  type ParticipanteRow = { reuniao_id: string; mentorados: { grupo_id: string } | null };
+
+  const gruposPorReuniao = new Map<string, Set<string>>();
+  for (const r of reunioes ?? []) {
+    gruposPorReuniao.set(r.id, new Set([r.grupo_id]));
+  }
+  for (const p of (participantes ?? []) as unknown as ParticipanteRow[]) {
+    const grupoId = p.mentorados?.grupo_id;
+    if (!grupoId) continue;
+    gruposPorReuniao.get(p.reuniao_id)?.add(grupoId);
+  }
+
   const ultimaReuniaoPorGrupo = new Map<string, string>();
   for (const r of reunioes ?? []) {
-    if (!ultimaReuniaoPorGrupo.has(r.grupo_id)) {
-      ultimaReuniaoPorGrupo.set(r.grupo_id, r.data);
+    const gruposEnvolvidos = gruposPorReuniao.get(r.id) ?? new Set([r.grupo_id]);
+    for (const gid of gruposEnvolvidos) {
+      const atual = ultimaReuniaoPorGrupo.get(gid);
+      if (!atual || r.data > atual) {
+        ultimaReuniaoPorGrupo.set(gid, r.data);
+      }
     }
   }
 
