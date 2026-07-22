@@ -31,12 +31,13 @@ export async function createReuniao(grupoId: string, formData: FormData) {
 
   const data = String(formData.get("data") ?? "").trim();
   const resumo = String(formData.get("resumo") ?? "").trim();
+  const compareceu = formData.get("nao_compareceu") !== "on";
   const entregasFeitas = formData.getAll("entrega_feita").map(String);
   const participantes = formData.getAll("participante_id").map(String);
   const responsavelIdRaw = String(formData.get("responsavel_id") ?? "").trim();
   const responsavel_id = responsavelIdRaw || null;
 
-  if (!resumo) {
+  if (compareceu && !resumo) {
     throw new Error("Descreva um resumo da reunião.");
   }
 
@@ -46,6 +47,7 @@ export async function createReuniao(grupoId: string, formData: FormData) {
       grupo_id: grupoId,
       resumo,
       responsavel_id,
+      compareceu,
       ...(data ? { data } : {}),
     })
     .select("*")
@@ -90,11 +92,12 @@ export async function updateReuniao(reuniaoId: string, formData: FormData) {
 
   const data = String(formData.get("data") ?? "").trim();
   const resumo = String(formData.get("resumo") ?? "").trim();
+  const compareceu = formData.get("nao_compareceu") !== "on";
   const participantes = formData.getAll("participante_id").map(String);
   const responsavelIdRaw = String(formData.get("responsavel_id") ?? "").trim();
   const responsavel_id = responsavelIdRaw || null;
 
-  if (!resumo) {
+  if (compareceu && !resumo) {
     throw new Error("Descreva um resumo da reunião.");
   }
 
@@ -108,6 +111,7 @@ export async function updateReuniao(reuniaoId: string, formData: FormData) {
     .update({
       resumo,
       responsavel_id,
+      compareceu,
       ...(data ? { data } : {}),
     })
     .eq("id", reuniaoId)

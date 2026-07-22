@@ -24,7 +24,13 @@ export function ReuniaoItem({
   mentoradosOutrosGrupos,
   responsaveis,
 }: {
-  reuniao: { id: string; data: string; resumo: string; responsavel_id: string | null };
+  reuniao: {
+    id: string;
+    data: string;
+    resumo: string;
+    responsavel_id: string | null;
+    compareceu: boolean;
+  };
   participantes: Participante[];
   responsavelNome: string | undefined;
   mentoradosDoGrupo: { id: string; nome: string }[];
@@ -43,6 +49,7 @@ export function ReuniaoItem({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState(reuniao.data);
+  const [naoCompareceu, setNaoCompareceu] = useState(!reuniao.compareceu);
 
   if (editando) {
     const participantesIds = new Set(participantes.map((p) => p.id));
@@ -86,27 +93,42 @@ export function ReuniaoItem({
             />
           </div>
 
+          <label className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary">
+            <input
+              type="checkbox"
+              name="nao_compareceu"
+              checked={naoCompareceu}
+              onChange={(e) => setNaoCompareceu(e.target.checked)}
+              className="h-4 w-4 accent-[var(--accent)]"
+            />
+            Grupo não compareceu à reunião agendada
+          </label>
+
           <div>
             <label className="mb-1 block text-sm text-text-secondary">
-              O que foi conversado e definido
+              {naoCompareceu
+                ? "Observação (opcional)"
+                : "O que foi conversado e definido"}
             </label>
             <textarea
               name="resumo"
-              required
-              rows={4}
+              required={!naoCompareceu}
+              rows={naoCompareceu ? 2 : 4}
               defaultValue={reuniao.resumo}
               className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
             />
           </div>
 
-          <ParticipantesFields
-            mentoradosDoGrupo={mentoradosDoGrupo}
-            grupoStatus={grupoStatus}
-            grupoDataTermino={grupoDataTermino}
-            mentoradosOutrosGrupos={mentoradosOutrosGrupos}
-            dataReuniao={data}
-            participantesSelecionados={participantesIds}
-          />
+          {!naoCompareceu && (
+            <ParticipantesFields
+              mentoradosDoGrupo={mentoradosDoGrupo}
+              grupoStatus={grupoStatus}
+              grupoDataTermino={grupoDataTermino}
+              mentoradosOutrosGrupos={mentoradosOutrosGrupos}
+              dataReuniao={data}
+              participantesSelecionados={participantesIds}
+            />
+          )}
 
           <div className="flex gap-2">
             <button
@@ -135,7 +157,14 @@ export function ReuniaoItem({
       className="cursor-pointer rounded-xl border border-border bg-bg-surface p-5 hover:bg-bg-surface-hover"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-medium text-text-primary">{formatDate(reuniao.data)}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium text-text-primary">{formatDate(reuniao.data)}</p>
+          {!reuniao.compareceu && (
+            <span className="rounded-full bg-status-alert-bg px-2 py-0.5 text-xs font-medium text-status-alert-text">
+              Não compareceu
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           {responsavelNome && (
             <span className="rounded-full bg-bg-surface-hover px-2 py-0.5 text-xs text-text-secondary">
@@ -175,7 +204,9 @@ export function ReuniaoItem({
       {error && (
         <p className="mt-2 text-xs text-status-alert-text">{error}</p>
       )}
-      <p className="mt-2 whitespace-pre-wrap text-sm text-text-secondary">{reuniao.resumo}</p>
+      {reuniao.resumo && (
+        <p className="mt-2 whitespace-pre-wrap text-sm text-text-secondary">{reuniao.resumo}</p>
+      )}
       {participantes.length > 0 && (
         <p className="mt-3 text-xs text-text-secondary">
           Participantes:{" "}

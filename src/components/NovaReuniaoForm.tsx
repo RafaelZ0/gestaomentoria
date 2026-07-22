@@ -36,6 +36,7 @@ export function NovaReuniaoForm({
   const [error, setError] = useState<string | null>(null);
   const [entregaFoiFeita, setEntregaFoiFeita] = useState<"sim" | "nao" | null>(null);
   const [data, setData] = useState(new Date().toISOString().slice(0, 10));
+  const [naoCompareceu, setNaoCompareceu] = useState(false);
 
   if (!open) {
     return (
@@ -84,27 +85,42 @@ export function NovaReuniaoForm({
         <ResponsavelField responsaveis={responsaveis} />
       </div>
 
+      <label className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary">
+        <input
+          type="checkbox"
+          name="nao_compareceu"
+          checked={naoCompareceu}
+          onChange={(e) => setNaoCompareceu(e.target.checked)}
+          className="h-4 w-4 accent-[var(--accent)]"
+        />
+        Grupo não compareceu à reunião agendada
+      </label>
+
       <div>
         <label className="mb-1 block text-sm text-text-secondary">
-          O que foi conversado e definido
+          {naoCompareceu
+            ? "Observação (opcional)"
+            : "O que foi conversado e definido"}
         </label>
         <textarea
           name="resumo"
-          required
-          rows={4}
+          required={!naoCompareceu}
+          rows={naoCompareceu ? 2 : 4}
           className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
         />
       </div>
 
-      <ParticipantesFields
-        mentoradosDoGrupo={mentoradosDoGrupo}
-        grupoStatus={grupoStatus}
-        grupoDataTermino={grupoDataTermino}
-        mentoradosOutrosGrupos={mentoradosOutrosGrupos}
-        dataReuniao={data}
-      />
+      {!naoCompareceu && (
+        <ParticipantesFields
+          mentoradosDoGrupo={mentoradosDoGrupo}
+          grupoStatus={grupoStatus}
+          grupoDataTermino={grupoDataTermino}
+          mentoradosOutrosGrupos={mentoradosOutrosGrupos}
+          dataReuniao={data}
+        />
+      )}
 
-      {entregasPendentes.length > 0 && (
+      {!naoCompareceu && entregasPendentes.length > 0 && (
         <div>
           <p className="mb-2 text-sm text-text-secondary">
             Alguma entrega foi feita nesta reunião?

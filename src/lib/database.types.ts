@@ -37,6 +37,7 @@ export type Reuniao = {
   data: string;
   resumo: string;
   responsavel_id: string | null;
+  compareceu: boolean;
   created_at: string;
 };
 

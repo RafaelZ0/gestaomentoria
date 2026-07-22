@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NovaReuniaoForm } from "@/components/NovaReuniaoForm";
 import { ReuniaoItem } from "@/components/ReuniaoItem";
+import { ComparecimentoResumo } from "@/components/ComparecimentoResumo";
 import { getGrupo } from "@/lib/data/grupo";
 
 export default async function ReunioesPage({
@@ -134,8 +135,17 @@ export default async function ReunioesPage({
     grupoDataTermino: m.grupos_gestao?.data_termino ?? null,
   }));
 
+  const totalAgendadas = (reunioesProprias ?? []).length;
+  const faltas = (reunioesProprias ?? []).filter((r) => !r.compareceu).length;
+
   return (
     <div className="space-y-6">
+      <ComparecimentoResumo
+        totalAgendadas={totalAgendadas}
+        faltas={faltas}
+        mentorados={mentoradosDoGrupo ?? []}
+      />
+
       <NovaReuniaoForm
         grupoId={id}
         entregasPendentes={pendentes}
