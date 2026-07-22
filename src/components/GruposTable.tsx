@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { formatBRL, formatDate } from "@/lib/format";
 import {
   StatusBadge,
@@ -21,6 +21,7 @@ const TRAFEGO_ORDEM: Record<string, number> = {
 };
 
 export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
+  const router = useRouter();
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
@@ -88,7 +89,8 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
           {gruposOrdenados.map((g) => (
             <tr
               key={g.id}
-              className="border-b border-border last:border-0 hover:bg-bg-surface-hover"
+              onClick={() => router.push(`/grupos/${g.id}`)}
+              className="cursor-pointer border-b border-border last:border-0 hover:bg-bg-surface-hover"
             >
               <td className="px-4 py-3 font-medium text-text-primary">{g.nome}</td>
               <td className="px-4 py-3">
@@ -110,14 +112,7 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
               <td className="px-4 py-3 tabular-nums text-text-secondary">
                 {formatDate(g.data_inicio)}
               </td>
-              <td className="px-4 py-3 text-right">
-                <Link
-                  href={`/grupos/${g.id}`}
-                  className="text-accent hover:text-accent-hover"
-                >
-                  Ver →
-                </Link>
-              </td>
+              <td className="px-4 py-3 text-right text-text-secondary">→</td>
             </tr>
           ))}
           {gruposOrdenados.length === 0 && (

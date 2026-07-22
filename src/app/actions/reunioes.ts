@@ -5,25 +5,22 @@ import { createClient } from "@/lib/supabase/server";
 
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
-// A reunião aparece automaticamente na aba "Reuniões" de todo grupo que
-// tiver um mentorado participante, então revalidamos o grupo de origem e o
-// grupo de cada participante (antigo e novo, no caso de uma edição).
-async function revalidarGruposDaReuniao(
+async function gruposDosMentorados(
   supabase: SupabaseClient,
-  grupoIdOrigem: string,
   mentoradoIds: string[]
-) {
-  const grupos = new Set([grupoIdOrigem]);
-  if (mentoradoIds.length > 0) {
-    const { data: mentorados } = await supabase
-      .from("mentorados")
-      .select("grupo_id")
-      .in("id", mentoradoIds);
-    for (const m of mentorados ?? []) {
-      grupos.add(m.grupo_id);
-    }
-  }
-  for (const id of grupos) {
+): Promise<string[]> {
+  if (mentoradoIds.length === 0) return [];
+  const { data } = await supabase
+    .from("mentorados")
+    .select("grupo_id")
+    .in("id", mentoradoIds);
+  return (data ?? []).map((m) => m.grupo_id);
+}
+
+// A reunião aparece automaticamente na aba "Reuniões" de todo grupo que
+// tiver um mentorado participante, então revalidamos cada um deles.
+function revalidarGrupos(grupoIds: Iterable<string>) {
+  for (const id of grupoIds) {
     revalidatePath(`/grupos/${id}`);
     revalidatePath(`/grupos/${id}/reunioes`);
   }
@@ -67,6 +64,12 @@ export async function createReuniao(grupoId: string, formData: FormData) {
     );
   }
 
+  const gruposParticipantes = await gruposDosMentorados(supabase, participantes);
+  const gruposEnvolvidos = [...new Set([grupoId, ...gruposParticipantes])];
+
+  // Marca o processo como feito em todos os grupos envolvidos na reunião
+  // (não só no grupo de origem), já que participantes de outros grupos
+  // também fizeram a entrega junto.
   if (entregasFeitas.length > 0) {
     await supabase
       .from("entregas_grupo")
@@ -75,10 +78,11 @@ export async function createReuniao(grupoId: string, formData: FormData) {
         data_feito: reuniao.data,
         reuniao_id: reuniao.id,
       })
-      .in("id", entregasFeitas);
+      .in("grupo_id", gruposEnvolvidos)
+      .in("tipo_entrega_id", entregasFeitas);
   }
 
-  await revalidarGruposDaReuniao(supabase, grupoId, participantes);
+  revalidarGrupos(gruposEnvolvidos);
 }
 
 export async function updateReuniao(reuniaoId: string, formData: FormData) {
@@ -129,10 +133,11 @@ export async function updateReuniao(reuniaoId: string, formData: FormData) {
   }
 
   const idsAntigos = (participantesAntigos ?? []).map((p) => p.mentorado_id);
-  await revalidarGruposDaReuniao(supabase, reuniao.grupo_id, [
+  const gruposParticipantes = await gruposDosMentorados(supabase, [
     ...idsAntigos,
     ...participantes,
   ]);
+  revalidarGrupos([reuniao.grupo_id, ...gruposParticipantes]);
 }
 
 export async function removeReuniao(reuniaoId: string) {
@@ -149,8 +154,9 @@ export async function removeReuniao(reuniaoId: string) {
     .select("mentorado_id")
     .eq("reuniao_id", reuniaoId);
 
-  // Entregas marcadas como feitas nesta reunião voltam a ficar pendentes,
-  // já que a reunião que as gerou está sendo excluída.
+  // Entregas marcadas como feitas nesta reunião voltam a ficar pendentes
+  // (em todos os grupos envolvidos), já que a reunião que as gerou está
+  // sendo excluída.
   await supabase
     .from("entregas_grupo")
     .update({ feito: false, data_feito: null, reuniao_id: null })
@@ -163,10 +169,10 @@ export async function removeReuniao(reuniaoId: string) {
   }
 
   if (reuniao) {
-    await revalidarGruposDaReuniao(
+    const gruposParticipantes = await gruposDosMentorados(
       supabase,
-      reuniao.grupo_id,
       (participantes ?? []).map((p) => p.mentorado_id)
     );
+    revalidarGrupos([reuniao.grupo_id, ...gruposParticipantes]);
   }
 }

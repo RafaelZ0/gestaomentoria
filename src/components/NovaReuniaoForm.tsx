@@ -6,18 +6,28 @@ import { ResponsavelField } from "@/components/ResponsavelField";
 import { ParticipantesFields } from "@/components/ParticipantesFields";
 import type { Responsavel } from "@/lib/database.types";
 
-type MentoradoOutroGrupo = { id: string; nome: string; grupoNome: string };
+type MentoradoOutroGrupo = {
+  id: string;
+  nome: string;
+  grupoNome: string;
+  grupoStatus: string;
+  grupoDataTermino: string | null;
+};
 
 export function NovaReuniaoForm({
   grupoId,
   entregasPendentes,
   mentoradosDoGrupo,
+  grupoStatus,
+  grupoDataTermino,
   mentoradosOutrosGrupos,
   responsaveis,
 }: {
   grupoId: string;
   entregasPendentes: { id: string; nome: string }[];
   mentoradosDoGrupo: { id: string; nome: string }[];
+  grupoStatus: string;
+  grupoDataTermino: string | null;
   mentoradosOutrosGrupos: MentoradoOutroGrupo[];
   responsaveis: Responsavel[];
 }) {
@@ -25,6 +35,7 @@ export function NovaReuniaoForm({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [entregaFoiFeita, setEntregaFoiFeita] = useState<"sim" | "nao" | null>(null);
+  const [data, setData] = useState(new Date().toISOString().slice(0, 10));
 
   if (!open) {
     return (
@@ -64,7 +75,8 @@ export function NovaReuniaoForm({
           <input
             type="date"
             name="data"
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            value={data}
+            onChange={(e) => setData(e.target.value)}
             className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
           />
         </div>
@@ -86,7 +98,10 @@ export function NovaReuniaoForm({
 
       <ParticipantesFields
         mentoradosDoGrupo={mentoradosDoGrupo}
+        grupoStatus={grupoStatus}
+        grupoDataTermino={grupoDataTermino}
         mentoradosOutrosGrupos={mentoradosOutrosGrupos}
+        dataReuniao={data}
       />
 
       {entregasPendentes.length > 0 && (

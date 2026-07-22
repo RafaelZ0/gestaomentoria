@@ -19,6 +19,8 @@ export function ReuniaoItem({
   participantes,
   responsavelNome,
   mentoradosDoGrupo,
+  grupoStatus,
+  grupoDataTermino,
   mentoradosOutrosGrupos,
   responsaveis,
 }: {
@@ -26,12 +28,21 @@ export function ReuniaoItem({
   participantes: Participante[];
   responsavelNome: string | undefined;
   mentoradosDoGrupo: { id: string; nome: string }[];
-  mentoradosOutrosGrupos: { id: string; nome: string; grupoNome: string }[];
+  grupoStatus: string;
+  grupoDataTermino: string | null;
+  mentoradosOutrosGrupos: {
+    id: string;
+    nome: string;
+    grupoNome: string;
+    grupoStatus: string;
+    grupoDataTermino: string | null;
+  }[];
   responsaveis: Responsavel[];
 }) {
   const [editando, setEditando] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState(reuniao.data);
 
   if (editando) {
     const participantesIds = new Set(participantes.map((p) => p.id));
@@ -64,7 +75,8 @@ export function ReuniaoItem({
               <input
                 type="date"
                 name="data"
-                defaultValue={reuniao.data}
+                value={data}
+                onChange={(e) => setData(e.target.value)}
                 className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
               />
             </div>
@@ -89,7 +101,10 @@ export function ReuniaoItem({
 
           <ParticipantesFields
             mentoradosDoGrupo={mentoradosDoGrupo}
+            grupoStatus={grupoStatus}
+            grupoDataTermino={grupoDataTermino}
             mentoradosOutrosGrupos={mentoradosOutrosGrupos}
+            dataReuniao={data}
             participantesSelecionados={participantesIds}
           />
 

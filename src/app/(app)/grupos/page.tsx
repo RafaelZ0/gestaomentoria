@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { calcFaturamentoEstimado, formatBRL } from "@/lib/format";
 import { GruposTable } from "@/components/GruposTable";
+import { SemSinalDeVidaCard } from "@/components/SemSinalDeVidaCard";
 
 const DIAS_SEM_SINAL_DE_VIDA = 30;
 
@@ -39,16 +40,20 @@ export default async function GruposPage() {
   }
 
   const hoje = new Date();
-  const semSinalDeVida = (grupos ?? []).filter((g) => {
-    if (g.status !== "Ativo") return false;
-    const ultima = ultimaReuniaoPorGrupo.get(g.id);
-    if (!ultima) return true;
-    const dias = Math.floor(
-      (hoje.getTime() - new Date(ultima + "T00:00:00").getTime()) /
-        (1000 * 60 * 60 * 24)
-    );
-    return dias > DIAS_SEM_SINAL_DE_VIDA;
-  });
+  const semSinalDeVida = (grupos ?? [])
+    .filter((g) => g.status === "Ativo")
+    .map((g) => {
+      const ultima = ultimaReuniaoPorGrupo.get(g.id);
+      const dias = ultima
+        ? Math.floor(
+            (hoje.getTime() - new Date(ultima + "T00:00:00").getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        : null;
+      return { id: g.id, nome: g.nome, dias };
+    })
+    .filter((g) => g.dias === null || g.dias > DIAS_SEM_SINAL_DE_VIDA)
+    .sort((a, b) => (b.dias ?? Infinity) - (a.dias ?? Infinity));
 
   const ativos = (grupos ?? []).filter((g) => g.status === "Ativo");
 
@@ -82,20 +87,10 @@ export default async function GruposPage() {
             </span>
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-bg-surface p-6">
-          <p className="text-sm text-text-secondary">
-            Sem sinal de vida (+{DIAS_SEM_SINAL_DE_VIDA}d)
-          </p>
-          <p
-            className={`mt-2 font-display text-2xl font-semibold tracking-tight tabular-nums ${
-              semSinalDeVida.length > 0
-                ? "text-status-warn-text"
-                : "text-text-primary"
-            }`}
-          >
-            {semSinalDeVida.length}
-          </p>
-        </div>
+        <SemSinalDeVidaCard
+          dias={DIAS_SEM_SINAL_DE_VIDA}
+          grupos={semSinalDeVida}
+        />
       </div>
 
       <GruposTable grupos={grupos ?? []} />

@@ -2,15 +2,37 @@
 
 import { useState } from "react";
 
-type MentoradoOutroGrupo = { id: string; nome: string; grupoNome: string };
+type MentoradoOutroGrupo = {
+  id: string;
+  nome: string;
+  grupoNome: string;
+  grupoStatus: string;
+  grupoDataTermino: string | null;
+};
+
+function visivelNaData(
+  status: string,
+  dataTermino: string | null,
+  dataReuniao: string
+): boolean {
+  if (status !== "Inativo") return true;
+  if (!dataTermino || !dataReuniao) return true;
+  return dataReuniao <= dataTermino;
+}
 
 export function ParticipantesFields({
   mentoradosDoGrupo,
+  grupoStatus = "Ativo",
+  grupoDataTermino = null,
   mentoradosOutrosGrupos,
+  dataReuniao = "",
   participantesSelecionados = new Set(),
 }: {
   mentoradosDoGrupo: { id: string; nome: string }[];
+  grupoStatus?: string;
+  grupoDataTermino?: string | null;
   mentoradosOutrosGrupos: MentoradoOutroGrupo[];
+  dataReuniao?: string;
   participantesSelecionados?: Set<string>;
 }) {
   const temOutroSelecionado = mentoradosOutrosGrupos.some((m) =>
@@ -18,8 +40,20 @@ export function ParticipantesFields({
   );
   const [mostrarOutrosGrupos, setMostrarOutrosGrupos] = useState(temOutroSelecionado);
 
+  const mentoradosDoGrupoVisiveis = mentoradosDoGrupo.filter(
+    (m) =>
+      participantesSelecionados.has(m.id) ||
+      visivelNaData(grupoStatus, grupoDataTermino, dataReuniao)
+  );
+
+  const mentoradosOutrosVisiveis = mentoradosOutrosGrupos.filter(
+    (m) =>
+      participantesSelecionados.has(m.id) ||
+      visivelNaData(m.grupoStatus, m.grupoDataTermino, dataReuniao)
+  );
+
   const gruposOutros = new Map<string, MentoradoOutroGrupo[]>();
-  for (const m of mentoradosOutrosGrupos) {
+  for (const m of mentoradosOutrosVisiveis) {
     const lista = gruposOutros.get(m.grupoNome) ?? [];
     lista.push(m);
     gruposOutros.set(m.grupoNome, lista);
@@ -29,7 +63,7 @@ export function ParticipantesFields({
     <div>
       <p className="mb-2 text-sm text-text-secondary">Quem participou</p>
       <div className="space-y-2">
-        {mentoradosDoGrupo.map((m) => (
+        {mentoradosDoGrupoVisiveis.map((m) => (
           <label
             key={m.id}
             className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
@@ -44,14 +78,16 @@ export function ParticipantesFields({
             {m.nome}
           </label>
         ))}
-        {mentoradosDoGrupo.length === 0 && (
+        {mentoradosDoGrupoVisiveis.length === 0 && (
           <p className="text-sm text-text-secondary">
-            Nenhum mentorado cadastrado neste grupo.
+            {mentoradosDoGrupo.length === 0
+              ? "Nenhum mentorado cadastrado neste grupo."
+              : "Grupo inativo antes dessa data — nenhum mentorado disponível."}
           </p>
         )}
       </div>
 
-      {mentoradosOutrosGrupos.length > 0 && (
+      {mentoradosOutrosVisiveis.length > 0 && (
         <div className="mt-3">
           {!mostrarOutrosGrupos ? (
             <button

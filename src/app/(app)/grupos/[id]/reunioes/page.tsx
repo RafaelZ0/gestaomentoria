@@ -11,6 +11,7 @@ export default async function ReunioesPage({
   const supabase = await createClient();
 
   const [
+    { data: grupoAtual },
     { data: mentoradosDoGrupo },
     { data: mentoradosOutrosGrupos },
     { data: responsaveis },
@@ -19,13 +20,18 @@ export default async function ReunioesPage({
     { data: entregasPendentes },
   ] = await Promise.all([
     supabase
+      .from("grupos_gestao")
+      .select("status, data_termino")
+      .eq("id", id)
+      .single(),
+    supabase
       .from("mentorados")
       .select("id, nome")
       .eq("grupo_id", id)
       .order("nome"),
     supabase
       .from("mentorados")
-      .select("id, nome, grupo_id, grupos_gestao(nome)")
+      .select("id, nome, grupo_id, grupos_gestao(nome, status, data_termino)")
       .neq("grupo_id", id)
       .order("nome"),
     supabase.from("responsaveis").select("*").order("nome"),
@@ -41,19 +47,19 @@ export default async function ReunioesPage({
       .eq("mentorados.grupo_id", id),
     supabase
       .from("entregas_grupo")
-      .select("id, tipos_entrega(id, nome, ativo)")
+      .select("tipo_entrega_id, tipos_entrega(id, nome, ativo)")
       .eq("grupo_id", id)
       .eq("feito", false),
   ]);
 
   type PendenteRow = {
-    id: string;
+    tipo_entrega_id: string;
     tipos_entrega: { id: string; nome: string; ativo: boolean } | null;
   };
 
   const pendentes = ((entregasPendentes ?? []) as unknown as PendenteRow[])
     .filter((e) => e.tipos_entrega?.ativo)
-    .map((e) => ({ id: e.id, nome: e.tipos_entrega!.nome }));
+    .map((e) => ({ id: e.tipo_entrega_id, nome: e.tipos_entrega!.nome }));
 
   type ParticipacaoExternaRow = { reuniao_id: string };
 
@@ -118,7 +124,7 @@ export default async function ReunioesPage({
     id: string;
     nome: string;
     grupo_id: string;
-    grupos_gestao: { nome: string } | null;
+    grupos_gestao: { nome: string; status: string; data_termino: string | null } | null;
   };
 
   const mentoradosOutrosGruposFormatado = (
@@ -127,6 +133,8 @@ export default async function ReunioesPage({
     id: m.id,
     nome: m.nome,
     grupoNome: m.grupos_gestao?.nome ?? "",
+    grupoStatus: m.grupos_gestao?.status ?? "Ativo",
+    grupoDataTermino: m.grupos_gestao?.data_termino ?? null,
   }));
 
   return (
@@ -135,6 +143,8 @@ export default async function ReunioesPage({
         grupoId={id}
         entregasPendentes={pendentes}
         mentoradosDoGrupo={mentoradosDoGrupo ?? []}
+        grupoStatus={grupoAtual?.status ?? "Ativo"}
+        grupoDataTermino={grupoAtual?.data_termino ?? null}
         mentoradosOutrosGrupos={mentoradosOutrosGruposFormatado}
         responsaveis={responsaveis ?? []}
       />
@@ -149,6 +159,8 @@ export default async function ReunioesPage({
               r.responsavel_id ? responsavelPorId.get(r.responsavel_id) : undefined
             }
             mentoradosDoGrupo={mentoradosDoGrupo ?? []}
+            grupoStatus={grupoAtual?.status ?? "Ativo"}
+            grupoDataTermino={grupoAtual?.data_termino ?? null}
             mentoradosOutrosGrupos={mentoradosOutrosGruposFormatado}
             responsaveis={responsaveis ?? []}
           />

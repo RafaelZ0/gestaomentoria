@@ -8,7 +8,7 @@ import { logout } from "@/app/actions/auth";
 const NAV_ITEMS = [
   { href: "/grupos", label: "Grupos de gestão" },
   { href: "/financas", label: "Finanças" },
-  { href: "/tipos-entrega", label: "Tipos de entrega" },
+  { href: "/tipos-entrega", label: "Processos" },
 ];
 
 export function Sidebar() {

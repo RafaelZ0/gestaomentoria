@@ -30,7 +30,7 @@ export function TiposEntregaList({ tipos }: { tipos: TipoEntrega[] }) {
         <input
           name="nome"
           required
-          placeholder="Nome do novo tipo de entrega…"
+          placeholder="Nome do novo processo…"
           className="flex-1 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
         />
         <button
