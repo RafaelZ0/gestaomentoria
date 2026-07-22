@@ -136,14 +136,34 @@ export default async function ReunioesPage({
   }));
 
   const totalAgendadas = (reunioesProprias ?? []).length;
-  const faltas = (reunioesProprias ?? []).filter((r) => !r.compareceu).length;
+  const faltasGrupoTodo = (reunioesProprias ?? []).filter(
+    (r) => !r.compareceu
+  ).length;
+
+  // Falta individual: reunião marcada como "grupo não compareceu" conta pra
+  // todo mundo; se a reunião aconteceu mas a pessoa não foi marcada como
+  // participante, conta falta só pra ela.
+  const comparecimentoPorMentorado = (mentoradosDoGrupo ?? []).map((m) => {
+    let mFaltas = 0;
+    for (const r of reunioesProprias ?? []) {
+      if (!r.compareceu) {
+        mFaltas++;
+        continue;
+      }
+      const presentes = participantesPorReuniao.get(r.id) ?? [];
+      if (!presentes.some((p) => p.id === m.id)) {
+        mFaltas++;
+      }
+    }
+    return { id: m.id, nome: m.nome, faltas: mFaltas };
+  });
 
   return (
     <div className="space-y-6">
       <ComparecimentoResumo
         totalAgendadas={totalAgendadas}
-        faltas={faltas}
-        mentorados={mentoradosDoGrupo ?? []}
+        faltasGrupoTodo={faltasGrupoTodo}
+        mentorados={comparecimentoPorMentorado}
       />
 
       <NovaReuniaoForm
