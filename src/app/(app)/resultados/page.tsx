@@ -46,6 +46,7 @@ export default async function ResultadosPage() {
       faturamento: m.faturamento,
       vendas: m.vendas,
       roas: m.investimento > 0 ? m.faturamento / m.investimento : null,
+      ticketMedio: m.vendas > 0 ? m.faturamento / m.vendas : null,
     };
   });
 

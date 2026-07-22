@@ -17,6 +17,11 @@ function calcCpl(investimento: number, leads: number): string {
   return formatBRL(investimento / leads);
 }
 
+function calcTicketMedio(faturamento: number, vendas: number): string {
+  if (!vendas) return "—";
+  return formatBRL(faturamento / vendas);
+}
+
 function somar(resultados: ResultadoGrupo[]) {
   return resultados.reduce(
     (acc, r) => ({
@@ -69,7 +74,7 @@ export function ResultadosList({
     <div className="space-y-6">
       <div>
         <p className="mb-2 text-sm text-text-secondary">Total (todos os lançamentos)</p>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
           <ResumoCard label="Investido" value={formatBRL(totais.investimento)} />
           <ResumoCard label="Leads" value={String(totais.leads)} />
           <ResumoCard
@@ -77,6 +82,10 @@ export function ResultadosList({
             value={calcCpl(totais.investimento, totais.leads)}
           />
           <ResumoCard label="Vendas" value={String(totalVendas)} />
+          <ResumoCard
+            label="Ticket médio"
+            value={calcTicketMedio(totalFaturamento, totalVendas)}
+          />
         </div>
       </div>
 
@@ -99,6 +108,7 @@ export function ResultadosList({
                   <th className="px-4 py-3 font-medium">CPL</th>
                   <th className="px-4 py-3 font-medium">Vendas</th>
                   <th className="px-4 py-3 font-medium">Faturamento</th>
+                  <th className="px-4 py-3 font-medium">Ticket médio</th>
                   <th className="px-4 py-3"></th>
                 </tr>
               </thead>
@@ -133,13 +143,16 @@ export function ResultadosList({
                         <td className="px-4 py-3 tabular-nums text-status-ok-text">
                           {formatBRL(faturamentoMes)}
                         </td>
+                        <td className="px-4 py-3 tabular-nums text-text-primary">
+                          {calcTicketMedio(faturamentoMes, vendasMes)}
+                        </td>
                         <td className="px-4 py-3 text-right text-text-secondary">
                           {aberto ? "▲" : "▼"}
                         </td>
                       </tr>
                       {aberto && (
                         <tr className="border-b border-border last:border-0">
-                          <td colSpan={7} className="bg-bg-surface-hover px-4 py-4">
+                          <td colSpan={8} className="bg-bg-surface-hover px-4 py-4">
                             <ul className="space-y-2">
                               {doMes.map((r) => (
                                 <ResultadoRow key={r.id} grupoId={grupoId} resultado={r} />
@@ -406,7 +419,10 @@ function ResultadoRow({
           </span>{" "}
           ({formatBRL(Number(resultado.faturamento_campanha_interna))} campanha
           interna + {formatBRL(Number(resultado.faturamento_trafego_pago))} tráfego
-          pago)
+          pago) · Ticket médio:{" "}
+          <span className="tabular-nums text-text-primary">
+            {calcTicketMedio(faturamentoTotal, vendasTotal)}
+          </span>
         </p>
         {resultado.observacao && (
           <p className="mt-1 text-xs text-text-secondary">{resultado.observacao}</p>

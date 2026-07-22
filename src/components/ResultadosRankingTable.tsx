@@ -11,9 +11,10 @@ export type LinhaRanking = {
   faturamento: number;
   vendas: number;
   roas: number | null;
+  ticketMedio: number | null;
 };
 
-type SortKey = "nome" | "roas" | "faturamento" | "vendas";
+type SortKey = "nome" | "roas" | "faturamento" | "vendas" | "ticketMedio";
 
 export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
   const router = useRouter();
@@ -35,8 +36,18 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
       if (sortKey === "nome") {
         return fator * a.nome.localeCompare(b.nome, "pt-BR");
       }
-      const va = sortKey === "roas" ? a.roas ?? -Infinity : a[sortKey];
-      const vb = sortKey === "roas" ? b.roas ?? -Infinity : b[sortKey];
+      const va =
+        sortKey === "roas"
+          ? a.roas ?? -Infinity
+          : sortKey === "ticketMedio"
+            ? a.ticketMedio ?? -Infinity
+            : a[sortKey];
+      const vb =
+        sortKey === "roas"
+          ? b.roas ?? -Infinity
+          : sortKey === "ticketMedio"
+            ? b.ticketMedio ?? -Infinity
+            : b[sortKey];
       return fator * (va - vb);
     });
   }, [linhas, sortKey, sortDir]);
@@ -75,6 +86,13 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
               dir={sortDir}
               onSort={handleSort}
             />
+            <SortableHeader
+              label="Ticket médio"
+              sortKey="ticketMedio"
+              current={sortKey}
+              dir={sortDir}
+              onSort={handleSort}
+            />
             <th className="px-4 py-3"></th>
           </tr>
         </thead>
@@ -94,12 +112,15 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
                 {formatBRL(l.faturamento)}
               </td>
               <td className="px-4 py-3 tabular-nums text-text-primary">{l.vendas}</td>
+              <td className="px-4 py-3 tabular-nums text-text-primary">
+                {l.ticketMedio === null ? "—" : formatBRL(l.ticketMedio)}
+              </td>
               <td className="px-4 py-3 text-right text-text-secondary">→</td>
             </tr>
           ))}
           {ordenadas.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-4 py-8 text-center text-text-secondary">
+              <td colSpan={7} className="px-4 py-8 text-center text-text-secondary">
                 Nenhum grupo ativo cadastrado ainda.
               </td>
             </tr>
