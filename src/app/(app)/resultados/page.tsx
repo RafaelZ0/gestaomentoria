@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import {
-  ResultadosRankingTable,
-  type LinhaRanking,
-} from "@/components/ResultadosRankingTable";
+import { type LinhaRanking } from "@/components/ResultadosRankingTable";
+import { type LinhaMensal } from "@/components/ResultadosPorMesTable";
+import { ResultadosTabs } from "@/components/ResultadosTabs";
 
 export default async function ResultadosPage() {
   const supabase = await createClient();
@@ -16,15 +15,20 @@ export default async function ResultadosPage() {
     supabase
       .from("resultados_grupo")
       .select(
-        "grupo_id, investimento, faturamento_campanha_interna, faturamento_trafego_pago, vendas_campanha_interna, vendas_trafego_pago"
+        "grupo_id, data, investimento, leads, faturamento_campanha_interna, faturamento_trafego_pago, vendas_campanha_interna, vendas_trafego_pago"
       ),
   ]);
+
+  const idsAtivos = new Set((grupos ?? []).map((g) => g.id));
+  const resultadosAtivos = (resultados ?? []).filter((r) =>
+    idsAtivos.has(r.grupo_id)
+  );
 
   const porGrupo = new Map<
     string,
     { investimento: number; faturamento: number; vendas: number }
   >();
-  for (const r of resultados ?? []) {
+  for (const r of resultadosAtivos) {
     const atual = porGrupo.get(r.grupo_id) ?? {
       investimento: 0,
       faturamento: 0,
@@ -37,7 +41,7 @@ export default async function ResultadosPage() {
     porGrupo.set(r.grupo_id, atual);
   }
 
-  const linhas: LinhaRanking[] = (grupos ?? []).map((g) => {
+  const linhasRanking: LinhaRanking[] = (grupos ?? []).map((g) => {
     const m = porGrupo.get(g.id) ?? { investimento: 0, faturamento: 0, vendas: 0 };
     return {
       id: g.id,
@@ -50,19 +54,54 @@ export default async function ResultadosPage() {
     };
   });
 
+  const porMes = new Map<
+    string,
+    { investimento: number; leads: number; faturamento: number; vendas: number }
+  >();
+  for (const r of resultadosAtivos) {
+    const chave = r.data.slice(0, 7);
+    const atual = porMes.get(chave) ?? {
+      investimento: 0,
+      leads: 0,
+      faturamento: 0,
+      vendas: 0,
+    };
+    atual.investimento += Number(r.investimento);
+    atual.leads += r.leads;
+    atual.faturamento +=
+      Number(r.faturamento_campanha_interna) + Number(r.faturamento_trafego_pago);
+    atual.vendas += r.vendas_campanha_interna + r.vendas_trafego_pago;
+    porMes.set(chave, atual);
+  }
+
+  const linhasMensal: LinhaMensal[] = [...porMes.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([mes, m]) => ({
+      mes,
+      investimento: m.investimento,
+      leads: m.leads,
+      vendas: m.vendas,
+      faturamento: m.faturamento,
+      roas: m.investimento > 0 ? m.faturamento / m.investimento : null,
+      ticketMedio: m.vendas > 0 ? m.faturamento / m.vendas : null,
+    }));
+
   return (
     <div className="max-w-4xl">
       <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
         Resultados
       </h1>
       <p className="mt-1 text-sm text-text-secondary">
-        Somente grupos ativos. Ranking por ROAS (faturamento ÷ investido) —
-        clique em Grupo, ROAS, Faturamento ou Vendas pra ordenar por essa
-        coluna, ou na linha pra abrir o detalhamento do grupo.
+        Somente grupos ativos. &quot;Por grupo&quot; ranqueia por ROAS
+        (faturamento ÷ investido) — clique em Grupo, ROAS, Faturamento ou
+        Vendas pra ordenar por essa coluna, ou na linha pra abrir o
+        detalhamento do grupo. &quot;Por mês&quot; soma os resultados de
+        todos os grupos ativos em cada mês, pra comparar a evolução ao longo
+        do tempo.
       </p>
 
       <div className="mt-6">
-        <ResultadosRankingTable linhas={linhas} />
+        <ResultadosTabs linhasRanking={linhasRanking} linhasMensal={linhasMensal} />
       </div>
     </div>
   );
