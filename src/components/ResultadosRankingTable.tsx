@@ -3,19 +3,17 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatBRL } from "@/lib/format";
-import { StatusBadge, statusGrupoVariant } from "@/components/StatusBadge";
 
 export type LinhaRanking = {
   id: string;
   nome: string;
-  status: string;
   investimento: number;
   faturamento: number;
   vendas: number;
   roas: number | null;
 };
 
-type SortKey = "roas" | "faturamento" | "vendas";
+type SortKey = "nome" | "roas" | "faturamento" | "vendas";
 
 export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
   const router = useRouter();
@@ -27,13 +25,16 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
       setSortKey(key);
-      setSortDir("desc");
+      setSortDir(key === "nome" ? "asc" : "desc");
     }
   }
 
   const ordenadas = useMemo(() => {
     const fator = sortDir === "asc" ? 1 : -1;
     return [...linhas].sort((a, b) => {
+      if (sortKey === "nome") {
+        return fator * a.nome.localeCompare(b.nome, "pt-BR");
+      }
       const va = sortKey === "roas" ? a.roas ?? -Infinity : a[sortKey];
       const vb = sortKey === "roas" ? b.roas ?? -Infinity : b[sortKey];
       return fator * (va - vb);
@@ -46,8 +47,13 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
         <thead>
           <tr className="border-b border-border text-text-secondary">
             <th className="px-4 py-3 font-medium">#</th>
-            <th className="px-4 py-3 font-medium">Grupo</th>
-            <th className="px-4 py-3 font-medium">Status</th>
+            <SortableHeader
+              label="Grupo"
+              sortKey="nome"
+              current={sortKey}
+              dir={sortDir}
+              onSort={handleSort}
+            />
             <SortableHeader
               label="ROAS"
               sortKey="roas"
@@ -81,9 +87,6 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
             >
               <td className="px-4 py-3 tabular-nums text-text-secondary">{i + 1}</td>
               <td className="px-4 py-3 font-medium text-text-primary">{l.nome}</td>
-              <td className="px-4 py-3">
-                <StatusBadge label={l.status} variant={statusGrupoVariant(l.status)} />
-              </td>
               <td className="px-4 py-3 tabular-nums text-text-primary">
                 {l.roas === null ? "—" : `${l.roas.toFixed(1)}x`}
               </td>
@@ -96,8 +99,8 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
           ))}
           {ordenadas.length === 0 && (
             <tr>
-              <td colSpan={7} className="px-4 py-8 text-center text-text-secondary">
-                Nenhum grupo cadastrado ainda.
+              <td colSpan={6} className="px-4 py-8 text-center text-text-secondary">
+                Nenhum grupo ativo cadastrado ainda.
               </td>
             </tr>
           )}

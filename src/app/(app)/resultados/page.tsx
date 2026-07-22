@@ -11,6 +11,7 @@ export default async function ResultadosPage() {
     supabase
       .from("grupos_gestao")
       .select("id, nome, status")
+      .eq("status", "Ativo")
       .order("nome", { ascending: true }),
     supabase
       .from("resultados_grupo")
@@ -41,7 +42,6 @@ export default async function ResultadosPage() {
     return {
       id: g.id,
       nome: g.nome,
-      status: g.status,
       investimento: m.investimento,
       faturamento: m.faturamento,
       vendas: m.vendas,
@@ -55,9 +55,9 @@ export default async function ResultadosPage() {
         Resultados
       </h1>
       <p className="mt-1 text-sm text-text-secondary">
-        Ranking por ROAS (faturamento ÷ investido) — clique numa coluna pra
-        ordenar por outra métrica, ou na linha pra abrir o detalhamento do
-        grupo.
+        Somente grupos ativos. Ranking por ROAS (faturamento ÷ investido) —
+        clique em Grupo, ROAS, Faturamento ou Vendas pra ordenar por essa
+        coluna, ou na linha pra abrir o detalhamento do grupo.
       </p>
 
       <div className="mt-6">
