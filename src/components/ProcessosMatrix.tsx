@@ -57,17 +57,29 @@ export function ProcessosMatrix({
     });
   }, [grupos, filtroStatus, filtroProcesso, filtroCondicao, filtroTrafego, feitoMap]);
 
+  const resumoPorProcesso = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of processos) {
+      let feitos = 0;
+      for (const g of gruposFiltrados) {
+        if (feitoMap.get(`${g.id}:${p.id}`)) feitos += 1;
+      }
+      m.set(p.id, feitos);
+    }
+    return m;
+  }, [processos, gruposFiltrados, feitoMap]);
+
   const processoSelecionado = processos.find((p) => p.id === filtroProcesso);
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-border bg-bg-surface-hover p-3">
         <div>
           <label className="mb-1 block text-xs text-text-secondary">Processo</label>
           <select
             value={filtroProcesso}
             onChange={(e) => setFiltroProcesso(e.target.value)}
-            className="rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+            className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
           >
             <option value="">Todos</option>
             <option value={TRAFEGO_PAGO_ID}>TRÁFEGO PAGO</option>
@@ -86,7 +98,7 @@ export function ProcessosMatrix({
             <select
               value={filtroTrafego}
               onChange={(e) => setFiltroTrafego(e.target.value)}
-              className="rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+              className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
             >
               {TRAFEGO_OPCOES.map((op) => (
                 <option key={op} value={op}>
@@ -106,7 +118,7 @@ export function ProcessosMatrix({
                 onChange={(e) =>
                   setFiltroCondicao(e.target.value as "fizeram" | "nao_fizeram")
                 }
-                className="rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+                className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
               >
                 <option value="nao_fizeram">Não fizeram</option>
                 <option value="fizeram">Fizeram</option>
@@ -115,7 +127,7 @@ export function ProcessosMatrix({
           )
         )}
 
-        <div>
+        <div className="border-l border-border pl-4">
           <label className="mb-1 block text-xs text-text-secondary">
             Status do grupo
           </label>
@@ -124,32 +136,36 @@ export function ProcessosMatrix({
             onChange={(e) =>
               setFiltroStatus(e.target.value as "todos" | "Ativo" | "Inativo")
             }
-            className="rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+            className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
           >
             <option value="Ativo">Ativos</option>
             <option value="Inativo">Inativos</option>
             <option value="todos">Todos</option>
           </select>
         </div>
-      </div>
 
-      <p className="text-sm text-text-secondary">
-        {gruposFiltrados.length} grupo{gruposFiltrados.length === 1 ? "" : "s"}
-        {filtroProcesso === TRAFEGO_PAGO_ID && <> com tráfego pago “{filtroTrafego}”</>}
-        {processoSelecionado && (
-          <>
-            {" "}
-            {filtroCondicao === "fizeram" ? "fizeram" : "não fizeram"} “
-            {processoSelecionado.nome}”
-          </>
-        )}
-      </p>
+        <p className="ml-auto text-sm text-text-secondary">
+          {gruposFiltrados.length} grupo{gruposFiltrados.length === 1 ? "" : "s"}
+          {filtroProcesso === TRAFEGO_PAGO_ID && (
+            <> com tráfego pago “{filtroTrafego}”</>
+          )}
+          {processoSelecionado && (
+            <>
+              {" "}
+              {filtroCondicao === "fizeram" ? "fizeram" : "não fizeram"} “
+              {processoSelecionado.nome}”
+            </>
+          )}
+        </p>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border text-text-secondary">
-              <th className="px-4 py-3 font-medium">Grupo</th>
+              <th className="sticky left-0 z-10 bg-bg-surface px-4 py-3 font-medium">
+                Grupo
+              </th>
               <th className="whitespace-nowrap px-4 py-3 text-center font-medium">
                 Tráfego pago
               </th>
@@ -158,7 +174,10 @@ export function ProcessosMatrix({
                   key={p.id}
                   className="whitespace-nowrap px-4 py-3 text-center font-medium"
                 >
-                  {p.nome}
+                  <div>{p.nome}</div>
+                  <div className="mt-0.5 font-normal tabular-nums text-text-secondary">
+                    {resumoPorProcesso.get(p.id) ?? 0}/{gruposFiltrados.length}
+                  </div>
                 </th>
               ))}
             </tr>
@@ -167,9 +186,9 @@ export function ProcessosMatrix({
             {gruposFiltrados.map((g) => (
               <tr
                 key={g.id}
-                className="border-b border-border last:border-0 hover:bg-bg-surface-hover"
+                className="group border-b border-border last:border-0 hover:bg-bg-surface-hover"
               >
-                <td className="whitespace-nowrap px-4 py-3 font-medium text-text-primary">
+                <td className="sticky left-0 z-10 whitespace-nowrap bg-bg-surface px-4 py-3 font-medium text-text-primary group-hover:bg-bg-surface-hover">
                   <Link href={`/grupos/${g.id}`} className="hover:text-accent">
                     {g.nome}
                   </Link>
@@ -191,9 +210,9 @@ export function ProcessosMatrix({
                       {feito === undefined ? (
                         <span className="text-text-secondary">—</span>
                       ) : feito ? (
-                        <span className="text-status-ok-text">✓</span>
+                        <StatusBadge label="Feito" variant="ok" />
                       ) : (
-                        <span className="text-status-alert-text">✗</span>
+                        <StatusBadge label="Falta" variant="alert" />
                       )}
                     </td>
                   );

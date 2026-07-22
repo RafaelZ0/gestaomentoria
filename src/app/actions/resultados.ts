@@ -8,7 +8,8 @@ function lerCampos(formData: FormData) {
     data: String(formData.get("data") ?? "").trim() || new Date().toISOString().slice(0, 10),
     investimento: Number(formData.get("investimento") ?? 0),
     leads: Number(formData.get("leads") ?? 0),
-    vendas: Number(formData.get("vendas") ?? 0),
+    vendas_campanha_interna: Number(formData.get("vendas_campanha_interna") ?? 0),
+    vendas_trafego_pago: Number(formData.get("vendas_trafego_pago") ?? 0),
     faturamento_campanha_interna: Number(
       formData.get("faturamento_campanha_interna") ?? 0
     ),

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { addMentorado, removeMentorado, updateMentorado } from "@/app/actions/grupos";
+import { formatTelefone } from "@/lib/format";
 import type { Mentorado } from "@/lib/database.types";
 
 export function MentoradosList({
@@ -68,7 +69,7 @@ export function MentoradosList({
       ) : (
         <button
           onClick={() => setAdding(true)}
-          className="text-sm text-accent hover:text-accent-hover"
+          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
         >
           + Adicionar mentorado
         </button>
@@ -87,6 +88,7 @@ function MentoradoRow({
   const [isPending, startTransition] = useTransition();
   const [nome, setNome] = useState(mentorado.nome);
   const [telefone, setTelefone] = useState(mentorado.telefone ?? "");
+  const [editandoTelefone, setEditandoTelefone] = useState(false);
 
   function salvar(novoNome: string, novoTelefone: string) {
     if (!novoNome.trim()) {
@@ -102,7 +104,7 @@ function MentoradoRow({
   }
 
   return (
-    <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm">
+    <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-surface px-4 py-3 text-sm hover:bg-bg-surface-hover">
       <div className="flex flex-1 gap-3">
         <input
           value={nome}
@@ -112,18 +114,25 @@ function MentoradoRow({
           className="flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text-primary outline-none hover:border-border focus:border-accent"
         />
         <input
-          value={telefone}
+          value={editandoTelefone ? telefone : formatTelefone(telefone)}
           placeholder="Telefone"
           disabled={isPending}
+          onFocus={() => setEditandoTelefone(true)}
           onChange={(e) => setTelefone(e.target.value)}
-          onBlur={() => salvar(nome, telefone)}
+          onBlur={() => {
+            setEditandoTelefone(false);
+            salvar(nome, telefone);
+          }}
           className="w-40 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text-secondary outline-none hover:border-border focus:border-accent"
         />
       </div>
       <button
         disabled={isPending}
-        onClick={() => startTransition(() => removeMentorado(grupoId, mentorado.id))}
-        className="text-text-secondary hover:text-status-alert-text"
+        onClick={() => {
+          if (!confirm(`Remover ${mentorado.nome} deste grupo?`)) return;
+          startTransition(() => removeMentorado(grupoId, mentorado.id));
+        }}
+        className="rounded-lg border border-status-alert-text/40 px-3 py-1.5 text-xs text-status-alert-text hover:bg-status-alert-bg disabled:opacity-60"
       >
         Remover
       </button>

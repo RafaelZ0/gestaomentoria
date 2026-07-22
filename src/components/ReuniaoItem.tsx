@@ -130,7 +130,10 @@ export function ReuniaoItem({
   }
 
   return (
-    <li className="rounded-xl border border-border bg-bg-surface p-5">
+    <li
+      onClick={() => setEditando(true)}
+      className="cursor-pointer rounded-xl border border-border bg-bg-surface p-5 hover:bg-bg-surface-hover"
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium text-text-primary">{formatDate(reuniao.data)}</p>
         <div className="flex items-center gap-3">
@@ -140,22 +143,26 @@ export function ReuniaoItem({
             </span>
           )}
           <button
-            onClick={() => setEditando(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditando(true);
+            }}
             className="text-xs text-text-secondary hover:text-text-primary"
           >
             Editar
           </button>
           <button
             disabled={isPending}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (!confirm("Excluir esta reunião? Essa ação não pode ser desfeita.")) {
                 return;
               }
               startTransition(async () => {
                 try {
                   await removeReuniao(reuniao.id);
-                } catch (e) {
-                  if (e instanceof Error) setError(e.message);
+                } catch (err) {
+                  if (err instanceof Error) setError(err.message);
                 }
               });
             }}

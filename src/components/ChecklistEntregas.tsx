@@ -44,23 +44,27 @@ export function ChecklistEntregas({
                   toggleEntrega(grupoId, e.id, ev.target.checked)
                 )
               }
-              className="h-4 w-4 accent-[var(--accent)]"
+              className="h-4 w-4 shrink-0 rounded border border-border bg-bg-surface accent-[var(--accent)]"
             />
             {e.nome}
           </label>
-          {e.feito && (
-            <input
-              type="date"
-              value={e.data_feito ?? ""}
-              disabled={isPending}
-              onChange={(ev) =>
-                startTransition(() =>
-                  updateEntregaData(grupoId, e.id, ev.target.value)
-                )
-              }
-              className="rounded-lg border border-border bg-bg-surface px-2 py-1 text-xs text-text-secondary outline-none focus:border-accent tabular-nums"
-            />
-          )}
+          <div className="w-[9.5rem] shrink-0 text-right">
+            {e.feito ? (
+              <input
+                type="date"
+                value={e.data_feito ?? ""}
+                disabled={isPending}
+                onChange={(ev) =>
+                  startTransition(() =>
+                    updateEntregaData(grupoId, e.id, ev.target.value)
+                  )
+                }
+                className="w-full rounded-lg border border-border bg-bg-surface px-2 py-1 text-xs text-text-secondary outline-none focus:border-accent tabular-nums"
+              />
+            ) : (
+              <span className="text-xs text-text-secondary">—</span>
+            )}
+          </div>
         </li>
       ))}
     </ul>

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Fragment, useState, useTransition } from "react";
 import {
   createResultado,
   removeResultado,
   updateResultado,
 } from "@/app/actions/resultados";
-import { formatBRL, formatDate } from "@/lib/format";
+import { formatBRL, formatDate, formatMesAno } from "@/lib/format";
 import type { ResultadoGrupo } from "@/lib/database.types";
 
 const inputClass =
@@ -15,6 +15,29 @@ const inputClass =
 function calcCpl(investimento: number, leads: number): string {
   if (!leads) return "—";
   return formatBRL(investimento / leads);
+}
+
+function somar(resultados: ResultadoGrupo[]) {
+  return resultados.reduce(
+    (acc, r) => ({
+      investimento: acc.investimento + Number(r.investimento),
+      leads: acc.leads + r.leads,
+      vendasCampanha: acc.vendasCampanha + r.vendas_campanha_interna,
+      vendasTrafego: acc.vendasTrafego + r.vendas_trafego_pago,
+      faturamentoCampanha:
+        acc.faturamentoCampanha + Number(r.faturamento_campanha_interna),
+      faturamentoTrafego:
+        acc.faturamentoTrafego + Number(r.faturamento_trafego_pago),
+    }),
+    {
+      investimento: 0,
+      leads: 0,
+      vendasCampanha: 0,
+      vendasTrafego: 0,
+      faturamentoCampanha: 0,
+      faturamentoTrafego: 0,
+    }
+  );
 }
 
 export function ResultadosList({
@@ -27,30 +50,34 @@ export function ResultadosList({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [expandido, setExpandido] = useState<string | null>(null);
 
-  const totais = resultados.reduce(
-    (acc, r) => ({
-      investimento: acc.investimento + Number(r.investimento),
-      leads: acc.leads + r.leads,
-      vendas: acc.vendas + r.vendas,
-      faturamento:
-        acc.faturamento +
-        Number(r.faturamento_campanha_interna) +
-        Number(r.faturamento_trafego_pago),
-    }),
-    { investimento: 0, leads: 0, vendas: 0, faturamento: 0 }
-  );
+  const totais = somar(resultados);
+  const totalVendas = totais.vendasCampanha + totais.vendasTrafego;
+  const totalFaturamento = totais.faturamentoCampanha + totais.faturamentoTrafego;
+
+  const porMes = new Map<string, ResultadoGrupo[]>();
+  for (const r of resultados) {
+    const chave = r.data.slice(0, 7);
+    const lista = porMes.get(chave) ?? [];
+    lista.push(r);
+    porMes.set(chave, lista);
+  }
+  const meses = [...porMes.entries()].sort((a, b) => b[0].localeCompare(a[0]));
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <ResumoCard label="Investido" value={formatBRL(totais.investimento)} />
-        <ResumoCard label="Leads" value={String(totais.leads)} />
-        <ResumoCard
-          label="CPL médio"
-          value={calcCpl(totais.investimento, totais.leads)}
-        />
-        <ResumoCard label="Vendas" value={String(totais.vendas)} />
+    <div className="space-y-6">
+      <div>
+        <p className="mb-2 text-sm text-text-secondary">Total (todos os lançamentos)</p>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <ResumoCard label="Investido" value={formatBRL(totais.investimento)} />
+          <ResumoCard label="Leads" value={String(totais.leads)} />
+          <ResumoCard
+            label="CPL médio"
+            value={calcCpl(totais.investimento, totais.leads)}
+          />
+          <ResumoCard label="Vendas" value={String(totalVendas)} />
+        </div>
       </div>
 
       {error && (
@@ -59,16 +86,82 @@ export function ResultadosList({
         </div>
       )}
 
-      <ul className="space-y-2">
-        {resultados.map((r) => (
-          <ResultadoRow key={r.id} grupoId={grupoId} resultado={r} />
-        ))}
-        {resultados.length === 0 && (
-          <p className="text-sm text-text-secondary">
-            Nenhum resultado registrado ainda.
-          </p>
-        )}
-      </ul>
+      {meses.length > 0 && (
+        <div>
+          <p className="mb-2 text-sm text-text-secondary">Por mês</p>
+          <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border text-text-secondary">
+                  <th className="px-4 py-3 font-medium">Mês</th>
+                  <th className="px-4 py-3 font-medium">Investido</th>
+                  <th className="px-4 py-3 font-medium">Leads</th>
+                  <th className="px-4 py-3 font-medium">CPL</th>
+                  <th className="px-4 py-3 font-medium">Vendas</th>
+                  <th className="px-4 py-3 font-medium">Faturamento</th>
+                  <th className="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {meses.map(([chave, doMes]) => {
+                  const [ano, mes] = chave.split("-").map(Number);
+                  const s = somar(doMes);
+                  const vendasMes = s.vendasCampanha + s.vendasTrafego;
+                  const faturamentoMes = s.faturamentoCampanha + s.faturamentoTrafego;
+                  const aberto = expandido === chave;
+                  return (
+                    <Fragment key={chave}>
+                      <tr
+                        className="cursor-pointer border-b border-border last:border-0 hover:bg-bg-surface-hover"
+                        onClick={() => setExpandido(aberto ? null : chave)}
+                      >
+                        <td className="px-4 py-3 font-medium text-text-primary">
+                          {formatMesAno(ano, mes)}
+                        </td>
+                        <td className="px-4 py-3 tabular-nums text-text-primary">
+                          {formatBRL(s.investimento)}
+                        </td>
+                        <td className="px-4 py-3 tabular-nums text-text-primary">
+                          {s.leads}
+                        </td>
+                        <td className="px-4 py-3 tabular-nums text-text-primary">
+                          {calcCpl(s.investimento, s.leads)}
+                        </td>
+                        <td className="px-4 py-3 tabular-nums text-text-primary">
+                          {vendasMes}
+                        </td>
+                        <td className="px-4 py-3 tabular-nums text-status-ok-text">
+                          {formatBRL(faturamentoMes)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-text-secondary">
+                          {aberto ? "▲" : "▼"}
+                        </td>
+                      </tr>
+                      {aberto && (
+                        <tr className="border-b border-border last:border-0">
+                          <td colSpan={7} className="bg-bg-surface-hover px-4 py-4">
+                            <ul className="space-y-2">
+                              {doMes.map((r) => (
+                                <ResultadoRow key={r.id} grupoId={grupoId} resultado={r} />
+                              ))}
+                            </ul>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {resultados.length === 0 && (
+        <p className="text-sm text-text-secondary">
+          Nenhum resultado registrado ainda.
+        </p>
+      )}
 
       {open ? (
         <form
@@ -165,18 +258,36 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">Vendas</label>
+          <label className="mb-1 block text-sm text-text-secondary">
+            Vendas — campanha interna
+          </label>
           <input
             type="number"
-            name="vendas"
+            name="vendas_campanha_interna"
             min="0"
             step="1"
-            defaultValue={defaultValues?.vendas ?? 0}
+            defaultValue={defaultValues?.vendas_campanha_interna ?? 0}
             className={`${inputClass} tabular-nums`}
           />
         </div>
+        <div>
+          <label className="mb-1 block text-sm text-text-secondary">
+            Vendas — tráfego pago
+          </label>
+          <input
+            type="number"
+            name="vendas_trafego_pago"
+            min="0"
+            step="1"
+            defaultValue={defaultValues?.vendas_trafego_pago ?? 0}
+            className={`${inputClass} tabular-nums`}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm text-text-secondary">
             Faturamento — campanha interna (R$)
@@ -230,13 +341,17 @@ function ResultadoRow({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  const vendasTotal = resultado.vendas_campanha_interna + resultado.vendas_trafego_pago;
   const faturamentoTotal =
     Number(resultado.faturamento_campanha_interna) +
     Number(resultado.faturamento_trafego_pago);
 
   if (!editing) {
     return (
-      <li className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm">
+      <li
+        onClick={(e) => e.stopPropagation()}
+        className="rounded-lg border border-border bg-bg-surface px-4 py-3 text-sm"
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="font-medium text-text-primary">
             {formatDate(resultado.data)}
@@ -250,9 +365,10 @@ function ResultadoRow({
             </button>
             <button
               disabled={isPending}
-              onClick={() =>
-                startTransition(() => removeResultado(resultado.id, grupoId))
-              }
+              onClick={() => {
+                if (!confirm("Remover este lançamento de resultado?")) return;
+                startTransition(() => removeResultado(resultado.id, grupoId));
+              }}
               className="text-text-secondary hover:text-status-alert-text"
             >
               Remover
@@ -278,7 +394,9 @@ function ResultadoRow({
           </span>
           <span>
             Vendas:{" "}
-            <span className="tabular-nums text-text-primary">{resultado.vendas}</span>
+            <span className="tabular-nums text-text-primary">{vendasTotal}</span>{" "}
+            ({resultado.vendas_campanha_interna} campanha +{" "}
+            {resultado.vendas_trafego_pago} tráfego)
           </span>
         </div>
         <p className="mt-1 text-xs text-text-secondary">
@@ -298,7 +416,10 @@ function ResultadoRow({
   }
 
   return (
-    <li className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3">
+    <li
+      onClick={(e) => e.stopPropagation()}
+      className="rounded-lg border border-border bg-bg-surface px-4 py-3"
+    >
       {error && (
         <div className="mb-2 rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
           {error}

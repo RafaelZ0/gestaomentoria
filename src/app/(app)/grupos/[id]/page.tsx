@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import {
   formatBRL,
@@ -22,16 +23,34 @@ export default async function GrupoOverviewPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: grupo }, { data: mentorados }, { data: entregas }, { data: pagamentos }] =
-    await Promise.all([
-      supabase.from("grupos_gestao").select("*").eq("id", id).single(),
-      supabase.from("mentorados").select("*").eq("grupo_id", id).order("nome"),
-      supabase
-        .from("entregas_grupo")
-        .select("id, feito, data_feito, tipos_entrega(id, nome, ativo)")
-        .eq("grupo_id", id),
-      supabase.from("pagamentos").select("*").eq("grupo_id", id),
-    ]);
+  const [
+    { data: grupo },
+    { data: mentorados },
+    { data: entregas },
+    { data: pagamentos },
+    { data: tarefasPendentes },
+    { data: ultimaReuniao },
+  ] = await Promise.all([
+    supabase.from("grupos_gestao").select("*").eq("id", id).single(),
+    supabase.from("mentorados").select("*").eq("grupo_id", id).order("nome"),
+    supabase
+      .from("entregas_grupo")
+      .select("id, feito, data_feito, tipos_entrega(id, nome, ativo)")
+      .eq("grupo_id", id),
+    supabase.from("pagamentos").select("*").eq("grupo_id", id),
+    supabase
+      .from("tarefas")
+      .select("id")
+      .eq("grupo_id", id)
+      .eq("concluida", false),
+    supabase
+      .from("reunioes")
+      .select("data")
+      .eq("grupo_id", id)
+      .order("data", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
   if (!grupo) return null;
 
@@ -46,6 +65,10 @@ export default async function GrupoOverviewPage({
     grupo.data_inicio,
     grupo.data_termino
   );
+
+  const diasDesdeUltimaReuniao = ultimaReuniao
+    ? calcDuracaoDias(ultimaReuniao.data, null)
+    : null;
 
   type EntregaRow = {
     id: string;
@@ -95,12 +118,29 @@ export default async function GrupoOverviewPage({
 
       <ObservacoesField grupoId={grupo.id} observacoes={grupo.observacoes} />
 
-      <div className="flex gap-2">
-        <CancelarGrupoButton
-          grupoId={grupo.id}
-          status={grupo.status}
-          valorMensal={Number(grupo.valor_mensal)}
-        />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Link
+          href={`/grupos/${grupo.id}/tarefas`}
+          className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm hover:bg-bg-surface"
+        >
+          <span className="text-text-secondary">Tarefas pendentes</span>{" "}
+          <span className="font-medium text-text-primary">
+            {(tarefasPendentes ?? []).length}
+          </span>
+        </Link>
+        <Link
+          href={`/grupos/${grupo.id}/reunioes`}
+          className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm hover:bg-bg-surface"
+        >
+          <span className="text-text-secondary">Última reunião</span>{" "}
+          <span className="font-medium text-text-primary">
+            {diasDesdeUltimaReuniao === null
+              ? "nunca teve reunião"
+              : diasDesdeUltimaReuniao === 0
+                ? "hoje"
+                : `${diasDesdeUltimaReuniao} dias atrás`}
+          </span>
+        </Link>
       </div>
 
       <section>
@@ -118,6 +158,24 @@ export default async function GrupoOverviewPage({
         </h2>
         <div className="mt-3">
           <ChecklistEntregas grupoId={grupo.id} entregas={entregasAtivas} />
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-xl border border-status-alert-text/20 bg-status-alert-bg/40 p-5">
+        <h2 className="font-display text-sm font-semibold text-status-alert-text">
+          Zona de risco
+        </h2>
+        <p className="mt-1 text-xs text-text-secondary">
+          Cancelar o grupo marca o contrato como encerrado e pode gerar uma
+          cobrança de cláusula. Essa ação pede confirmação antes de ser
+          aplicada.
+        </p>
+        <div className="mt-3">
+          <CancelarGrupoButton
+            grupoId={grupo.id}
+            status={grupo.status}
+            valorMensal={Number(grupo.valor_mensal)}
+          />
         </div>
       </section>
     </div>

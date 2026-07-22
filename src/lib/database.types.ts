@@ -118,7 +118,8 @@ export type ResultadoGrupo = {
   data: string;
   investimento: number;
   leads: number;
-  vendas: number;
+  vendas_campanha_interna: number;
+  vendas_trafego_pago: number;
   faturamento_campanha_interna: number;
   faturamento_trafego_pago: number;
   observacao: string | null;
