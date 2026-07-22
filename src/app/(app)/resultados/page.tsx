@@ -1,65 +1,67 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { StatusBadge, statusGrupoVariant } from "@/components/StatusBadge";
+import {
+  ResultadosRankingTable,
+  type LinhaRanking,
+} from "@/components/ResultadosRankingTable";
 
 export default async function ResultadosPage() {
   const supabase = await createClient();
 
-  const { data: grupos } = await supabase
-    .from("grupos_gestao")
-    .select("id, nome, status")
-    .order("status", { ascending: true })
-    .order("nome", { ascending: true });
+  const [{ data: grupos }, { data: resultados }] = await Promise.all([
+    supabase
+      .from("grupos_gestao")
+      .select("id, nome, status")
+      .order("nome", { ascending: true }),
+    supabase
+      .from("resultados_grupo")
+      .select(
+        "grupo_id, investimento, faturamento_campanha_interna, faturamento_trafego_pago, vendas_campanha_interna, vendas_trafego_pago"
+      ),
+  ]);
+
+  const porGrupo = new Map<
+    string,
+    { investimento: number; faturamento: number; vendas: number }
+  >();
+  for (const r of resultados ?? []) {
+    const atual = porGrupo.get(r.grupo_id) ?? {
+      investimento: 0,
+      faturamento: 0,
+      vendas: 0,
+    };
+    atual.investimento += Number(r.investimento);
+    atual.faturamento +=
+      Number(r.faturamento_campanha_interna) + Number(r.faturamento_trafego_pago);
+    atual.vendas += r.vendas_campanha_interna + r.vendas_trafego_pago;
+    porGrupo.set(r.grupo_id, atual);
+  }
+
+  const linhas: LinhaRanking[] = (grupos ?? []).map((g) => {
+    const m = porGrupo.get(g.id) ?? { investimento: 0, faturamento: 0, vendas: 0 };
+    return {
+      id: g.id,
+      nome: g.nome,
+      status: g.status,
+      investimento: m.investimento,
+      faturamento: m.faturamento,
+      vendas: m.vendas,
+      roas: m.investimento > 0 ? m.faturamento / m.investimento : null,
+    };
+  });
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
       <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
         Resultados
       </h1>
       <p className="mt-1 text-sm text-text-secondary">
-        Investimento, leads, vendas e faturamento de tráfego pago são
-        controlados por grupo. Escolha um grupo para ver o total e o
-        detalhamento por mês.
+        Ranking por ROAS (faturamento ÷ investido) — clique numa coluna pra
+        ordenar por outra métrica, ou na linha pra abrir o detalhamento do
+        grupo.
       </p>
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-bg-surface">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-border text-text-secondary">
-              <th className="px-4 py-3 font-medium">Grupo</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {(grupos ?? []).map((g) => (
-              <tr
-                key={g.id}
-                className="border-b border-border last:border-0 hover:bg-bg-surface-hover"
-              >
-                <td className="px-4 py-3 font-medium text-text-primary">
-                  <Link
-                    href={`/grupos/${g.id}/resultados`}
-                    className="hover:text-accent"
-                  >
-                    {g.nome}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge label={g.status} variant={statusGrupoVariant(g.status)} />
-                </td>
-                <td className="px-4 py-3 text-right text-text-secondary">→</td>
-              </tr>
-            ))}
-            {(grupos ?? []).length === 0 && (
-              <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-text-secondary">
-                  Nenhum grupo cadastrado ainda.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="mt-6">
+        <ResultadosRankingTable linhas={linhas} />
       </div>
     </div>
   );
