@@ -17,7 +17,7 @@ export default async function GruposPage() {
       .order("nome", { ascending: true }),
     supabase
       .from("reunioes")
-      .select("*")
+      .select("grupo_id, data")
       .order("data", { ascending: false }),
   ]);
 

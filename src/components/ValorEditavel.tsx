@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 export function ValorEditavel({
   label,
@@ -15,13 +15,20 @@ export function ValorEditavel({
   onSalvar: (novoValor: number) => Promise<void> | void;
   sufixo?: string;
 }) {
+  const [valorAtual, setValorAtual] = useState(valor);
   const [editando, setEditando] = useState(false);
   const [texto, setTexto] = useState(String(valor));
   const [isPending, startTransition] = useTransition();
   const [sucesso, setSucesso] = useState(false);
 
+  // Mantém sincronizado se o valor mudar por outra via (ex: revalidação
+  // trazendo dado mais recente do servidor).
+  useEffect(() => {
+    setValorAtual(valor);
+  }, [valor]);
+
   function cancelar() {
-    setTexto(String(valor));
+    setTexto(String(valorAtual));
     setEditando(false);
   }
 
@@ -31,15 +38,25 @@ export function ValorEditavel({
       cancelar();
       return;
     }
-    if (novoValor === valor) {
+    if (novoValor === valorAtual) {
       setEditando(false);
       return;
     }
+
+    // Atualização otimista: reflete o novo valor na tela na hora, sem
+    // esperar o round-trip do servidor. Reverte se a gravação falhar.
+    const anterior = valorAtual;
+    setValorAtual(novoValor);
+    setEditando(false);
+    setSucesso(true);
+    setTimeout(() => setSucesso(false), 1500);
+
     startTransition(async () => {
-      await onSalvar(novoValor);
-      setEditando(false);
-      setSucesso(true);
-      setTimeout(() => setSucesso(false), 1500);
+      try {
+        await onSalvar(novoValor);
+      } catch {
+        setValorAtual(anterior);
+      }
     });
   }
 
@@ -72,7 +89,7 @@ export function ValorEditavel({
             onClick={salvar}
             className="rounded-lg bg-accent px-2.5 py-1 text-xs font-medium text-white hover:bg-accent-hover disabled:opacity-60"
           >
-            {isPending ? "Salvando…" : "Salvar"}
+            Salvar
           </button>
           <button
             type="button"
@@ -96,12 +113,12 @@ export function ValorEditavel({
             sucesso ? "text-status-ok-text" : "text-text-primary"
           }`}
         >
-          {formatarExibicao(valor)}
+          {formatarExibicao(valorAtual)}
         </p>
         <button
           type="button"
           onClick={() => {
-            setTexto(String(valor));
+            setTexto(String(valorAtual));
             setEditando(true);
           }}
           aria-label={`Editar ${label}`}

@@ -14,6 +14,7 @@ import { TrafegoCard } from "@/components/TrafegoCard";
 import { ValorMensalCard } from "@/components/ValorMensalCard";
 import { DataInicioField } from "@/components/DataInicioField";
 import { ObservacoesField } from "@/components/ObservacoesField";
+import { getGrupo } from "@/lib/data/grupo";
 
 export default async function GrupoOverviewPage({
   params,
@@ -31,13 +32,13 @@ export default async function GrupoOverviewPage({
     { data: tarefasPendentes },
     { data: ultimaReuniao },
   ] = await Promise.all([
-    supabase.from("grupos_gestao").select("*").eq("id", id).single(),
+    getGrupo(id).then((data) => ({ data })),
     supabase.from("mentorados").select("*").eq("grupo_id", id).order("nome"),
     supabase
       .from("entregas_grupo")
       .select("id, feito, data_feito, tipos_entrega(id, nome, ativo)")
       .eq("grupo_id", id),
-    supabase.from("pagamentos").select("*").eq("grupo_id", id),
+    supabase.from("pagamentos").select("valor").eq("grupo_id", id),
     supabase
       .from("tarefas")
       .select("id")

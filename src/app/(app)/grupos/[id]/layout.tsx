@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import {
   StatusBadge,
   statusGrupoVariant,
 } from "@/components/StatusBadge";
 import { GrupoTabs } from "@/components/GrupoTabs";
 import { NomeGrupoField } from "@/components/NomeGrupoField";
+import { getGrupo } from "@/lib/data/grupo";
 
 export default async function GrupoLayout({
   children,
@@ -16,13 +16,7 @@ export default async function GrupoLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  const { data: grupo } = await supabase
-    .from("grupos_gestao")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const grupo = await getGrupo(id);
 
   if (!grupo) notFound();
 

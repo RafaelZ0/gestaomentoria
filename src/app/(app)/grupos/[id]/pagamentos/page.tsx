@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate, datasVencimento } from "@/lib/format";
 import { NovoPagamentoForm } from "@/components/NovoPagamentoForm";
+import { getGrupo } from "@/lib/data/grupo";
 
 const TIPO_LABEL: Record<string, string> = {
   MENSALIDADE: "Mensalidade",
@@ -15,8 +16,8 @@ export default async function PagamentosPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: grupo }, { data: pagamentos }] = await Promise.all([
-    supabase.from("grupos_gestao").select("*").eq("id", id).single(),
+  const [grupo, { data: pagamentos }] = await Promise.all([
+    getGrupo(id),
     supabase
       .from("pagamentos")
       .select("*")

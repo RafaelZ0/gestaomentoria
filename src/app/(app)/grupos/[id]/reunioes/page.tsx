@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NovaReuniaoForm } from "@/components/NovaReuniaoForm";
 import { ReuniaoItem } from "@/components/ReuniaoItem";
+import { getGrupo } from "@/lib/data/grupo";
 
 export default async function ReunioesPage({
   params,
@@ -11,7 +12,7 @@ export default async function ReunioesPage({
   const supabase = await createClient();
 
   const [
-    { data: grupoAtual },
+    grupoAtual,
     { data: mentoradosDoGrupo },
     { data: mentoradosOutrosGrupos },
     { data: responsaveis },
@@ -19,11 +20,7 @@ export default async function ReunioesPage({
     { data: participacoesExternas },
     { data: entregasPendentes },
   ] = await Promise.all([
-    supabase
-      .from("grupos_gestao")
-      .select("status, data_termino")
-      .eq("id", id)
-      .single(),
+    getGrupo(id),
     supabase
       .from("mentorados")
       .select("id, nome")

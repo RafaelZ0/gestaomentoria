@@ -10,7 +10,7 @@ export default async function CustoHoraPage() {
     await Promise.all([
       supabase.from("custos_fixos").select("*").order("nome"),
       supabase.from("custo_hora_config").select("*").eq("id", 1).single(),
-      supabase.from("grupos_gestao").select("*").eq("status", "Ativo"),
+      supabase.from("grupos_gestao").select("valor_mensal").eq("status", "Ativo"),
     ]);
 
   const totalCustosFixos = (custos ?? []).reduce(
