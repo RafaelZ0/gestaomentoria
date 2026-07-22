@@ -2,10 +2,19 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { StatusBadge, trafegoPagoVariant } from "@/components/StatusBadge";
 
-type Grupo = { id: string; nome: string; status: string };
+type Grupo = {
+  id: string;
+  nome: string;
+  status: string;
+  trafego_pago: string | null;
+};
 type Processo = { id: string; nome: string; ativo: boolean };
 type Entrega = { grupo_id: string; tipo_entrega_id: string; feito: boolean };
+
+const TRAFEGO_PAGO_ID = "__trafego_pago__";
+const TRAFEGO_OPCOES = ["SIM", "NÃO", "PARADO", "EM IMPLEMENTAÇÃO"];
 
 export function ProcessosMatrix({
   grupos,
@@ -20,6 +29,7 @@ export function ProcessosMatrix({
   const [filtroCondicao, setFiltroCondicao] = useState<"fizeram" | "nao_fizeram">(
     "nao_fizeram"
   );
+  const [filtroTrafego, setFiltroTrafego] = useState("SIM");
   const [filtroStatus, setFiltroStatus] = useState<"todos" | "Ativo" | "Inativo">(
     "Ativo"
   );
@@ -35,6 +45,9 @@ export function ProcessosMatrix({
   const gruposFiltrados = useMemo(() => {
     return grupos.filter((g) => {
       if (filtroStatus !== "todos" && g.status !== filtroStatus) return false;
+      if (filtroProcesso === TRAFEGO_PAGO_ID) {
+        return (g.trafego_pago ?? "") === filtroTrafego;
+      }
       if (filtroProcesso) {
         const feito = feitoMap.get(`${g.id}:${filtroProcesso}`);
         if (filtroCondicao === "fizeram" && feito !== true) return false;
@@ -42,7 +55,7 @@ export function ProcessosMatrix({
       }
       return true;
     });
-  }, [grupos, filtroStatus, filtroProcesso, filtroCondicao, feitoMap]);
+  }, [grupos, filtroStatus, filtroProcesso, filtroCondicao, filtroTrafego, feitoMap]);
 
   const processoSelecionado = processos.find((p) => p.id === filtroProcesso);
 
@@ -57,6 +70,7 @@ export function ProcessosMatrix({
             className="rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
           >
             <option value="">Todos</option>
+            <option value={TRAFEGO_PAGO_ID}>TRÁFEGO PAGO</option>
             {processos.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.nome}
@@ -66,20 +80,39 @@ export function ProcessosMatrix({
           </select>
         </div>
 
-        {filtroProcesso && (
+        {filtroProcesso === TRAFEGO_PAGO_ID ? (
           <div>
-            <label className="mb-1 block text-xs text-text-secondary">Condição</label>
+            <label className="mb-1 block text-xs text-text-secondary">Status</label>
             <select
-              value={filtroCondicao}
-              onChange={(e) =>
-                setFiltroCondicao(e.target.value as "fizeram" | "nao_fizeram")
-              }
+              value={filtroTrafego}
+              onChange={(e) => setFiltroTrafego(e.target.value)}
               className="rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
             >
-              <option value="nao_fizeram">Não fizeram</option>
-              <option value="fizeram">Fizeram</option>
+              {TRAFEGO_OPCOES.map((op) => (
+                <option key={op} value={op}>
+                  {op}
+                </option>
+              ))}
             </select>
           </div>
+        ) : (
+          filtroProcesso && (
+            <div>
+              <label className="mb-1 block text-xs text-text-secondary">
+                Condição
+              </label>
+              <select
+                value={filtroCondicao}
+                onChange={(e) =>
+                  setFiltroCondicao(e.target.value as "fizeram" | "nao_fizeram")
+                }
+                className="rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+              >
+                <option value="nao_fizeram">Não fizeram</option>
+                <option value="fizeram">Fizeram</option>
+              </select>
+            </div>
+          )
         )}
 
         <div>
@@ -102,6 +135,7 @@ export function ProcessosMatrix({
 
       <p className="text-sm text-text-secondary">
         {gruposFiltrados.length} grupo{gruposFiltrados.length === 1 ? "" : "s"}
+        {filtroProcesso === TRAFEGO_PAGO_ID && <> com tráfego pago “{filtroTrafego}”</>}
         {processoSelecionado && (
           <>
             {" "}
@@ -116,6 +150,9 @@ export function ProcessosMatrix({
           <thead>
             <tr className="border-b border-border text-text-secondary">
               <th className="px-4 py-3 font-medium">Grupo</th>
+              <th className="whitespace-nowrap px-4 py-3 text-center font-medium">
+                Tráfego pago
+              </th>
               {processos.map((p) => (
                 <th
                   key={p.id}
@@ -137,6 +174,16 @@ export function ProcessosMatrix({
                     {g.nome}
                   </Link>
                 </td>
+                <td className="px-4 py-3 text-center">
+                  {g.trafego_pago ? (
+                    <StatusBadge
+                      label={g.trafego_pago}
+                      variant={trafegoPagoVariant(g.trafego_pago)}
+                    />
+                  ) : (
+                    <span className="text-text-secondary">—</span>
+                  )}
+                </td>
                 {processos.map((p) => {
                   const feito = feitoMap.get(`${g.id}:${p.id}`);
                   return (
@@ -156,7 +203,7 @@ export function ProcessosMatrix({
             {gruposFiltrados.length === 0 && (
               <tr>
                 <td
-                  colSpan={processos.length + 1}
+                  colSpan={processos.length + 2}
                   className="px-4 py-8 text-center text-text-secondary"
                 >
                   Nenhum grupo encontrado com esse filtro.

@@ -11,6 +11,7 @@ export function GrupoTabs({ grupoId }: { grupoId: string }) {
     { href: base, label: "Visão geral" },
     { href: `${base}/reunioes`, label: "Reuniões" },
     { href: `${base}/pagamentos`, label: "Pagamentos" },
+    { href: `${base}/resultados`, label: "Resultados" },
     { href: `${base}/tarefas`, label: "Tarefas" },
   ];
 

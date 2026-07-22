@@ -9,7 +9,7 @@ export default async function ProcessosPage() {
     supabase.from("tipos_entrega").select("*").order("nome"),
     supabase
       .from("grupos_gestao")
-      .select("id, nome, status")
+      .select("id, nome, status, trafego_pago")
       .order("nome"),
     supabase.from("entregas_grupo").select("grupo_id, tipo_entrega_id, feito"),
   ]);
@@ -41,7 +41,12 @@ export default async function ProcessosPage() {
         </p>
         <div className="mt-3">
           <ProcessosMatrix
-            grupos={grupos ?? []}
+            grupos={(grupos ?? []).map((g) => ({
+              id: g.id,
+              nome: g.nome,
+              status: g.status,
+              trafego_pago: g.trafego_pago,
+            }))}
             processos={tipos ?? []}
             entregas={(entregas ?? []).map((e) => ({
               grupo_id: e.grupo_id,

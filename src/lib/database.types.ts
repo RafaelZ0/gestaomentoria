@@ -112,6 +112,19 @@ export type CustoFixoMensalItem = {
   created_at: string;
 };
 
+export type ResultadoGrupo = {
+  id: string;
+  grupo_id: string;
+  data: string;
+  investimento: number;
+  leads: number;
+  vendas: number;
+  faturamento_campanha_interna: number;
+  faturamento_trafego_pago: number;
+  observacao: string | null;
+  created_at: string;
+};
+
 type Relationships = never[];
 
 export type Database = {
@@ -198,6 +211,12 @@ export type Database = {
         Insert: Partial<CustoFixoMensalItem> &
           Pick<CustoFixoMensalItem, "ano" | "mes" | "nome" | "valor">;
         Update: Partial<CustoFixoMensalItem>;
+        Relationships: Relationships;
+      };
+      resultados_grupo: {
+        Row: ResultadoGrupo;
+        Insert: Partial<ResultadoGrupo> & Pick<ResultadoGrupo, "grupo_id" | "data">;
+        Update: Partial<ResultadoGrupo>;
         Relationships: Relationships;
       };
     };
