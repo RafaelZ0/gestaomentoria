@@ -16,6 +16,10 @@ export function GrupoTabs({ grupoId }: { grupoId: string }) {
   ];
 
   return (
+    // prefetch=false: rotas dinâmicas (Supabase por request); com prefetch
+    // ligado, clicar numa aba disparava RSC fetch para as 5 ao mesmo tempo
+    // (mais o menu lateral), rajada que o Vercel às vezes limitava com 503,
+    // fazendo a navegação por clique falhar de forma intermitente.
     <div className="mt-6 flex gap-1 border-b border-border">
       {tabs.map((tab) => {
         const active = pathname === tab.href;
@@ -23,6 +27,7 @@ export function GrupoTabs({ grupoId }: { grupoId: string }) {
           <Link
             key={tab.href}
             href={tab.href}
+            prefetch={false}
             className={`border-b-2 px-4 py-2 text-sm transition-colors ${
               active
                 ? "border-accent text-text-primary font-medium"

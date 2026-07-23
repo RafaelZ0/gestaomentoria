@@ -159,6 +159,7 @@ function InfoCard({
         (href ? (
           <Link
             href={href}
+            prefetch={false}
             className="mt-1 block text-xs text-accent hover:text-accent-hover"
           >
             {hint}

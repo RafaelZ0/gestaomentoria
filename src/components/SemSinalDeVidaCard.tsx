@@ -47,6 +47,7 @@ export function SemSinalDeVidaCard({
             <li key={g.id}>
               <Link
                 href={`/grupos/${g.id}`}
+                prefetch={false}
                 className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm hover:bg-bg-surface-hover"
               >
                 <span className="text-text-primary">{g.nome}</span>

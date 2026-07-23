@@ -189,7 +189,7 @@ export function ProcessosMatrix({
                 className="group border-b border-border last:border-0 hover:bg-bg-surface-hover"
               >
                 <td className="sticky left-0 z-10 whitespace-nowrap bg-bg-surface px-4 py-3 font-medium text-text-primary group-hover:bg-bg-surface-hover">
-                  <Link href={`/grupos/${g.id}`} className="hover:text-accent">
+                  <Link href={`/grupos/${g.id}`} prefetch={false} className="hover:text-accent">
                     {g.nome}
                   </Link>
                 </td>

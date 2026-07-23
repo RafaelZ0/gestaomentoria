@@ -70,12 +70,30 @@ export default async function ReunioesPage({
     ),
   ];
 
-  const { data: reunioesExternas } =
+  const { data: reunioesExternasRaw } =
     idsExternas.length > 0
-      ? await supabase.from("reunioes").select("*").in("id", idsExternas)
+      ? await supabase
+          .from("reunioes")
+          .select("*, grupos_gestao(nome)")
+          .in("id", idsExternas)
       : { data: [] };
 
-  const reunioes = [...(reunioesProprias ?? []), ...(reunioesExternas ?? [])].sort(
+  type ReuniaoExternaRow = {
+    id: string;
+    grupos_gestao: { nome: string } | null;
+  };
+
+  const grupoOrigemPorReuniao = new Map<string, string>();
+  for (const r of (reunioesExternasRaw ??
+    []) as unknown as ReuniaoExternaRow[]) {
+    if (r.grupos_gestao?.nome) {
+      grupoOrigemPorReuniao.set(r.id, r.grupos_gestao.nome);
+    }
+  }
+
+  const reunioesExternas = reunioesExternasRaw ?? [];
+
+  const reunioes = [...(reunioesProprias ?? []), ...reunioesExternas].sort(
     (a, b) => b.data.localeCompare(a.data) || b.created_at.localeCompare(a.created_at)
   );
 
@@ -135,12 +153,20 @@ export default async function ReunioesPage({
     grupoDataTermino: m.grupos_gestao?.data_termino ?? null,
   }));
 
+  // Conta só reuniões próprias do grupo (não participações como convidado
+  // em reunião de outro grupo), pra bater com o que "faltas" já considera.
+  // A lista abaixo mostra própria + externas; externas ficam marcadas com
+  // o nome do grupo de origem pra não parecer que o número está errado.
   const totalAgendadas = (reunioesProprias ?? []).length;
   const faltas = (reunioesProprias ?? []).filter((r) => !r.compareceu).length;
 
   return (
     <div className="space-y-6">
-      <ComparecimentoResumo totalAgendadas={totalAgendadas} faltas={faltas} />
+      <ComparecimentoResumo
+        totalAgendadas={totalAgendadas}
+        faltas={faltas}
+        reunioesExternas={reunioesExternas.length}
+      />
 
       <NovaReuniaoForm
         grupoId={id}
@@ -157,6 +183,7 @@ export default async function ReunioesPage({
           <ReuniaoItem
             key={r.id}
             reuniao={r}
+            grupoOrigemNome={grupoOrigemPorReuniao.get(r.id)}
             participantes={participantesPorReuniao.get(r.id) ?? []}
             responsavelNome={
               r.responsavel_id ? responsavelPorId.get(r.responsavel_id) : undefined

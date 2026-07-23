@@ -60,6 +60,11 @@ export function Sidebar() {
             ✕
           </button>
         </div>
+        {/* prefetch=false: todas as rotas são dinâmicas (Supabase por
+            request); com prefetch ligado, o Next dispara uma rajada de
+            requisições RSC simultâneas (um fetch por link visível) que
+            estava sendo limitada pelo Vercel com 503, deixando a navegação
+            por clique intermitente. */}
         <nav className="flex-1 space-y-1 px-3">
           {NAV_ITEMS.map((item) => {
             const active =
@@ -70,6 +75,7 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 className={`block rounded-lg border-l-2 px-3 py-2 text-sm transition-colors ${
                   active
                     ? "border-accent bg-bg-surface-hover text-text-primary font-medium"

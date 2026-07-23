@@ -22,7 +22,7 @@ export default async function GrupoLayout({
 
   return (
     <div className="max-w-5xl">
-      <Link href="/grupos" className="text-sm text-text-secondary hover:text-text-primary">
+      <Link href="/grupos" prefetch={false} className="text-sm text-text-secondary hover:text-text-primary">
         ← Grupos de gestão
       </Link>
 

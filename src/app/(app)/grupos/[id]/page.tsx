@@ -122,6 +122,7 @@ export default async function GrupoOverviewPage({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Link
           href={`/grupos/${grupo.id}/tarefas`}
+          prefetch={false}
           className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm hover:bg-bg-surface"
         >
           <span className="text-text-secondary">Tarefas pendentes</span>{" "}
@@ -131,6 +132,7 @@ export default async function GrupoOverviewPage({
         </Link>
         <Link
           href={`/grupos/${grupo.id}/reunioes`}
+          prefetch={false}
           className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm hover:bg-bg-surface"
         >
           <span className="text-text-secondary">Última reunião</span>{" "}

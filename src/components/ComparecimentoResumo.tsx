@@ -1,9 +1,11 @@
 export function ComparecimentoResumo({
   totalAgendadas,
   faltas,
+  reunioesExternas = 0,
 }: {
   totalAgendadas: number;
   faltas: number;
+  reunioesExternas?: number;
 }) {
   if (totalAgendadas === 0) return null;
 
@@ -37,6 +39,13 @@ export function ComparecimentoResumo({
           </p>
         </div>
       </div>
+      {reunioesExternas > 0 && (
+        <p className="mt-3 border-t border-border pt-3 text-xs text-text-secondary">
+          + {reunioesExternas} reunião{reunioesExternas === 1 ? "" : "ões"} listada
+          {reunioesExternas === 1 ? "" : "s"} abaixo em que alguém deste grupo
+          participou como convidado em outro grupo — não conta nesses números.
+        </p>
+      )}
     </div>
   );
 }

@@ -16,6 +16,7 @@ type Participante = {
 
 export function ReuniaoItem({
   reuniao,
+  grupoOrigemNome,
   participantes,
   responsavelNome,
   mentoradosDoGrupo,
@@ -31,6 +32,7 @@ export function ReuniaoItem({
     responsavel_id: string | null;
     compareceu: boolean;
   };
+  grupoOrigemNome?: string;
   participantes: Participante[];
   responsavelNome: string | undefined;
   mentoradosDoGrupo: { id: string; nome: string }[];
@@ -162,6 +164,14 @@ export function ReuniaoItem({
           {!reuniao.compareceu && (
             <span className="rounded-full bg-status-alert-bg px-2 py-0.5 text-xs font-medium text-status-alert-text">
               Não compareceu
+            </span>
+          )}
+          {grupoOrigemNome && (
+            <span
+              title="Essa reunião foi agendada em outro grupo; não conta nas estatísticas de reuniões deste grupo."
+              className="rounded-full bg-bg-surface-hover px-2 py-0.5 text-xs text-text-secondary"
+            >
+              Reunião de {grupoOrigemNome}
             </span>
           )}
         </div>
