@@ -18,12 +18,14 @@ async function gruposDosMentorados(
 }
 
 // A reunião aparece automaticamente na aba "Reuniões" de todo grupo que
-// tiver um mentorado participante, então revalidamos cada um deles.
+// tiver um mentorado participante, então revalidamos cada um deles, além
+// da página global /reunioes que lista tudo junto.
 function revalidarGrupos(grupoIds: Iterable<string>) {
   for (const id of grupoIds) {
     revalidatePath(`/grupos/${id}`);
     revalidatePath(`/grupos/${id}/reunioes`);
   }
+  revalidatePath("/reunioes");
 }
 
 export async function createReuniao(grupoId: string, formData: FormData) {

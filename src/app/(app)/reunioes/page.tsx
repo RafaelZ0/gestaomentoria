@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ReunioesGlobalList } from "@/components/ReunioesGlobalList";
+import { AgendarReuniaoGlobalForm } from "@/components/AgendarReuniaoGlobalForm";
 
 export default async function ReunioesGlobaisPage() {
   const supabase = await createClient();
@@ -10,7 +11,7 @@ export default async function ReunioesGlobaisPage() {
     { data: reunioes },
     { data: participantes },
   ] = await Promise.all([
-    supabase.from("grupos_gestao").select("id, nome").order("nome"),
+    supabase.from("grupos_gestao").select("id, nome, status").order("nome"),
     supabase.from("responsaveis").select("*").order("nome"),
     supabase
       .from("reunioes")
@@ -62,6 +63,8 @@ export default async function ReunioesGlobaisPage() {
     participantes: participantesPorReuniao.get(r.id) ?? [],
   }));
 
+  const gruposAtivos = (grupos ?? []).filter((g) => g.status === "Ativo");
+
   return (
     <div className="max-w-5xl">
       <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
@@ -71,6 +74,13 @@ export default async function ReunioesGlobaisPage() {
         Todas as reuniões de todos os grupos — agendadas e já realizadas — num
         só lugar.
       </p>
+
+      <div className="mt-4">
+        <AgendarReuniaoGlobalForm
+          grupos={gruposAtivos}
+          responsaveis={responsaveis ?? []}
+        />
+      </div>
 
       <div className="mt-6">
         <ReunioesGlobalList
