@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
+import {
+  NotificationBell,
+  type NotificacaoAgendar,
+  type NotificacaoHoje,
+} from "@/components/NotificationBell";
 
 const NAV_ITEMS = [
   { href: "/grupos", label: "Grupos de gestão" },
@@ -13,7 +18,13 @@ const NAV_ITEMS = [
   { href: "/custo-hora", label: "Custo por grupo" },
 ];
 
-export function Sidebar() {
+export function Sidebar({
+  notifAgendar,
+  notifHoje,
+}: {
+  notifAgendar: NotificacaoAgendar[];
+  notifHoje: NotificacaoHoje[];
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -27,13 +38,16 @@ export function Sidebar() {
         <span className="font-display text-base font-semibold text-text-primary">
           Gestão de Tráfego
         </span>
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="Abrir menu"
-          className="btn-secondary px-2.5 py-1.5"
-        >
-          ☰
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationBell notifAgendar={notifAgendar} notifHoje={notifHoje} />
+          <button
+            onClick={() => setOpen(true)}
+            aria-label="Abrir menu"
+            className="btn-secondary px-2.5 py-1.5"
+          >
+            ☰
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -53,6 +67,9 @@ export function Sidebar() {
           <span className="font-display text-lg font-semibold text-text-primary">
             Gestão de Tráfego
           </span>
+          <div className="hidden md:block">
+            <NotificationBell notifAgendar={notifAgendar} notifHoje={notifHoje} />
+          </div>
           <button
             onClick={() => setOpen(false)}
             aria-label="Fechar menu"
