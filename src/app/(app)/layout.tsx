@@ -19,12 +19,16 @@ export default async function AppLayout({
   const supabase = await createClient();
   const hoje = new Date().toISOString().slice(0, 10);
 
-  const [{ data: gruposAtivos }, { data: reunioes }] = await Promise.all([
-    supabase.from("grupos_gestao").select("id, nome").eq("status", "Ativo"),
-    supabase
-      .from("reunioes")
-      .select("id, grupo_id, data, compareceu, hora, grupos_gestao(nome)"),
-  ]);
+  const [{ data: gruposAtivos }, { data: reunioes }, { data: participantes }] =
+    await Promise.all([
+      supabase.from("grupos_gestao").select("id, nome").eq("status", "Ativo"),
+      supabase
+        .from("reunioes")
+        .select("id, grupo_id, data, compareceu, hora, grupos_gestao(nome)"),
+      supabase
+        .from("reuniao_participantes")
+        .select("reuniao_id, mentorados(grupo_id)"),
+    ]);
 
   type ReuniaoRow = {
     id: string;
@@ -34,19 +38,36 @@ export default async function AppLayout({
     hora: string | null;
     grupos_gestao: { nome: string } | null;
   };
+  type ParticipanteRow = { reuniao_id: string; mentorados: { grupo_id: string } | null };
 
   const reunioesRows = (reunioes ?? []) as unknown as ReuniaoRow[];
+
+  // Uma reunião "conta" pra todo grupo com participante nela, não só pro
+  // grupo dono — reunião conjunta vale sinal de vida pra quem participou,
+  // igual valeria se fosse uma reunião só daquele grupo.
+  const gruposPorReuniao = new Map<string, Set<string>>();
+  for (const r of reunioesRows) {
+    gruposPorReuniao.set(r.id, new Set([r.grupo_id]));
+  }
+  for (const p of (participantes ?? []) as unknown as ParticipanteRow[]) {
+    const grupoId = p.mentorados?.grupo_id;
+    if (!grupoId) continue;
+    gruposPorReuniao.get(p.reuniao_id)?.add(grupoId);
+  }
 
   const porGrupo = new Map<string, { ultima: string | null; temFutura: boolean }>();
   for (const g of gruposAtivos ?? []) {
     porGrupo.set(g.id, { ultima: null, temFutura: false });
   }
   for (const r of reunioesRows) {
-    const info = porGrupo.get(r.grupo_id);
-    if (!info) continue;
-    if (r.data > hoje && r.compareceu) info.temFutura = true;
-    if (r.data <= hoje && (!info.ultima || r.data > info.ultima)) {
-      info.ultima = r.data;
+    const gruposEnvolvidos = gruposPorReuniao.get(r.id) ?? new Set([r.grupo_id]);
+    for (const gid of gruposEnvolvidos) {
+      const info = porGrupo.get(gid);
+      if (!info) continue;
+      if (r.data > hoje && r.compareceu) info.temFutura = true;
+      if (r.data <= hoje && (!info.ultima || r.data > info.ultima)) {
+        info.ultima = r.data;
+      }
     }
   }
 

@@ -90,7 +90,7 @@ export function ReunioesGlobalList({
           </select>
         </div>
         <p className="ml-auto text-sm text-text-secondary">
-          {filtradas.length} reunião{filtradas.length === 1 ? "" : "ões"}
+          {filtradas.length} reuni{filtradas.length === 1 ? "ão" : "ões"}
         </p>
       </div>
 
