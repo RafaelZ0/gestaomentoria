@@ -22,6 +22,11 @@ const COR_LINHA = "#6366f1";
 const COR_GRID = "#232838";
 const COR_EIXO = "#a8b0c4";
 
+const formatCompacto = new Intl.NumberFormat("pt-BR", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+}).format;
+
 function mesCurto(mes: string) {
   const [ano, m] = mes.split("-").map(Number);
   return new Date(ano, m - 1, 1)
@@ -91,9 +96,13 @@ function GraficoLinha({
                 stroke={COR_GRID}
                 tick={{ fill: COR_EIXO, fontSize: 11 }}
                 tickLine={false}
-                width={44}
+                width={campo === "faturamento" ? 36 : 44}
                 tickFormatter={(v) =>
-                  campo === "roas" ? `${v}x` : formatar(v).replace("R$", "")
+                  campo === "roas"
+                    ? `${v}x`
+                    : campo === "faturamento"
+                      ? formatCompacto(v)
+                      : formatar(v).replace("R$", "")
                 }
               />
               <Tooltip
