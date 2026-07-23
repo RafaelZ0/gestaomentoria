@@ -16,7 +16,7 @@ export default async function ReunioesGlobaisPage() {
     supabase
       .from("reunioes")
       .select(
-        "id, grupo_id, data, hora, resumo, compareceu, link_reuniao, responsavel_id, grupos_gestao(nome)"
+        "id, grupo_id, data, hora, resumo, compareceu, link_reuniao, responsavel_id, grupos_gestao(nome, status)"
       )
       .order("data", { ascending: false }),
     supabase
@@ -33,7 +33,7 @@ export default async function ReunioesGlobaisPage() {
     compareceu: boolean;
     link_reuniao: string | null;
     responsavel_id: string | null;
-    grupos_gestao: { nome: string } | null;
+    grupos_gestao: { nome: string; status: string } | null;
   };
 
   type ParticipanteRow = { reuniao_id: string; mentorados: { nome: string } | null };
@@ -52,6 +52,7 @@ export default async function ReunioesGlobaisPage() {
     id: r.id,
     grupoId: r.grupo_id,
     grupoNome: r.grupos_gestao?.nome ?? "—",
+    grupoStatus: r.grupos_gestao?.status ?? "Ativo",
     data: r.data,
     hora: r.hora,
     resumo: r.resumo,
@@ -83,11 +84,7 @@ export default async function ReunioesGlobaisPage() {
       </div>
 
       <div className="mt-6">
-        <ReunioesGlobalList
-          reunioes={linhas}
-          grupos={grupos ?? []}
-          responsaveis={responsaveis ?? []}
-        />
+        <ReunioesGlobalList reunioes={linhas} responsaveis={responsaveis ?? []} />
       </div>
     </div>
   );
