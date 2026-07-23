@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import { ResultadosRankingTable, type LinhaRanking } from "@/components/ResultadosRankingTable";
-import { ResultadosPorMesTable, type LinhaMensal } from "@/components/ResultadosPorMesTable";
+import {
+  ResultadosComparativoMensal,
+  type MesComparativo,
+} from "@/components/ResultadosComparativoMensal";
 
 export function ResultadosTabs({
   linhasRanking,
-  linhasMensal,
+  meses,
 }: {
   linhasRanking: LinhaRanking[];
-  linhasMensal: LinhaMensal[];
+  meses: MesComparativo[];
 }) {
   const [aba, setAba] = useState<"grupo" | "mes">("grupo");
 
@@ -24,7 +27,7 @@ export function ResultadosTabs({
         {aba === "grupo" ? (
           <ResultadosRankingTable linhas={linhasRanking} />
         ) : (
-          <ResultadosPorMesTable linhas={linhasMensal} />
+          <ResultadosComparativoMensal meses={meses} />
         )}
       </div>
     </div>

@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { type LinhaRanking } from "@/components/ResultadosRankingTable";
-import { type LinhaMensal } from "@/components/ResultadosPorMesTable";
+import {
+  type LinhaClinicaMes,
+  type MesComparativo,
+} from "@/components/ResultadosComparativoMensal";
 import { ResultadosTabs } from "@/components/ResultadosTabs";
 
 export default async function ResultadosPage() {
@@ -54,13 +57,19 @@ export default async function ResultadosPage() {
     };
   });
 
-  const porMes = new Map<
+  const nomePorGrupo = new Map((grupos ?? []).map((g) => [g.id, g.nome]));
+
+  const porMesEClinica = new Map<
     string,
-    { investimento: number; leads: number; faturamento: number; vendas: number }
+    Map<
+      string,
+      { investimento: number; leads: number; faturamento: number; vendas: number }
+    >
   >();
   for (const r of resultadosAtivos) {
-    const chave = r.data.slice(0, 7);
-    const atual = porMes.get(chave) ?? {
+    const chaveMes = r.data.slice(0, 7);
+    const porClinica = porMesEClinica.get(chaveMes) ?? new Map();
+    const atual = porClinica.get(r.grupo_id) ?? {
       investimento: 0,
       leads: 0,
       faturamento: 0,
@@ -71,23 +80,30 @@ export default async function ResultadosPage() {
     atual.faturamento +=
       Number(r.faturamento_campanha_interna) + Number(r.faturamento_trafego_pago);
     atual.vendas += r.vendas_campanha_interna + r.vendas_trafego_pago;
-    porMes.set(chave, atual);
+    porClinica.set(r.grupo_id, atual);
+    porMesEClinica.set(chaveMes, porClinica);
   }
 
-  const linhasMensal: LinhaMensal[] = [...porMes.entries()]
+  const meses: MesComparativo[] = [...porMesEClinica.entries()]
     .sort((a, b) => b[0].localeCompare(a[0]))
-    .map(([mes, m]) => ({
-      mes,
-      investimento: m.investimento,
-      leads: m.leads,
-      vendas: m.vendas,
-      faturamento: m.faturamento,
-      roas: m.investimento > 0 ? m.faturamento / m.investimento : null,
-      ticketMedio: m.vendas > 0 ? m.faturamento / m.vendas : null,
-    }));
+    .map(([mes, porClinica]) => {
+      const clinicas: LinhaClinicaMes[] = [...porClinica.entries()].map(
+        ([grupoId, m]) => ({
+          id: grupoId,
+          nome: nomePorGrupo.get(grupoId) ?? "—",
+          investimento: m.investimento,
+          leads: m.leads,
+          vendas: m.vendas,
+          faturamento: m.faturamento,
+          roas: m.investimento > 0 ? m.faturamento / m.investimento : null,
+          ticketMedio: m.vendas > 0 ? m.faturamento / m.vendas : null,
+        })
+      );
+      return { mes, clinicas };
+    });
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
         Resultados
       </h1>
@@ -95,13 +111,12 @@ export default async function ResultadosPage() {
         Somente grupos ativos. &quot;Por grupo&quot; ranqueia por ROAS
         (faturamento ÷ investido) — clique em Grupo, ROAS, Faturamento ou
         Vendas pra ordenar por essa coluna, ou na linha pra abrir o
-        detalhamento do grupo. &quot;Por mês&quot; soma os resultados de
-        todos os grupos ativos em cada mês, pra comparar a evolução ao longo
-        do tempo.
+        detalhamento do grupo. &quot;Por mês&quot; abre cada mês pra comparar
+        lado a lado como cada clínica performou naquele período.
       </p>
 
       <div className="mt-6">
-        <ResultadosTabs linhasRanking={linhasRanking} linhasMensal={linhasMensal} />
+        <ResultadosTabs linhasRanking={linhasRanking} meses={meses} />
       </div>
     </div>
   );
