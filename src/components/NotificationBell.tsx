@@ -3,13 +3,34 @@
 import { useState } from "react";
 import Link from "next/link";
 
-export type NotificacaoAgendar = { id: string; nome: string };
+export type NotificacaoAgendar = {
+  id: string;
+  nome: string;
+  diasSemReuniao: number | null;
+};
 export type NotificacaoHoje = {
   reuniaoId: string;
   grupoId: string;
   grupoNome: string;
   hora: string | null;
 };
+
+function BellIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+    >
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}
 
 export function NotificationBell({
   notifAgendar,
@@ -29,7 +50,7 @@ export function NotificationBell({
         aria-label="Sem notificações"
         className="relative rounded-lg p-2 text-text-secondary opacity-50"
       >
-        🔔
+        <BellIcon />
       </button>
     );
   }
@@ -42,7 +63,7 @@ export function NotificationBell({
         aria-label={`${total} notificações`}
         className="relative rounded-lg p-2 text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
       >
-        🔔
+        <BellIcon />
         <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-status-alert-text px-1 text-[10px] font-semibold text-white">
           {total}
         </span>
@@ -93,6 +114,13 @@ export function NotificationBell({
                   >
                     <span className="font-medium text-text-primary">
                       {n.nome}
+                    </span>
+                    <span className="text-text-secondary">
+                      {" "}
+                      —{" "}
+                      {n.diasSemReuniao === null
+                        ? "nunca teve reunião"
+                        : `última reunião há ${n.diasSemReuniao} dias`}
                     </span>
                   </Link>
                 ))}

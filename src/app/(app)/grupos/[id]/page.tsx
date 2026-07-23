@@ -8,6 +8,7 @@ import {
   formatDuracao,
 } from "@/lib/format";
 import { resumoStatusMensalidades } from "@/lib/mensalidade";
+import { calcSaudeGrupo, calcTendenciaRoas } from "@/lib/saude";
 import { CancelarGrupoButton } from "@/components/CancelarGrupoModal";
 import { ChecklistEntregas } from "@/components/ChecklistEntregas";
 import { MentoradosList } from "@/components/MentoradosList";
@@ -147,6 +148,32 @@ export default async function GrupoOverviewPage({
     }))
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
+  const resultadosPorMes = new Map<
+    string,
+    { investimento: number; faturamento: number }
+  >();
+  for (const r of resultados ?? []) {
+    const mes = r.data.slice(0, 7);
+    const atual = resultadosPorMes.get(mes) ?? { investimento: 0, faturamento: 0 };
+    atual.investimento += Number(r.investimento);
+    atual.faturamento +=
+      Number(r.faturamento_campanha_interna) + Number(r.faturamento_trafego_pago);
+    resultadosPorMes.set(mes, atual);
+  }
+  const tendenciaRoas = calcTendenciaRoas(
+    [...resultadosPorMes.entries()].map(([mes, v]) => ({ mes, ...v }))
+  );
+  const processosIncompletos = entregasAtivas.filter((e) => !e.feito).length;
+  const saude = calcSaudeGrupo({
+    diasSemReuniao: diasDesdeUltimaReuniao,
+    tendenciaRoas,
+    processosIncompletos,
+  });
+  const saudeVariant =
+    saude.status === "ok" ? "ok" : saude.status === "warn" ? "warn" : "alert";
+  const saudeLabel =
+    saude.status === "ok" ? "Saudável" : saude.status === "warn" ? "Atenção" : "Crítico";
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
@@ -197,6 +224,18 @@ export default async function GrupoOverviewPage({
             )}
           </div>
         </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-bg-surface p-5">
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-text-secondary">Saúde do cliente</p>
+          <StatusBadge label={saudeLabel} variant={saudeVariant} />
+        </div>
+        <p className="mt-1 text-sm text-text-secondary">
+          {saude.flags.length > 0
+            ? saude.flags.join(" · ")
+            : "Nenhum sinal de alerta no momento."}
+        </p>
       </div>
 
       <div className="text-sm text-text-secondary">

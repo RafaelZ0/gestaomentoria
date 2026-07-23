@@ -50,18 +50,28 @@ export default async function AppLayout({
     }
   }
 
+  function diasDesde(data: string) {
+    return Math.floor(
+      (Date.now() - new Date(data + "T00:00:00").getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+  }
+
   const notifAgendar: NotificacaoAgendar[] = (gruposAtivos ?? [])
     .filter((g) => {
       const info = porGrupo.get(g.id)!;
       if (info.temFutura) return false;
       if (!info.ultima) return true;
-      const dias = Math.floor(
-        (Date.now() - new Date(info.ultima + "T00:00:00").getTime()) /
-          (1000 * 60 * 60 * 24)
-      );
-      return dias > DIAS_PARA_AGENDAR;
+      return diasDesde(info.ultima) > DIAS_PARA_AGENDAR;
     })
-    .map((g) => ({ id: g.id, nome: g.nome }));
+    .map((g) => {
+      const ultima = porGrupo.get(g.id)!.ultima;
+      return {
+        id: g.id,
+        nome: g.nome,
+        diasSemReuniao: ultima ? diasDesde(ultima) : null,
+      };
+    });
 
   const notifHoje: NotificacaoHoje[] = reunioesRows
     .filter((r) => r.data === hoje && r.compareceu)
