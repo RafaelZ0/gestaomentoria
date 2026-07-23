@@ -131,7 +131,7 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
               onClick={() => setEditandoData(true)}
               aria-label="Editar data"
               title="Editar data"
-              className="text-text-secondary hover:text-text-primary"
+              className="-m-1.5 rounded p-1.5 text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
             >
               ✎
             </button>

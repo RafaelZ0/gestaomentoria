@@ -55,7 +55,7 @@ export function TrafegoCard({
         <option value="EM IMPLEMENTAÇÃO">EM IMPLEMENTAÇÃO</option>
       </select>
 
-      <p className="mt-3 text-sm text-text-secondary">Desde</p>
+      <p className="mt-3 text-sm text-text-secondary">Tráfego pago ativo desde</p>
       <input
         type="date"
         value={desde}

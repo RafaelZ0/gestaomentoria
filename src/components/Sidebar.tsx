@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/financas", label: "Finanças" },
   { href: "/resultados", label: "Resultados" },
   { href: "/tipos-entrega", label: "Processos" },
+  { href: "/custo-hora", label: "Custo por grupo" },
 ];
 
 export function Sidebar() {

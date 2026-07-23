@@ -24,6 +24,10 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
   const router = useRouter();
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [busca, setBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState<"todos" | "Ativo" | "Inativo">(
+    "todos"
+  );
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -34,12 +38,23 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
     }
   }
 
+  const gruposFiltrados = useMemo(() => {
+    const buscaNormalizada = busca.trim().toLowerCase();
+    return grupos.filter((g) => {
+      if (filtroStatus !== "todos" && g.status !== filtroStatus) return false;
+      if (buscaNormalizada && !g.nome.toLowerCase().includes(buscaNormalizada)) {
+        return false;
+      }
+      return true;
+    });
+  }, [grupos, filtroStatus, busca]);
+
   const gruposOrdenados = useMemo(() => {
-    if (!sortKey) return grupos;
+    if (!sortKey) return gruposFiltrados;
 
     const fator = sortDir === "asc" ? 1 : -1;
 
-    return [...grupos].sort((a, b) => {
+    return [...gruposFiltrados].sort((a, b) => {
       switch (sortKey) {
         case "nome":
           return fator * a.nome.localeCompare(b.nome, "pt-BR");
@@ -58,11 +73,42 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
           return 0;
       }
     });
-  }, [grupos, sortKey, sortDir]);
+  }, [gruposFiltrados, sortKey, sortDir]);
 
   return (
-    <div className="mt-8 overflow-x-auto rounded-xl border border-border bg-bg-surface">
-      <table className="w-full text-left text-sm">
+    <div className="mt-8">
+      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-border bg-bg-surface-hover p-3">
+        <div>
+          <label className="mb-1 block text-xs text-text-secondary">Buscar</label>
+          <input
+            type="text"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Nome do grupo"
+            className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-text-secondary">Status</label>
+          <select
+            value={filtroStatus}
+            onChange={(e) =>
+              setFiltroStatus(e.target.value as "todos" | "Ativo" | "Inativo")
+            }
+            className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
+          >
+            <option value="todos">Todos</option>
+            <option value="Ativo">Ativos</option>
+            <option value="Inativo">Inativos</option>
+          </select>
+        </div>
+        <p className="ml-auto text-sm text-text-secondary">
+          {gruposOrdenados.length} grupo{gruposOrdenados.length === 1 ? "" : "s"}
+        </p>
+      </div>
+
+      <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-bg-surface">
+        <table className="w-full text-left text-sm">
         <thead>
           <tr className="border-b border-border text-text-secondary">
             <SortableHeader label="Nome" sortKey="nome" current={sortKey} dir={sortDir} onSort={handleSort} />
@@ -118,12 +164,15 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
           {gruposOrdenados.length === 0 && (
             <tr>
               <td colSpan={6} className="px-4 py-8 text-center text-text-secondary">
-                Nenhum grupo cadastrado ainda.
+                {grupos.length === 0
+                  ? "Nenhum grupo cadastrado ainda."
+                  : "Nenhum grupo encontrado com esse filtro."}
               </td>
             </tr>
           )}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 }

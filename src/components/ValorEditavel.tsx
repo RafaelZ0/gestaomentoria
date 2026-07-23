@@ -123,7 +123,7 @@ export function ValorEditavel({
           }}
           aria-label={`Editar ${label}`}
           title={`Editar ${label}`}
-          className="text-text-secondary hover:text-text-primary"
+          className="-m-1.5 rounded p-1.5 text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
         >
           ✎
         </button>

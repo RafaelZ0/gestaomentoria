@@ -15,7 +15,7 @@ export function DataInicioField({
 
   return (
     <span className="inline-flex items-center gap-1">
-      Início em{" "}
+      Início do contrato em{" "}
       <input
         type="date"
         value={valor}
