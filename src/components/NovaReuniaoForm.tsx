@@ -88,16 +88,28 @@ export function NovaReuniaoForm({
       </div>
 
       {agendada && (
-        <div>
-          <label className="mb-1 block text-sm text-text-secondary">
-            Link da reunião (opcional)
-          </label>
-          <input
-            type="url"
-            name="link_reuniao"
-            placeholder="https://meet.google.com/..."
-            className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
-          />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm text-text-secondary">
+              Horário (opcional)
+            </label>
+            <input
+              type="time"
+              name="hora"
+              className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm text-text-secondary">
+              Link da reunião (opcional)
+            </label>
+            <input
+              type="url"
+              name="link_reuniao"
+              placeholder="https://meet.google.com/..."
+              className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+            />
+          </div>
         </div>
       )}
 

@@ -56,14 +56,20 @@ export async function createGrupo(formData: FormData) {
 
 export async function updateGrupoCampo(
   grupoId: string,
-  campo: "nome" | "data_inicio" | "valor_mensal" | "observacoes",
+  campo:
+    | "nome"
+    | "data_inicio"
+    | "valor_mensal"
+    | "observacoes"
+    | "meta_cpl"
+    | "meta_roas",
   valor: string
 ) {
   const supabase = await createClient();
 
   const updates =
-    campo === "valor_mensal"
-      ? { valor_mensal: Number(valor) }
+    campo === "valor_mensal" || campo === "meta_cpl" || campo === "meta_roas"
+      ? { [campo]: valor.trim() === "" ? null : Number(valor) }
       : campo === "observacoes"
         ? { observacoes: valor.trim() || null }
         : { [campo]: valor };

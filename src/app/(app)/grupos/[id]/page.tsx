@@ -16,6 +16,7 @@ import { ValorMensalCard } from "@/components/ValorMensalCard";
 import { DataInicioField } from "@/components/DataInicioField";
 import { ObservacoesField } from "@/components/ObservacoesField";
 import { StatusBadge } from "@/components/StatusBadge";
+import { MetaComparacaoCard } from "@/components/MetaComparacaoCard";
 import { getGrupo } from "@/lib/data/grupo";
 
 export default async function GrupoOverviewPage({
@@ -168,10 +169,23 @@ export default async function GrupoOverviewPage({
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <InfoCard label="ROAS" value={roas === null ? "—" : `${roas.toFixed(1)}x`} />
-        <InfoCard
+        <MetaComparacaoCard
+          grupoId={grupo.id}
+          label="ROAS"
+          campo="meta_roas"
+          realizado={roas}
+          meta={grupo.meta_roas !== null ? Number(grupo.meta_roas) : null}
+          formatarValor={(v) => `${v.toFixed(1)}x`}
+          melhorQuandoMaior
+        />
+        <MetaComparacaoCard
+          grupoId={grupo.id}
           label="Último CPL"
-          value={ultimoCpl === null ? "—" : formatBRL(ultimoCpl)}
+          campo="meta_cpl"
+          realizado={ultimoCpl}
+          meta={grupo.meta_cpl !== null ? Number(grupo.meta_cpl) : null}
+          formatarValor={formatBRL}
+          melhorQuandoMaior={false}
         />
         <div className="rounded-xl border border-border bg-bg-surface p-5">
           <p className="text-sm text-text-secondary">Mensalidade</p>

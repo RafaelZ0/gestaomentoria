@@ -174,6 +174,7 @@ export default async function ReunioesPage({
       <ReuniaoItem
         key={r.id}
         reuniao={r}
+        grupoNome={grupoOrigemPorReuniao.get(r.id) ?? grupoAtual?.nome ?? ""}
         grupoOrigemNome={grupoOrigemPorReuniao.get(r.id)}
         participantes={participantesPorReuniao.get(r.id) ?? []}
         responsavelNome={

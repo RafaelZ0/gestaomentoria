@@ -13,6 +13,8 @@ export type GrupoGestao = {
   valor_mensal: number;
   valor_investido_dia: number | null;
   observacoes: string | null;
+  meta_cpl: number | null;
+  meta_roas: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -39,6 +41,7 @@ export type Reuniao = {
   responsavel_id: string | null;
   compareceu: boolean;
   link_reuniao: string | null;
+  hora: string | null;
   created_at: string;
 };
 

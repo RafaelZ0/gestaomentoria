@@ -34,6 +34,8 @@ export async function createReuniao(grupoId: string, formData: FormData) {
   const compareceu = formData.get("nao_compareceu") !== "on";
   const linkReuniaoRaw = String(formData.get("link_reuniao") ?? "").trim();
   const link_reuniao = linkReuniaoRaw || null;
+  const horaRaw = String(formData.get("hora") ?? "").trim();
+  const hora = horaRaw || null;
   const entregasFeitas = formData.getAll("entrega_feita").map(String);
   const participantes = formData.getAll("participante_id").map(String);
   const responsavelIdRaw = String(formData.get("responsavel_id") ?? "").trim();
@@ -54,6 +56,7 @@ export async function createReuniao(grupoId: string, formData: FormData) {
       responsavel_id,
       compareceu,
       link_reuniao,
+      hora,
       ...(data ? { data } : {}),
     })
     .select("*")
@@ -101,6 +104,8 @@ export async function updateReuniao(reuniaoId: string, formData: FormData) {
   const compareceu = formData.get("nao_compareceu") !== "on";
   const linkReuniaoRaw = String(formData.get("link_reuniao") ?? "").trim();
   const link_reuniao = linkReuniaoRaw || null;
+  const horaRaw = String(formData.get("hora") ?? "").trim();
+  const hora = horaRaw || null;
   const participantes = formData.getAll("participante_id").map(String);
   const responsavelIdRaw = String(formData.get("responsavel_id") ?? "").trim();
   const responsavel_id = responsavelIdRaw || null;
@@ -124,6 +129,7 @@ export async function updateReuniao(reuniaoId: string, formData: FormData) {
       responsavel_id,
       compareceu,
       link_reuniao,
+      hora,
       ...(data ? { data } : {}),
     })
     .eq("id", reuniaoId)

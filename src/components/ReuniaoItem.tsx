@@ -5,6 +5,11 @@ import { formatDate } from "@/lib/format";
 import { updateReuniao, removeReuniao } from "@/app/actions/reunioes";
 import { ResponsavelField } from "@/components/ResponsavelField";
 import { ParticipantesFields } from "@/components/ParticipantesFields";
+import {
+  linkWhatsapp,
+  mensagemConfirmacaoReuniao,
+  mensagemLinkReuniao,
+} from "@/lib/whatsapp";
 import type { Responsavel } from "@/lib/database.types";
 
 type Participante = {
@@ -16,6 +21,7 @@ type Participante = {
 
 export function ReuniaoItem({
   reuniao,
+  grupoNome,
   grupoOrigemNome,
   participantes,
   responsavelNome,
@@ -32,7 +38,9 @@ export function ReuniaoItem({
     responsavel_id: string | null;
     compareceu: boolean;
     link_reuniao: string | null;
+    hora: string | null;
   };
+  grupoNome: string;
   grupoOrigemNome?: string;
   participantes: Participante[];
   responsavelNome: string | undefined;
@@ -100,17 +108,30 @@ export function ReuniaoItem({
           </div>
 
           {agendadaEdicao && (
-            <div>
-              <label className="mb-1 block text-sm text-text-secondary">
-                Link da reunião (opcional)
-              </label>
-              <input
-                type="url"
-                name="link_reuniao"
-                defaultValue={reuniao.link_reuniao ?? ""}
-                placeholder="https://meet.google.com/..."
-                className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
-              />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm text-text-secondary">
+                  Horário (opcional)
+                </label>
+                <input
+                  type="time"
+                  name="hora"
+                  defaultValue={reuniao.hora ? reuniao.hora.slice(0, 5) : ""}
+                  className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm text-text-secondary">
+                  Link da reunião (opcional)
+                </label>
+                <input
+                  type="url"
+                  name="link_reuniao"
+                  defaultValue={reuniao.link_reuniao ?? ""}
+                  placeholder="https://meet.google.com/..."
+                  className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+                />
+              </div>
             </div>
           )}
 
@@ -183,7 +204,10 @@ export function ReuniaoItem({
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-text-primary">{formatDate(reuniao.data)}</p>
+          <p className="text-sm font-medium text-text-primary">
+            {formatDate(reuniao.data)}
+            {reuniao.hora && ` às ${reuniao.hora.slice(0, 5)}`}
+          </p>
           {!reuniao.compareceu && (
             <span className="rounded-full bg-status-alert-bg px-2 py-0.5 text-xs font-medium text-status-alert-text">
               Não compareceu
@@ -255,6 +279,32 @@ export function ReuniaoItem({
         >
           {reuniao.link_reuniao}
         </a>
+      )}
+      {agendada && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a
+            href={linkWhatsapp(
+              mensagemConfirmacaoReuniao(grupoNome, reuniao.data, reuniao.hora)
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="rounded-lg border border-border px-2.5 py-1 text-xs text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
+          >
+            Lembrete de confirmação
+          </a>
+          <a
+            href={linkWhatsapp(
+              mensagemLinkReuniao(grupoNome, reuniao.hora, reuniao.link_reuniao)
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="rounded-lg border border-border px-2.5 py-1 text-xs text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
+          >
+            Lembrete com link (10 min antes)
+          </a>
+        </div>
       )}
       {participantes.length > 0 && (
         <p className="mt-3 text-xs text-text-secondary">
