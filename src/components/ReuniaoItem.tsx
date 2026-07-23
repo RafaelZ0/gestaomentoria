@@ -31,6 +31,7 @@ export function ReuniaoItem({
     resumo: string;
     responsavel_id: string | null;
     compareceu: boolean;
+    link_reuniao: string | null;
   };
   grupoOrigemNome?: string;
   participantes: Participante[];
@@ -52,6 +53,9 @@ export function ReuniaoItem({
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState(reuniao.data);
   const [naoCompareceu, setNaoCompareceu] = useState(!reuniao.compareceu);
+  const hoje = new Date().toISOString().slice(0, 10);
+  const agendadaEdicao = data > hoje;
+  const agendada = reuniao.data > hoje && reuniao.compareceu;
 
   if (editando) {
     const participantesIds = new Set(participantes.map((p) => p.id));
@@ -95,33 +99,52 @@ export function ReuniaoItem({
             />
           </div>
 
-          <label className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary">
-            <input
-              type="checkbox"
-              name="nao_compareceu"
-              checked={naoCompareceu}
-              onChange={(e) => setNaoCompareceu(e.target.checked)}
-              className="h-4 w-4 accent-[var(--accent)]"
-            />
-            Grupo não compareceu à reunião agendada
-          </label>
+          {agendadaEdicao && (
+            <div>
+              <label className="mb-1 block text-sm text-text-secondary">
+                Link da reunião (opcional)
+              </label>
+              <input
+                type="url"
+                name="link_reuniao"
+                defaultValue={reuniao.link_reuniao ?? ""}
+                placeholder="https://meet.google.com/..."
+                className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+              />
+            </div>
+          )}
+
+          {!agendadaEdicao && (
+            <label className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary">
+              <input
+                type="checkbox"
+                name="nao_compareceu"
+                checked={naoCompareceu}
+                onChange={(e) => setNaoCompareceu(e.target.checked)}
+                className="h-4 w-4 accent-[var(--accent)]"
+              />
+              Grupo não compareceu à reunião agendada
+            </label>
+          )}
 
           <div>
             <label className="mb-1 block text-sm text-text-secondary">
-              {naoCompareceu
-                ? "Observação (opcional)"
-                : "O que foi conversado e definido"}
+              {agendadaEdicao
+                ? "Pauta / observação (opcional)"
+                : naoCompareceu
+                  ? "Observação (opcional)"
+                  : "O que foi conversado e definido"}
             </label>
             <textarea
               name="resumo"
-              required={!naoCompareceu}
-              rows={naoCompareceu ? 2 : 4}
+              required={!agendadaEdicao && !naoCompareceu}
+              rows={agendadaEdicao || naoCompareceu ? 2 : 4}
               defaultValue={reuniao.resumo}
               className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
             />
           </div>
 
-          {!naoCompareceu && (
+          {!agendadaEdicao && !naoCompareceu && (
             <ParticipantesFields
               mentoradosDoGrupo={mentoradosDoGrupo}
               grupoStatus={grupoStatus}
@@ -164,6 +187,11 @@ export function ReuniaoItem({
           {!reuniao.compareceu && (
             <span className="rounded-full bg-status-alert-bg px-2 py-0.5 text-xs font-medium text-status-alert-text">
               Não compareceu
+            </span>
+          )}
+          {agendada && (
+            <span className="rounded-full bg-status-accent-bg px-2 py-0.5 text-xs font-medium text-status-accent-text">
+              Agendada
             </span>
           )}
           {grupoOrigemNome && (
@@ -216,6 +244,17 @@ export function ReuniaoItem({
       )}
       {reuniao.resumo && (
         <p className="mt-2 whitespace-pre-wrap text-sm text-text-secondary">{reuniao.resumo}</p>
+      )}
+      {reuniao.link_reuniao && (
+        <a
+          href={reuniao.link_reuniao}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="mt-2 inline-block text-sm text-accent hover:text-accent-hover"
+        >
+          {reuniao.link_reuniao}
+        </a>
       )}
       {participantes.length > 0 && (
         <p className="mt-3 text-xs text-text-secondary">

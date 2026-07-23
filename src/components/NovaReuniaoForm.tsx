@@ -35,8 +35,10 @@ export function NovaReuniaoForm({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [entregaFoiFeita, setEntregaFoiFeita] = useState<"sim" | "nao" | null>(null);
-  const [data, setData] = useState(new Date().toISOString().slice(0, 10));
+  const hoje = new Date().toISOString().slice(0, 10);
+  const [data, setData] = useState(hoje);
   const [naoCompareceu, setNaoCompareceu] = useState(false);
+  const agendada = data > hoje;
 
   if (!open) {
     return (
@@ -85,32 +87,50 @@ export function NovaReuniaoForm({
         <ResponsavelField responsaveis={responsaveis} />
       </div>
 
-      <label className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary">
-        <input
-          type="checkbox"
-          name="nao_compareceu"
-          checked={naoCompareceu}
-          onChange={(e) => setNaoCompareceu(e.target.checked)}
-          className="h-4 w-4 accent-[var(--accent)]"
-        />
-        Grupo não compareceu à reunião agendada
-      </label>
+      {agendada && (
+        <div>
+          <label className="mb-1 block text-sm text-text-secondary">
+            Link da reunião (opcional)
+          </label>
+          <input
+            type="url"
+            name="link_reuniao"
+            placeholder="https://meet.google.com/..."
+            className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+          />
+        </div>
+      )}
+
+      {!agendada && (
+        <label className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary">
+          <input
+            type="checkbox"
+            name="nao_compareceu"
+            checked={naoCompareceu}
+            onChange={(e) => setNaoCompareceu(e.target.checked)}
+            className="h-4 w-4 accent-[var(--accent)]"
+          />
+          Grupo não compareceu à reunião agendada
+        </label>
+      )}
 
       <div>
         <label className="mb-1 block text-sm text-text-secondary">
-          {naoCompareceu
-            ? "Observação (opcional)"
-            : "O que foi conversado e definido"}
+          {agendada
+            ? "Pauta / observação (opcional)"
+            : naoCompareceu
+              ? "Observação (opcional)"
+              : "O que foi conversado e definido"}
         </label>
         <textarea
           name="resumo"
-          required={!naoCompareceu}
-          rows={naoCompareceu ? 2 : 4}
+          required={!agendada && !naoCompareceu}
+          rows={agendada || naoCompareceu ? 2 : 4}
           className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
         />
       </div>
 
-      {!naoCompareceu && (
+      {!agendada && !naoCompareceu && (
         <ParticipantesFields
           mentoradosDoGrupo={mentoradosDoGrupo}
           grupoStatus={grupoStatus}
@@ -120,7 +140,7 @@ export function NovaReuniaoForm({
         />
       )}
 
-      {!naoCompareceu && entregasPendentes.length > 0 && (
+      {!agendada && !naoCompareceu && entregasPendentes.length > 0 && (
         <div>
           <p className="mb-2 text-sm text-text-secondary">
             Alguma entrega foi feita nesta reunião?
@@ -177,7 +197,7 @@ export function NovaReuniaoForm({
           disabled={isPending}
           className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
         >
-          {isPending ? "Salvando…" : "Registrar reunião"}
+          {isPending ? "Salvando…" : agendada ? "Agendar reunião" : "Registrar reunião"}
         </button>
         <button
           type="button"

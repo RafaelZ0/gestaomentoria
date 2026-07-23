@@ -35,6 +35,7 @@ export default async function GrupoOverviewPage({
     { data: ultimaReuniao },
     { data: resultados },
     { data: mensalidadesPagas },
+    { data: proximaReuniao },
   ] = await Promise.all([
     getGrupo(id).then((data) => ({ data })),
     supabase.from("mentorados").select("*").eq("grupo_id", id).order("nome"),
@@ -52,6 +53,7 @@ export default async function GrupoOverviewPage({
       .from("reunioes")
       .select("data")
       .eq("grupo_id", id)
+      .lte("data", new Date().toISOString().slice(0, 10))
       .order("data", { ascending: false })
       .limit(1)
       .maybeSingle(),
@@ -64,6 +66,15 @@ export default async function GrupoOverviewPage({
       .order("data", { ascending: false })
       .order("created_at", { ascending: false }),
     supabase.from("mensalidade_paga").select("data_vencimento").eq("grupo_id", id),
+    supabase
+      .from("reunioes")
+      .select("data, link_reuniao")
+      .eq("grupo_id", id)
+      .eq("compareceu", true)
+      .gt("data", new Date().toISOString().slice(0, 10))
+      .order("data", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   if (!grupo) return null;
@@ -184,7 +195,7 @@ export default async function GrupoOverviewPage({
 
       <ObservacoesField grupoId={grupo.id} observacoes={grupo.observacoes} />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Link
           href={`/grupos/${grupo.id}/tarefas`}
           prefetch={false}
@@ -207,6 +218,16 @@ export default async function GrupoOverviewPage({
               : diasDesdeUltimaReuniao === 0
                 ? "hoje"
                 : `${diasDesdeUltimaReuniao} dias atrás`}
+          </span>
+        </Link>
+        <Link
+          href={`/grupos/${grupo.id}/reunioes`}
+          prefetch={false}
+          className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm hover:bg-bg-surface"
+        >
+          <span className="text-text-secondary">Próxima reunião</span>{" "}
+          <span className="font-medium text-text-primary">
+            {proximaReuniao ? formatDate(proximaReuniao.data) : "não agendada"}
           </span>
         </Link>
       </div>

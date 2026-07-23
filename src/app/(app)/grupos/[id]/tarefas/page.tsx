@@ -9,11 +9,20 @@ export default async function TarefasPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: tarefas } = await supabase
-    .from("tarefas")
-    .select("*")
-    .eq("grupo_id", id)
-    .order("created_at", { ascending: false });
+  const [{ data: tarefas }, { data: responsaveis }] = await Promise.all([
+    supabase
+      .from("tarefas")
+      .select("*")
+      .eq("grupo_id", id)
+      .order("created_at", { ascending: false }),
+    supabase.from("responsaveis").select("*").order("nome"),
+  ]);
 
-  return <TarefasList grupoId={id} tarefas={tarefas ?? []} />;
+  return (
+    <TarefasList
+      grupoId={id}
+      tarefas={tarefas ?? []}
+      responsaveis={responsaveis ?? []}
+    />
+  );
 }

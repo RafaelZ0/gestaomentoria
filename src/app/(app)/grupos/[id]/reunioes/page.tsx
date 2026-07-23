@@ -153,13 +153,40 @@ export default async function ReunioesPage({
     grupoDataTermino: m.grupos_gestao?.data_termino ?? null,
   }));
 
+  const hoje = new Date().toISOString().slice(0, 10);
+  const proximas = reunioes
+    .filter((r) => r.data > hoje && r.compareceu)
+    .sort((a, b) => a.data.localeCompare(b.data));
+  const historico = reunioes.filter((r) => !(r.data > hoje && r.compareceu));
+
   // Reuniões agendadas conta própria + participação como convidado em
-  // reunião de outro grupo (reflete quantas reuniões esse grupo já teve,
-  // no total). Faltas só considera reuniões próprias — uma participação
-  // externa nunca é falta, já que só aparece na lista se o mentorado de
-  // fato participou.
-  const totalAgendadas = reunioes.length;
-  const faltas = (reunioesProprias ?? []).filter((r) => !r.compareceu).length;
+  // reunião de outro grupo, mas só do histórico (reuniões futuras ainda não
+  // aconteceram, então não entram na estatística de comparecimento).
+  // Faltas só considera reuniões próprias — uma participação externa nunca
+  // é falta, já que só aparece na lista se o mentorado de fato participou.
+  const totalAgendadas = historico.length;
+  const faltas = (reunioesProprias ?? []).filter(
+    (r) => !(r.data > hoje && r.compareceu) && !r.compareceu
+  ).length;
+
+  function renderItem(r: (typeof reunioes)[number]) {
+    return (
+      <ReuniaoItem
+        key={r.id}
+        reuniao={r}
+        grupoOrigemNome={grupoOrigemPorReuniao.get(r.id)}
+        participantes={participantesPorReuniao.get(r.id) ?? []}
+        responsavelNome={
+          r.responsavel_id ? responsavelPorId.get(r.responsavel_id) : undefined
+        }
+        mentoradosDoGrupo={mentoradosDoGrupo ?? []}
+        grupoStatus={grupoAtual?.status ?? "Ativo"}
+        grupoDataTermino={grupoAtual?.data_termino ?? null}
+        mentoradosOutrosGrupos={mentoradosOutrosGruposFormatado}
+        responsaveis={responsaveis ?? []}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -175,29 +202,30 @@ export default async function ReunioesPage({
         responsaveis={responsaveis ?? []}
       />
 
-      <ul className="space-y-3">
-        {reunioes.map((r) => (
-          <ReuniaoItem
-            key={r.id}
-            reuniao={r}
-            grupoOrigemNome={grupoOrigemPorReuniao.get(r.id)}
-            participantes={participantesPorReuniao.get(r.id) ?? []}
-            responsavelNome={
-              r.responsavel_id ? responsavelPorId.get(r.responsavel_id) : undefined
-            }
-            mentoradosDoGrupo={mentoradosDoGrupo ?? []}
-            grupoStatus={grupoAtual?.status ?? "Ativo"}
-            grupoDataTermino={grupoAtual?.data_termino ?? null}
-            mentoradosOutrosGrupos={mentoradosOutrosGruposFormatado}
-            responsaveis={responsaveis ?? []}
-          />
-        ))}
-        {reunioes.length === 0 && (
-          <p className="text-sm text-text-secondary">
-            Nenhuma reunião registrada ainda.
-          </p>
+      {proximas.length > 0 && (
+        <div>
+          <h2 className="mb-2 font-display text-lg font-semibold text-text-primary">
+            Próximas reuniões
+          </h2>
+          <ul className="space-y-3">{proximas.map(renderItem)}</ul>
+        </div>
+      )}
+
+      <div>
+        {proximas.length > 0 && (
+          <h2 className="mb-2 font-display text-lg font-semibold text-text-primary">
+            Histórico
+          </h2>
         )}
-      </ul>
+        <ul className="space-y-3">
+          {historico.map(renderItem)}
+          {reunioes.length === 0 && (
+            <p className="text-sm text-text-secondary">
+              Nenhuma reunião registrada ainda.
+            </p>
+          )}
+        </ul>
+      </div>
     </div>
   );
 }

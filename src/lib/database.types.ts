@@ -38,6 +38,7 @@ export type Reuniao = {
   resumo: string;
   responsavel_id: string | null;
   compareceu: boolean;
+  link_reuniao: string | null;
   created_at: string;
 };
 
@@ -71,11 +72,16 @@ export type Pagamento = {
   created_at: string;
 };
 
+export type PrioridadeTarefa = "Baixa" | "Média" | "Alta";
+
 export type Tarefa = {
   id: string;
   grupo_id: string;
   descricao: string;
   concluida: boolean;
+  prazo: string | null;
+  prioridade: PrioridadeTarefa;
+  responsavel_id: string | null;
   created_at: string;
 };
 

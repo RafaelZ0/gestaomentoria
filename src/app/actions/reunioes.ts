@@ -32,12 +32,17 @@ export async function createReuniao(grupoId: string, formData: FormData) {
   const data = String(formData.get("data") ?? "").trim();
   const resumo = String(formData.get("resumo") ?? "").trim();
   const compareceu = formData.get("nao_compareceu") !== "on";
+  const linkReuniaoRaw = String(formData.get("link_reuniao") ?? "").trim();
+  const link_reuniao = linkReuniaoRaw || null;
   const entregasFeitas = formData.getAll("entrega_feita").map(String);
   const participantes = formData.getAll("participante_id").map(String);
   const responsavelIdRaw = String(formData.get("responsavel_id") ?? "").trim();
   const responsavel_id = responsavelIdRaw || null;
 
-  if (compareceu && !resumo) {
+  const hoje = new Date().toISOString().slice(0, 10);
+  const agendada = !!data && data > hoje;
+
+  if (compareceu && !agendada && !resumo) {
     throw new Error("Descreva um resumo da reunião.");
   }
 
@@ -48,6 +53,7 @@ export async function createReuniao(grupoId: string, formData: FormData) {
       resumo,
       responsavel_id,
       compareceu,
+      link_reuniao,
       ...(data ? { data } : {}),
     })
     .select("*")
@@ -93,11 +99,16 @@ export async function updateReuniao(reuniaoId: string, formData: FormData) {
   const data = String(formData.get("data") ?? "").trim();
   const resumo = String(formData.get("resumo") ?? "").trim();
   const compareceu = formData.get("nao_compareceu") !== "on";
+  const linkReuniaoRaw = String(formData.get("link_reuniao") ?? "").trim();
+  const link_reuniao = linkReuniaoRaw || null;
   const participantes = formData.getAll("participante_id").map(String);
   const responsavelIdRaw = String(formData.get("responsavel_id") ?? "").trim();
   const responsavel_id = responsavelIdRaw || null;
 
-  if (compareceu && !resumo) {
+  const hoje = new Date().toISOString().slice(0, 10);
+  const agendada = !!data && data > hoje;
+
+  if (compareceu && !agendada && !resumo) {
     throw new Error("Descreva um resumo da reunião.");
   }
 
@@ -112,6 +123,7 @@ export async function updateReuniao(reuniaoId: string, formData: FormData) {
       resumo,
       responsavel_id,
       compareceu,
+      link_reuniao,
       ...(data ? { data } : {}),
     })
     .eq("id", reuniaoId)

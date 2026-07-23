@@ -7,9 +7,11 @@ import type { Responsavel } from "@/lib/database.types";
 export function ResponsavelField({
   responsaveis,
   defaultResponsavelId = "",
+  label = "Quem conduziu a reunião",
 }: {
   responsaveis: Responsavel[];
   defaultResponsavelId?: string;
+  label?: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,7 @@ export function ResponsavelField({
   return (
     <div>
       <label className="mb-1 block text-sm text-text-secondary">
-        Quem conduziu a reunião
+        {label}
       </label>
       {error && <p className="mb-1 text-xs text-status-alert-text">{error}</p>}
       {!novoResponsavel ? (
