@@ -168,7 +168,7 @@ export function ReuniaoItem({
           )}
           {grupoOrigemNome && (
             <span
-              title="Essa reunião foi agendada em outro grupo; não conta nas estatísticas de reuniões deste grupo."
+              title="Essa reunião foi agendada por outro grupo; alguém deste grupo participou como convidado."
               className="rounded-full bg-bg-surface-hover px-2 py-0.5 text-xs text-text-secondary"
             >
               Reunião de {grupoOrigemNome}

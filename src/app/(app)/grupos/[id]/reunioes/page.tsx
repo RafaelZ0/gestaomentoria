@@ -153,20 +153,17 @@ export default async function ReunioesPage({
     grupoDataTermino: m.grupos_gestao?.data_termino ?? null,
   }));
 
-  // Conta só reuniões próprias do grupo (não participações como convidado
-  // em reunião de outro grupo), pra bater com o que "faltas" já considera.
-  // A lista abaixo mostra própria + externas; externas ficam marcadas com
-  // o nome do grupo de origem pra não parecer que o número está errado.
-  const totalAgendadas = (reunioesProprias ?? []).length;
+  // Reuniões agendadas conta própria + participação como convidado em
+  // reunião de outro grupo (reflete quantas reuniões esse grupo já teve,
+  // no total). Faltas só considera reuniões próprias — uma participação
+  // externa nunca é falta, já que só aparece na lista se o mentorado de
+  // fato participou.
+  const totalAgendadas = reunioes.length;
   const faltas = (reunioesProprias ?? []).filter((r) => !r.compareceu).length;
 
   return (
     <div className="space-y-6">
-      <ComparecimentoResumo
-        totalAgendadas={totalAgendadas}
-        faltas={faltas}
-        reunioesExternas={reunioesExternas.length}
-      />
+      <ComparecimentoResumo totalAgendadas={totalAgendadas} faltas={faltas} />
 
       <NovaReuniaoForm
         grupoId={id}
