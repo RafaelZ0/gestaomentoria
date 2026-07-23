@@ -79,6 +79,13 @@ export type Tarefa = {
   created_at: string;
 };
 
+export type MensalidadePaga = {
+  grupo_id: string;
+  data_vencimento: string;
+  data_pagamento: string;
+  created_at: string;
+};
+
 export type CustoFixo = {
   id: string;
   nome: string;
@@ -187,6 +194,13 @@ export type Database = {
         Row: Tarefa;
         Insert: Partial<Tarefa> & Pick<Tarefa, "grupo_id" | "descricao">;
         Update: Partial<Tarefa>;
+        Relationships: Relationships;
+      };
+      mensalidade_paga: {
+        Row: MensalidadePaga;
+        Insert: Partial<MensalidadePaga> &
+          Pick<MensalidadePaga, "grupo_id" | "data_vencimento">;
+        Update: Partial<MensalidadePaga>;
         Relationships: Relationships;
       };
       custos_fixos: {

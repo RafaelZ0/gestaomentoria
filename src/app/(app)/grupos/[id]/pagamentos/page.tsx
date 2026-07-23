@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate, datasVencimento } from "@/lib/format";
+import { calcUltimoVencimento, statusMensalidade } from "@/lib/mensalidade";
 import { NovoPagamentoForm } from "@/components/NovoPagamentoForm";
+import { MensalidadeStatusCell } from "@/components/MensalidadeStatusCell";
+import { StatusBadge } from "@/components/StatusBadge";
 import { getGrupo } from "@/lib/data/grupo";
 
 const TIPO_LABEL: Record<string, string> = {
@@ -16,32 +19,42 @@ export default async function PagamentosPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [grupo, { data: pagamentos }] = await Promise.all([
-    getGrupo(id),
-    supabase
-      .from("pagamentos")
-      .select("*")
-      .eq("grupo_id", id)
-      .order("data", { ascending: false }),
-  ]);
+  const [grupo, { data: pagamentos }, { data: mensalidadesPagas }] =
+    await Promise.all([
+      getGrupo(id),
+      supabase
+        .from("pagamentos")
+        .select("*")
+        .eq("grupo_id", id)
+        .order("data", { ascending: false }),
+      supabase.from("mensalidade_paga").select("data_vencimento").eq("grupo_id", id),
+    ]);
 
-  const linhasAutomaticas = grupo
+  const pagasSet = new Set((mensalidadesPagas ?? []).map((m) => m.data_vencimento));
+
+  const datasAutomaticas = grupo
     ? datasVencimento(
         new Date(grupo.data_inicio + "T00:00:00"),
         grupo.data_termino
           ? new Date(grupo.data_termino + "T00:00:00")
           : new Date(new Date().toDateString())
-      ).map((d) => {
-        const data = d.toISOString().slice(0, 10);
-        return {
-          id: `auto-${data}`,
-          data,
-          tipoLabel: "Mensalidade (automática)",
-          valor: Number(grupo.valor_mensal),
-          observacao: null as string | null,
-          automatica: true,
-        };
-      })
+      ).map((d) => d.toISOString().slice(0, 10))
+    : [];
+
+  const ultimoVencimento = grupo
+    ? calcUltimoVencimento(grupo.data_inicio, grupo.data_termino)
+    : null;
+
+  const linhasAutomaticas = grupo
+    ? datasAutomaticas.map((data) => ({
+        id: `auto-${data}`,
+        data,
+        tipoLabel: "Mensalidade (automática)",
+        valor: Number(grupo.valor_mensal),
+        observacao: null as string | null,
+        automatica: true,
+        status: statusMensalidade(data, ultimoVencimento, pagasSet.has(data)),
+      }))
     : [];
 
   const linhasManuais = (pagamentos ?? []).map((p) => ({
@@ -51,23 +64,37 @@ export default async function PagamentosPage({
     valor: Number(p.valor),
     observacao: p.observacao,
     automatica: false,
+    status: "Pago" as const,
   }));
 
   const linhas = [...linhasAutomaticas, ...linhasManuais].sort((a, b) =>
     b.data.localeCompare(a.data)
   );
 
-  const total = linhas.reduce((acc, l) => acc + l.valor, 0);
+  const totalPrevisto = linhas.reduce((acc, l) => acc + l.valor, 0);
+  const totalRecebido = linhas
+    .filter((l) => l.status === "Pago")
+    .reduce((acc, l) => acc + l.valor, 0);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm text-text-secondary">Total pago</p>
-          <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-text-primary">
-            {formatBRL(total)}
-          </p>
-          <p className="mt-1 text-xs text-text-secondary">
+          <div className="flex gap-6">
+            <div>
+              <p className="text-sm text-text-secondary">Total recebido</p>
+              <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-status-ok-text">
+                {formatBRL(totalRecebido)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-text-secondary">Total previsto</p>
+              <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-text-primary">
+                {formatBRL(totalPrevisto)}
+              </p>
+            </div>
+          </div>
+          <p className="mt-2 max-w-md text-xs text-text-secondary">
             Mensalidades entram automaticamente com base na data de início e no
             valor mensal do grupo. Use o botão ao lado só para cláusulas ou
             ajustes extras.
@@ -83,6 +110,7 @@ export default async function PagamentosPage({
               <th className="px-4 py-3 font-medium">Data</th>
               <th className="px-4 py-3 font-medium">Tipo</th>
               <th className="px-4 py-3 font-medium">Valor</th>
+              <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Observação</th>
             </tr>
           </thead>
@@ -98,6 +126,17 @@ export default async function PagamentosPage({
                 <td className="px-4 py-3 tabular-nums text-text-primary">
                   {formatBRL(l.valor)}
                 </td>
+                <td className="px-4 py-3">
+                  {l.automatica ? (
+                    <MensalidadeStatusCell
+                      grupoId={id}
+                      dataVencimento={l.data}
+                      status={l.status}
+                    />
+                  ) : (
+                    <StatusBadge label="Pago" variant="ok" />
+                  )}
+                </td>
                 <td className="px-4 py-3 text-text-secondary">
                   {l.observacao ?? "—"}
                 </td>
@@ -105,7 +144,7 @@ export default async function PagamentosPage({
             ))}
             {linhas.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-text-secondary">
+                <td colSpan={5} className="px-4 py-8 text-center text-text-secondary">
                   Nenhum pagamento ainda.
                 </td>
               </tr>

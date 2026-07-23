@@ -7,6 +7,7 @@ import {
   calcFaturamentoEstimado,
   formatDuracao,
 } from "@/lib/format";
+import { resumoStatusMensalidades } from "@/lib/mensalidade";
 import { CancelarGrupoButton } from "@/components/CancelarGrupoModal";
 import { ChecklistEntregas } from "@/components/ChecklistEntregas";
 import { MentoradosList } from "@/components/MentoradosList";
@@ -14,6 +15,7 @@ import { TrafegoCard } from "@/components/TrafegoCard";
 import { ValorMensalCard } from "@/components/ValorMensalCard";
 import { DataInicioField } from "@/components/DataInicioField";
 import { ObservacoesField } from "@/components/ObservacoesField";
+import { StatusBadge } from "@/components/StatusBadge";
 import { getGrupo } from "@/lib/data/grupo";
 
 export default async function GrupoOverviewPage({
@@ -31,6 +33,8 @@ export default async function GrupoOverviewPage({
     { data: pagamentos },
     { data: tarefasPendentes },
     { data: ultimaReuniao },
+    { data: resultados },
+    { data: mensalidadesPagas },
   ] = await Promise.all([
     getGrupo(id).then((data) => ({ data })),
     supabase.from("mentorados").select("*").eq("grupo_id", id).order("nome"),
@@ -51,9 +55,52 @@ export default async function GrupoOverviewPage({
       .order("data", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("resultados_grupo")
+      .select(
+        "data, investimento, leads, faturamento_campanha_interna, faturamento_trafego_pago"
+      )
+      .eq("grupo_id", id)
+      .order("data", { ascending: false })
+      .order("created_at", { ascending: false }),
+    supabase.from("mensalidade_paga").select("data_vencimento").eq("grupo_id", id),
   ]);
 
   if (!grupo) return null;
+
+  const totaisResultados = (resultados ?? []).reduce(
+    (acc, r) => ({
+      investimento: acc.investimento + Number(r.investimento),
+      faturamento:
+        acc.faturamento +
+        Number(r.faturamento_campanha_interna) +
+        Number(r.faturamento_trafego_pago),
+    }),
+    { investimento: 0, faturamento: 0 }
+  );
+  const roas =
+    totaisResultados.investimento > 0
+      ? totaisResultados.faturamento / totaisResultados.investimento
+      : null;
+
+  const ultimoResultado = (resultados ?? [])[0] ?? null;
+  const ultimoCpl =
+    ultimoResultado && ultimoResultado.leads > 0
+      ? Number(ultimoResultado.investimento) / ultimoResultado.leads
+      : null;
+
+  const pagasSet = new Set((mensalidadesPagas ?? []).map((m) => m.data_vencimento));
+  const statusMensalidadeAtual = resumoStatusMensalidades(
+    grupo.data_inicio,
+    grupo.data_termino,
+    pagasSet
+  );
+  const statusVariant =
+    statusMensalidadeAtual === "Pago"
+      ? "ok"
+      : statusMensalidadeAtual === "Atrasado"
+        ? "alert"
+        : "warn";
 
   const recebidoRegistrado = (pagamentos ?? []).reduce(
     (acc, p) => acc + Number(p.valor),
@@ -107,6 +154,24 @@ export default async function GrupoOverviewPage({
               : null
           }
         />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <InfoCard label="ROAS" value={roas === null ? "—" : `${roas.toFixed(1)}x`} />
+        <InfoCard
+          label="Último CPL"
+          value={ultimoCpl === null ? "—" : formatBRL(ultimoCpl)}
+        />
+        <div className="rounded-xl border border-border bg-bg-surface p-5">
+          <p className="text-sm text-text-secondary">Mensalidade</p>
+          <div className="mt-2">
+            {statusMensalidadeAtual ? (
+              <StatusBadge label={statusMensalidadeAtual} variant={statusVariant} />
+            ) : (
+              <span className="text-text-secondary">—</span>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="text-sm text-text-secondary">
