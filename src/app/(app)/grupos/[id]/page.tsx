@@ -202,7 +202,7 @@ export default async function GrupoOverviewPage({
           campo="meta_roas"
           realizado={roas}
           meta={grupo.meta_roas !== null ? Number(grupo.meta_roas) : null}
-          formatarValor={(v) => `${v.toFixed(1)}x`}
+          unidade="roas"
           melhorQuandoMaior
         />
         <MetaComparacaoCard
@@ -211,7 +211,7 @@ export default async function GrupoOverviewPage({
           campo="meta_cpl"
           realizado={ultimoCpl}
           meta={grupo.meta_cpl !== null ? Number(grupo.meta_cpl) : null}
-          formatarValor={formatBRL}
+          unidade="brl"
           melhorQuandoMaior={false}
         />
         <div className="rounded-xl border border-border bg-bg-surface p-5">

@@ -2,6 +2,16 @@
 
 import { updateGrupoCampo } from "@/app/actions/grupos";
 import { ValorEditavel } from "@/components/ValorEditavel";
+import { formatBRL } from "@/lib/format";
+
+// formatarValor não pode ser passado como prop de função de um Server
+// Component (page.tsx) pra esse Client Component — o Next.js quebra em
+// producao ("Functions cannot be passed directly to Client Components").
+// Em vez disso, recebe só a unidade (string, serializável) e decide o
+// formato aqui dentro.
+function formatarPorUnidade(unidade: "brl" | "roas", v: number): string {
+  return unidade === "roas" ? `${v.toFixed(1)}x` : formatBRL(v);
+}
 
 export function MetaComparacaoCard({
   grupoId,
@@ -9,7 +19,7 @@ export function MetaComparacaoCard({
   campo,
   realizado,
   meta,
-  formatarValor,
+  unidade,
   melhorQuandoMaior,
 }: {
   grupoId: string;
@@ -17,9 +27,10 @@ export function MetaComparacaoCard({
   campo: "meta_cpl" | "meta_roas";
   realizado: number | null;
   meta: number | null;
-  formatarValor: (v: number) => string;
+  unidade: "brl" | "roas";
   melhorQuandoMaior: boolean;
 }) {
+  const formatarValor = (v: number) => formatarPorUnidade(unidade, v);
   const dentroDaMeta =
     realizado !== null && meta !== null
       ? melhorQuandoMaior
