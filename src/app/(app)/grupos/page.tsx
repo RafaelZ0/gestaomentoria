@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { calcFaturamentoEstimado, formatBRL } from "@/lib/format";
+import { calcFaturamentoEstimado } from "@/lib/format";
 import { calcSaudeGrupo, calcTendenciaRoas } from "@/lib/saude";
 import { GruposTable } from "@/components/GruposTable";
-import { SemSinalDeVidaCard } from "@/components/SemSinalDeVidaCard";
-import { SaudeClientesPanel } from "@/components/SaudeClientesPanel";
+import { GruposResumo } from "@/components/GruposResumo";
 
 const DIAS_SEM_SINAL_DE_VIDA = 30;
 
@@ -170,41 +169,13 @@ export default async function GruposPage() {
         </Link>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="card-hero rounded-xl border border-border bg-bg-surface p-6 sm:col-span-1">
-          <p className="text-sm text-text-secondary">Faturamento total (estimado)</p>
-          <p className="mt-2 font-display text-4xl font-bold tracking-tight tabular-nums text-text-primary">
-            {formatBRL(faturamentoTotal)}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-bg-surface p-6">
-          <p className="text-sm text-text-secondary">Grupos ativos</p>
-          <p className="mt-2 font-display text-2xl font-semibold tracking-tight tabular-nums text-text-primary">
-            {ativos.length}{" "}
-            <span className="text-base font-normal text-text-secondary">
-              / {(grupos ?? []).length}
-            </span>
-          </p>
-        </div>
-        <SemSinalDeVidaCard
-          dias={DIAS_SEM_SINAL_DE_VIDA}
-          grupos={semSinalDeVida}
-        />
-      </div>
-
-      <div className="mt-8">
-        <h2 className="font-display text-lg font-semibold text-text-primary">
-          Saúde dos clientes
-        </h2>
-        <p className="mt-1 text-xs text-text-secondary">
-          Combina sinal de vida (+{DIAS_SEM_SINAL_DE_VIDA}d), tendência de
-          ROAS entre os últimos dois meses com lançamento e processos ativos
-          pendentes.
-        </p>
-        <div className="mt-3">
-          <SaudeClientesPanel grupos={saudeGrupos} />
-        </div>
-      </div>
+      <GruposResumo
+        faturamentoTotal={faturamentoTotal}
+        ativosCount={ativos.length}
+        totalCount={(grupos ?? []).length}
+        semSinalDeVidaCount={semSinalDeVida.length}
+        saudeGrupos={saudeGrupos}
+      />
 
       <GruposTable grupos={grupos ?? []} />
     </div>
