@@ -7,7 +7,6 @@ import {
   calcFaturamentoEstimado,
   formatDuracao,
 } from "@/lib/format";
-import { resumoStatusMensalidades } from "@/lib/mensalidade";
 import { calcSaudeGrupo, calcTendenciaRoas } from "@/lib/saude";
 import { CancelarGrupoButton } from "@/components/CancelarGrupoModal";
 import { ChecklistEntregas } from "@/components/ChecklistEntregas";
@@ -36,7 +35,6 @@ export default async function GrupoOverviewPage({
     { data: tarefasPendentes },
     { data: ultimaReuniao },
     { data: resultados },
-    { data: mensalidadesPagas },
     { data: proximaReuniao },
   ] = await Promise.all([
     getGrupo(id).then((data) => ({ data })),
@@ -45,7 +43,11 @@ export default async function GrupoOverviewPage({
       .from("entregas_grupo")
       .select("id, feito, data_feito, tipos_entrega(id, nome, ativo)")
       .eq("grupo_id", id),
-    supabase.from("pagamentos").select("valor").eq("grupo_id", id),
+    supabase
+      .from("pagamentos")
+      .select("data, valor")
+      .eq("grupo_id", id)
+      .order("data", { ascending: false }),
     supabase
       .from("tarefas")
       .select("id")
@@ -67,7 +69,6 @@ export default async function GrupoOverviewPage({
       .eq("grupo_id", id)
       .order("data", { ascending: false })
       .order("created_at", { ascending: false }),
-    supabase.from("mensalidade_paga").select("data_vencimento").eq("grupo_id", id),
     supabase
       .from("reunioes")
       .select("data, link_reuniao")
@@ -102,23 +103,11 @@ export default async function GrupoOverviewPage({
       ? Number(ultimoResultado.investimento) / ultimoResultado.leads
       : null;
 
-  const pagasSet = new Set((mensalidadesPagas ?? []).map((m) => m.data_vencimento));
-  const statusMensalidadeAtual = resumoStatusMensalidades(
-    grupo.data_inicio,
-    grupo.data_termino,
-    pagasSet
-  );
-  const statusVariant =
-    statusMensalidadeAtual === "Pago"
-      ? "ok"
-      : statusMensalidadeAtual === "Atrasado"
-        ? "alert"
-        : "warn";
-
   const recebidoRegistrado = (pagamentos ?? []).reduce(
     (acc, p) => acc + Number(p.valor),
     0
   );
+  const ultimoPagamento = (pagamentos ?? [])[0] ?? null;
 
   const duracaoDias = calcDuracaoDias(grupo.data_inicio, grupo.data_termino);
   const faturamentoEstimado = calcFaturamentoEstimado(
@@ -214,16 +203,18 @@ export default async function GrupoOverviewPage({
           unidade="brl"
           melhorQuandoMaior={false}
         />
-        <div className="rounded-xl border border-border bg-bg-surface p-5">
-          <p className="text-sm text-text-secondary">Mensalidade</p>
-          <div className="mt-2">
-            {statusMensalidadeAtual ? (
-              <StatusBadge label={statusMensalidadeAtual} variant={statusVariant} />
-            ) : (
-              <span className="text-text-secondary">—</span>
-            )}
-          </div>
-        </div>
+        <Link
+          href={`/grupos/${grupo.id}/pagamentos`}
+          prefetch={false}
+          className="rounded-xl border border-border bg-bg-surface p-5 hover:bg-bg-surface-hover"
+        >
+          <p className="text-sm text-text-secondary">Último pagamento</p>
+          <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text-primary">
+            {ultimoPagamento
+              ? `${formatBRL(Number(ultimoPagamento.valor))} em ${formatDate(ultimoPagamento.data)}`
+              : "Nenhum registrado"}
+          </p>
+        </Link>
       </div>
 
       <div className="rounded-xl border border-border bg-bg-surface p-5">
