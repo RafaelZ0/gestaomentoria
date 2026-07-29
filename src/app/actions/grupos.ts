@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { TrafegoPago } from "@/lib/database.types";
+import type { TrafegoPago, GrupoGestao } from "@/lib/database.types";
 
 export async function createGrupo(formData: FormData) {
   const supabase = await createClient();
@@ -62,16 +62,17 @@ export async function updateGrupoCampo(
     | "valor_mensal"
     | "observacoes"
     | "meta_cpl"
-    | "meta_roas",
+    | "meta_roas"
+    | "asaas_customer_id",
   valor: string
 ) {
   const supabase = await createClient();
 
-  const updates =
+  const updates: Partial<GrupoGestao> =
     campo === "valor_mensal" || campo === "meta_cpl" || campo === "meta_roas"
       ? { [campo]: valor.trim() === "" ? null : Number(valor) }
-      : campo === "observacoes"
-        ? { observacoes: valor.trim() || null }
+      : campo === "observacoes" || campo === "asaas_customer_id"
+        ? { [campo]: valor.trim() || null }
         : { [campo]: valor };
 
   await supabase.from("grupos_gestao").update(updates).eq("id", grupoId);

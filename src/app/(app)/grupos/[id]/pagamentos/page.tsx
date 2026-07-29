@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/format";
 import { NovoPagamentoForm } from "@/components/NovoPagamentoForm";
+import { AsaasCustomerIdField } from "@/components/AsaasCustomerIdField";
 import { getGrupo } from "@/lib/data/grupo";
 
 const TIPO_LABEL: Record<string, string> = {
@@ -31,6 +32,7 @@ export default async function PagamentosPage({
     tipoLabel: TIPO_LABEL[p.tipo] ?? p.tipo,
     valor: Number(p.valor),
     observacao: p.observacao,
+    viaAsaas: !!p.asaas_payment_id,
   }));
 
   const totalRecebido = linhas.reduce((acc, l) => acc + l.valor, 0);
@@ -51,6 +53,11 @@ export default async function PagamentosPage({
         <NovoPagamentoForm grupoId={id} valorSugerido={Number(grupo?.valor_mensal ?? 0)} />
       </div>
 
+      <AsaasCustomerIdField
+        grupoId={id}
+        asaasCustomerId={grupo?.asaas_customer_id ?? null}
+      />
+
       <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
         <table className="w-full text-left text-sm">
           <thead>
@@ -69,6 +76,11 @@ export default async function PagamentosPage({
                 </td>
                 <td className="px-4 py-3 text-text-secondary">
                   {l.tipoLabel}
+                  {l.viaAsaas && (
+                    <span className="ml-2 rounded-full bg-status-accent-bg px-2 py-0.5 text-xs font-medium text-status-accent-text">
+                      via Asaas
+                    </span>
+                  )}
                 </td>
                 <td className="px-4 py-3 tabular-nums text-text-primary">
                   {formatBRL(l.valor)}

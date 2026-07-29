@@ -15,6 +15,7 @@ export type GrupoGestao = {
   observacoes: string | null;
   meta_cpl: number | null;
   meta_roas: number | null;
+  asaas_customer_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -72,6 +73,7 @@ export type Pagamento = {
   valor: number;
   tipo: TipoPagamento;
   observacao: string | null;
+  asaas_payment_id: string | null;
   created_at: string;
 };
 
