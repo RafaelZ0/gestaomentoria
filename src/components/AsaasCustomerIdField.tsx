@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateGrupoCampo } from "@/app/actions/grupos";
+import { importarHistoricoAsaas } from "@/app/actions/asaas";
 
 export function AsaasCustomerIdField({
   grupoId,
@@ -12,6 +13,9 @@ export function AsaasCustomerIdField({
 }) {
   const [isPending, startTransition] = useTransition();
   const [valor, setValor] = useState(asaasCustomerId ?? "");
+  const [isImporting, startImport] = useTransition();
+  const [resultadoImport, setResultadoImport] = useState<string | null>(null);
+  const [erroImport, setErroImport] = useState<string | null>(null);
 
   return (
     <div className="rounded-xl border border-border bg-bg-surface p-5">
@@ -38,6 +42,42 @@ export function AsaasCustomerIdField({
         topo). Com isso preenchido, pagamentos confirmados no Asaas entram
         aqui automaticamente.
       </p>
+
+      {valor.trim() && (
+        <div className="mt-4 border-t border-border pt-4">
+          <button
+            type="button"
+            disabled={isImporting}
+            onClick={() => {
+              setErroImport(null);
+              setResultadoImport(null);
+              startImport(async () => {
+                try {
+                  const r = await importarHistoricoAsaas(grupoId);
+                  setResultadoImport(
+                    r.importados > 0
+                      ? `${r.importados} pagamento(s) novo(s) importado(s) do histórico (de ${r.totalEncontrados} encontrados no Asaas).`
+                      : `Nenhum pagamento novo — todos os ${r.totalEncontrados} encontrados no Asaas já estavam registrados.`
+                  );
+                } catch (e) {
+                  setErroImport(
+                    e instanceof Error ? e.message : "Erro ao importar histórico."
+                  );
+                }
+              });
+            }}
+            className="btn-secondary text-sm"
+          >
+            {isImporting ? "Importando…" : "Importar histórico do Asaas"}
+          </button>
+          {resultadoImport && (
+            <p className="mt-2 text-xs text-status-ok-text">{resultadoImport}</p>
+          )}
+          {erroImport && (
+            <p className="mt-2 text-xs text-status-alert-text">{erroImport}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
