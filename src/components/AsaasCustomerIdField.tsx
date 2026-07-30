@@ -2,7 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { updateGrupoCampo } from "@/app/actions/grupos";
-import { importarHistoricoAsaas } from "@/app/actions/asaas";
+import {
+  importarHistoricoAsaas,
+  buscarClienteAsaasPorDocumento,
+} from "@/app/actions/asaas";
 
 export function AsaasCustomerIdField({
   grupoId,
@@ -16,6 +19,10 @@ export function AsaasCustomerIdField({
   const [isImporting, startImport] = useTransition();
   const [resultadoImport, setResultadoImport] = useState<string | null>(null);
   const [erroImport, setErroImport] = useState<string | null>(null);
+  const [documento, setDocumento] = useState("");
+  const [isBuscando, startBusca] = useTransition();
+  const [erroBusca, setErroBusca] = useState<string | null>(null);
+  const [encontrado, setEncontrado] = useState<string | null>(null);
 
   return (
     <div className="rounded-xl border border-border bg-bg-surface p-5">
@@ -42,6 +49,48 @@ export function AsaasCustomerIdField({
         topo). Com isso preenchido, pagamentos confirmados no Asaas entram
         aqui automaticamente.
       </p>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <input
+          type="text"
+          value={documento}
+          disabled={isBuscando}
+          placeholder="CPF ou CNPJ do cliente"
+          onChange={(e) => setDocumento(e.target.value)}
+          className="w-56 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+        />
+        <button
+          type="button"
+          disabled={isBuscando || !documento.trim()}
+          onClick={() => {
+            setErroBusca(null);
+            setEncontrado(null);
+            startBusca(async () => {
+              try {
+                const cliente = await buscarClienteAsaasPorDocumento(documento);
+                setValor(cliente.id);
+                setEncontrado(`Encontrado: ${cliente.name} (${cliente.id})`);
+                startTransition(() =>
+                  updateGrupoCampo(grupoId, "asaas_customer_id", cliente.id)
+                );
+              } catch (e) {
+                setErroBusca(
+                  e instanceof Error ? e.message : "Erro ao buscar cliente."
+                );
+              }
+            });
+          }}
+          className="btn-secondary text-sm"
+        >
+          {isBuscando ? "Buscando…" : "Buscar ID pelo CPF/CNPJ"}
+        </button>
+      </div>
+      {encontrado && (
+        <p className="mt-2 text-xs text-status-ok-text">{encontrado}</p>
+      )}
+      {erroBusca && (
+        <p className="mt-2 text-xs text-status-alert-text">{erroBusca}</p>
+      )}
 
       {valor.trim() && (
         <div className="mt-4 border-t border-border pt-4">

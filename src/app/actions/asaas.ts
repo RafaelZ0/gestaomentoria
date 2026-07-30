@@ -47,6 +47,37 @@ async function buscarPagamentosAsaas(
   return [...encontrados.values()];
 }
 
+export async function buscarClienteAsaasPorDocumento(cpfCnpj: string) {
+  const apiKey = process.env.ASAAS_API_KEY;
+  if (!apiKey) {
+    throw new Error("ASAAS_API_KEY não configurada no servidor.");
+  }
+
+  const documento = cpfCnpj.replace(/\D/g, "");
+  if (!documento) {
+    throw new Error("Informe um CPF ou CNPJ.");
+  }
+
+  const res = await fetch(
+    `${ASAAS_BASE_URL}/customers?cpfCnpj=${encodeURIComponent(documento)}`,
+    { headers: { access_token: apiKey }, cache: "no-store" }
+  );
+  if (!res.ok) {
+    throw new Error(`Erro ao consultar o Asaas (status ${res.status}).`);
+  }
+
+  const json = (await res.json()) as {
+    data?: { id: string; name: string }[];
+  };
+
+  const cliente = json.data?.[0];
+  if (!cliente) {
+    throw new Error("Nenhum cliente encontrado no Asaas com esse CPF/CNPJ.");
+  }
+
+  return { id: cliente.id, name: cliente.name };
+}
+
 export async function importarHistoricoAsaas(grupoId: string) {
   const apiKey = process.env.ASAAS_API_KEY;
   if (!apiKey) {
