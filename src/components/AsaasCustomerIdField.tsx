@@ -66,18 +66,16 @@ export function AsaasCustomerIdField({
             setErroBusca(null);
             setEncontrado(null);
             startBusca(async () => {
-              try {
-                const cliente = await buscarClienteAsaasPorDocumento(documento);
-                setValor(cliente.id);
-                setEncontrado(`Encontrado: ${cliente.name} (${cliente.id})`);
-                startTransition(() =>
-                  updateGrupoCampo(grupoId, "asaas_customer_id", cliente.id)
-                );
-              } catch (e) {
-                setErroBusca(
-                  e instanceof Error ? e.message : "Erro ao buscar cliente."
-                );
+              const r = await buscarClienteAsaasPorDocumento(documento);
+              if (!r.ok) {
+                setErroBusca(r.error);
+                return;
               }
+              setValor(r.id);
+              setEncontrado(`Encontrado: ${r.name} (${r.id})`);
+              startTransition(() =>
+                updateGrupoCampo(grupoId, "asaas_customer_id", r.id)
+              );
             });
           }}
           className="btn-secondary text-sm"
@@ -101,18 +99,16 @@ export function AsaasCustomerIdField({
               setErroImport(null);
               setResultadoImport(null);
               startImport(async () => {
-                try {
-                  const r = await importarHistoricoAsaas(grupoId);
-                  setResultadoImport(
-                    r.importados > 0
-                      ? `${r.importados} pagamento(s) novo(s) importado(s) do histórico (de ${r.totalEncontrados} encontrados no Asaas).`
-                      : `Nenhum pagamento novo — todos os ${r.totalEncontrados} encontrados no Asaas já estavam registrados.`
-                  );
-                } catch (e) {
-                  setErroImport(
-                    e instanceof Error ? e.message : "Erro ao importar histórico."
-                  );
+                const r = await importarHistoricoAsaas(grupoId);
+                if (!r.ok) {
+                  setErroImport(r.error);
+                  return;
                 }
+                setResultadoImport(
+                  r.importados > 0
+                    ? `${r.importados} pagamento(s) novo(s) importado(s) do histórico (de ${r.totalEncontrados} encontrados no Asaas).`
+                    : `Nenhum pagamento novo — todos os ${r.totalEncontrados} encontrados no Asaas já estavam registrados.`
+                );
               });
             }}
             className="btn-secondary text-sm"
