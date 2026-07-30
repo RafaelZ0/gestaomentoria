@@ -125,6 +125,13 @@ export function TabelaMensalFinancas({
                                 </li>
                               )}
                           </ul>
+                          <div className="mt-3">
+                            <LancamentosList
+                              lancamentos={lancamentosDoMes.filter(
+                                (l) => l.tipo === "RECEITA"
+                              )}
+                            />
+                          </div>
                         </div>
 
                         <div>
@@ -170,19 +177,12 @@ export function TabelaMensalFinancas({
                             itens={m.custosFixosItens}
                           />
                         </div>
-                      </div>
-
-                      <div className="mt-6">
-                        <h3 className="font-display text-sm font-semibold text-text-primary">
-                          Lançamentos avulsos deste mês
-                        </h3>
-                        <p className="mt-1 text-xs text-text-secondary">
-                          Receitas e despesas avulsas lançadas em{" "}
-                          {formatMesAno(m.ano, m.mes)}. Edite ou remova aqui, ou
-                          adicione uma nova.
-                        </p>
                         <div className="mt-3">
-                          <LancamentosList lancamentos={lancamentosDoMes} />
+                          <LancamentosList
+                            lancamentos={lancamentosDoMes.filter(
+                              (l) => l.tipo === "DESPESA"
+                            )}
+                          />
                         </div>
                       </div>
                     </td>
