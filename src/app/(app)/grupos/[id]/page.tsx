@@ -39,7 +39,7 @@ export default async function GrupoOverviewPage({
       .eq("grupo_id", id),
     supabase
       .from("pagamentos")
-      .select("data, valor")
+      .select("data, valor, status")
       .eq("grupo_id", id)
       .order("data", { ascending: false }),
     supabase
@@ -97,11 +97,16 @@ export default async function GrupoOverviewPage({
       ? Number(ultimoResultado.investimento) / ultimoResultado.leads
       : null;
 
-  const recebidoRegistrado = (pagamentos ?? []).reduce(
+  const pagamentosPagos = (pagamentos ?? []).filter((p) => p.status === "PAGO");
+  const recebidoRegistrado = pagamentosPagos.reduce(
     (acc, p) => acc + Number(p.valor),
     0
   );
-  const ultimoPagamento = (pagamentos ?? [])[0] ?? null;
+  const ultimoPagamento = pagamentosPagos[0] ?? null;
+  const hojeISO = new Date().toISOString().slice(0, 10);
+  const emAtraso = (pagamentos ?? [])
+    .filter((p) => p.status === "PENDENTE" && p.data < hojeISO)
+    .reduce((acc, p) => acc + Number(p.valor), 0);
 
   const duracaoDias = calcDuracaoDias(grupo.data_inicio, grupo.data_termino);
 
@@ -170,7 +175,7 @@ export default async function GrupoOverviewPage({
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <MetaComparacaoCard
           grupoId={grupo.id}
           label="ROAS"
@@ -199,6 +204,20 @@ export default async function GrupoOverviewPage({
             {ultimoPagamento
               ? `${formatBRL(Number(ultimoPagamento.valor))} em ${formatDate(ultimoPagamento.data)}`
               : "Nenhum registrado"}
+          </p>
+        </Link>
+        <Link
+          href={`/grupos/${grupo.id}/pagamentos`}
+          prefetch={false}
+          className="rounded-xl border border-border bg-bg-surface p-5 hover:bg-bg-surface-hover"
+        >
+          <p className="text-sm text-text-secondary">Em atraso</p>
+          <p
+            className={`mt-2 font-display text-xl font-semibold tracking-tight tabular-nums ${
+              emAtraso > 0 ? "text-status-alert-text" : "text-text-primary"
+            }`}
+          >
+            {formatBRL(emAtraso)}
           </p>
         </Link>
       </div>

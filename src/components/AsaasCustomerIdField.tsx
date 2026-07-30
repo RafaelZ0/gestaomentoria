@@ -47,7 +47,9 @@ export function AsaasCustomerIdField({
       <p className="mt-2 text-xs text-text-secondary">
         Cole aqui o ID do cliente no Asaas (Clientes → esse cliente → ID no
         topo). Com isso preenchido, pagamentos confirmados no Asaas entram
-        aqui automaticamente.
+        aqui automaticamente, e boletos pendentes/atrasados aparecem ao
+        importar o histórico (sem contar como recebido até serem pagos de
+        verdade).
       </p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -104,10 +106,17 @@ export function AsaasCustomerIdField({
                   setErroImport(r.error);
                   return;
                 }
+                const partes: string[] = [];
+                if (r.importados > 0) {
+                  partes.push(`${r.importados} novo(s) lançado(s)`);
+                }
+                if (r.atualizados > 0) {
+                  partes.push(`${r.atualizados} atualizado(s) (ex: virou Pago)`);
+                }
                 setResultadoImport(
-                  r.importados > 0
-                    ? `${r.importados} pagamento(s) novo(s) importado(s) do histórico (de ${r.totalEncontrados} encontrados no Asaas).`
-                    : `Nenhum pagamento novo — todos os ${r.totalEncontrados} encontrados no Asaas já estavam registrados.`
+                  partes.length > 0
+                    ? `${partes.join(", ")} — de ${r.totalEncontrados} encontrados no Asaas (inclui pagos, pendentes e atrasados).`
+                    : `Nada novo — todos os ${r.totalEncontrados} encontrados no Asaas já estavam atualizados.`
                 );
               });
             }}

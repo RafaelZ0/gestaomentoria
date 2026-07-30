@@ -58,12 +58,17 @@ export default async function FinancasPage() {
   const lucroAcumulado = entradaTotal - gastoTotal;
 
   const valorClausulas = (pagamentos ?? [])
-    .filter((p) => p.tipo === "CLAUSULA_CANCELAMENTO")
+    .filter((p) => p.tipo === "CLAUSULA_CANCELAMENTO" && p.status === "PAGO")
     .reduce((acc, p) => acc + Number(p.valor), 0);
 
   const gruposCancelados = (grupos ?? []).filter(
     (g) => g.status === "Inativo"
   ).length;
+
+  const hojeISO = new Date().toISOString().slice(0, 10);
+  const emAtrasoTotal = (pagamentos ?? [])
+    .filter((p) => p.status === "PENDENTE" && p.data < hojeISO)
+    .reduce((acc, p) => acc + Number(p.valor), 0);
 
   return (
     <div className="max-w-5xl space-y-8">
@@ -92,7 +97,7 @@ export default async function FinancasPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <InfoCard label="Entrada total" value={formatBRL(entradaTotal)} />
         <InfoCard
           label="Faturamento vendido"
@@ -100,6 +105,12 @@ export default async function FinancasPage() {
           hint="Valor total dos acompanhamentos fechados"
         />
         <InfoCard label="Gasto total" value={formatBRL(gastoTotal)} />
+        <InfoCard
+          label="Em atraso"
+          value={formatBRL(emAtrasoTotal)}
+          alert={emAtrasoTotal > 0}
+          hint="Boletos vencidos importados do Asaas, ainda não pagos"
+        />
         <InfoCard
           label="Custos fixos mensais"
           value={formatBRL(custosFixosMensais)}
@@ -143,16 +154,22 @@ function InfoCard({
   value,
   hint,
   href,
+  alert,
 }: {
   label: string;
   value: string;
   hint?: string;
   href?: string;
+  alert?: boolean;
 }) {
   return (
     <div className="rounded-xl border border-border bg-bg-surface p-5">
       <p className="text-sm text-text-secondary">{label}</p>
-      <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text-primary">
+      <p
+        className={`mt-2 font-display text-xl font-semibold tracking-tight tabular-nums ${
+          alert ? "text-status-alert-text" : "text-text-primary"
+        }`}
+      >
         {value}
       </p>
       {hint &&

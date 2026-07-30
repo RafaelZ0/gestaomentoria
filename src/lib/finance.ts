@@ -82,7 +82,7 @@ export function calcTabelaMensal(
     const noMes = (d: Date) => d.getFullYear() === ano && d.getMonth() === mesIdx;
 
     const pagamentosMensalidadeDoMes = pagamentos.filter(
-      (p) => p.tipo === "MENSALIDADE" && noMes(toDate(p.data))
+      (p) => p.tipo === "MENSALIDADE" && p.status === "PAGO" && noMes(toDate(p.data))
     );
     const mensalidadesDetalhe: PagamentoDetalhe[] = pagamentosMensalidadeDoMes.map(
       (p) => ({
@@ -98,7 +98,7 @@ export function calcTabelaMensal(
     );
 
     const pagamentosClausulaDoMes = pagamentos.filter(
-      (p) => p.tipo === "CLAUSULA_CANCELAMENTO" && noMes(toDate(p.data))
+      (p) => p.tipo === "CLAUSULA_CANCELAMENTO" && p.status === "PAGO" && noMes(toDate(p.data))
     );
     const clausulas = pagamentosClausulaDoMes.reduce(
       (acc, p) => acc + Number(p.valor),

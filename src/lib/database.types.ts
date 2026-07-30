@@ -1,6 +1,7 @@
 export type StatusGrupo = "Ativo" | "Inativo";
 export type TrafegoPago = "SIM" | "NÃO" | "PARADO" | "EM IMPLEMENTAÇÃO";
 export type TipoPagamento = "MENSALIDADE" | "CLAUSULA_CANCELAMENTO";
+export type StatusPagamento = "PAGO" | "PENDENTE";
 
 export type GrupoGestao = {
   id: string;
@@ -72,6 +73,7 @@ export type Pagamento = {
   data: string;
   valor: number;
   tipo: TipoPagamento;
+  status: StatusPagamento;
   observacao: string | null;
   asaas_payment_id: string | null;
   created_at: string;

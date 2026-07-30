@@ -34,13 +34,12 @@ export default async function GruposPage() {
       ),
     supabase.from("tipos_entrega").select("id").eq("ativo", true),
     supabase.from("entregas_grupo").select("grupo_id, tipo_entrega_id, feito"),
-    supabase.from("pagamentos").select("valor"),
+    supabase.from("pagamentos").select("valor, status"),
   ]);
 
-  const totalPago = (pagamentos ?? []).reduce(
-    (acc, p) => acc + Number(p.valor),
-    0
-  );
+  const totalPago = (pagamentos ?? [])
+    .filter((p) => p.status === "PAGO")
+    .reduce((acc, p) => acc + Number(p.valor), 0);
 
   type ParticipanteRow = { reuniao_id: string; mentorados: { grupo_id: string } | null };
 

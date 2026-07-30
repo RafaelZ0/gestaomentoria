@@ -70,18 +70,6 @@ export async function POST(request: Request) {
     return new Response("OK (sem grupo vinculado)", { status: 200 });
   }
 
-  // Idempotência: o Asaas pode reenviar o mesmo evento, ou disparar mais de
-  // um evento pro mesmo pagamento (ex: CONFIRMED e depois RECEIVED).
-  const { data: existente } = await supabase
-    .from("pagamentos")
-    .select("id")
-    .eq("asaas_payment_id", payment.id)
-    .maybeSingle();
-
-  if (existente) {
-    return new Response("OK (já registrado)", { status: 200 });
-  }
-
   // Juros/multa somados ao valor original, tudo num lançamento só.
   const valorTotal = Number(payment.value ?? 0) + Number(payment.interestValue ?? 0);
   const data =
@@ -89,11 +77,37 @@ export async function POST(request: Request) {
     payment.clientPaymentDate ??
     new Date().toISOString().slice(0, 10);
 
+  // Idempotência: o Asaas pode reenviar o mesmo evento, ou disparar mais de
+  // um evento pro mesmo pagamento (ex: CONFIRMED e depois RECEIVED). Se o
+  // boleto já foi importado como PENDENTE antes de ser pago, atualiza pra
+  // PAGO em vez de ignorar.
+  const { data: existente } = await supabase
+    .from("pagamentos")
+    .select("id, status")
+    .eq("asaas_payment_id", payment.id)
+    .maybeSingle();
+
+  if (existente) {
+    if (existente.status === "PAGO") {
+      return new Response("OK (já registrado)", { status: 200 });
+    }
+    const { error } = await supabase
+      .from("pagamentos")
+      .update({ status: "PAGO", valor: valorTotal, data })
+      .eq("id", existente.id);
+    if (error) {
+      console.error("Webhook Asaas: erro ao atualizar pagamento.", error);
+      return new Response("Erro ao atualizar pagamento", { status: 500 });
+    }
+    return new Response("OK (atualizado pra pago)", { status: 200 });
+  }
+
   const { error } = await supabase.from("pagamentos").insert({
     grupo_id: grupo.id,
     data,
     valor: valorTotal,
     tipo: "MENSALIDADE",
+    status: "PAGO",
     observacao: `Pago via Asaas (${evento})`,
     asaas_payment_id: payment.id,
   });
