@@ -27,7 +27,8 @@ export function TabelaMensalFinancas({
         <thead>
           <tr className="border-b border-border text-text-secondary">
             <th className="px-4 py-3 font-medium">Mês</th>
-            <th className="px-4 py-3 font-medium">Receita</th>
+            <th className="px-4 py-3 font-medium">Entrada</th>
+            <th className="px-4 py-3 font-medium">Faturamento</th>
             <th className="px-4 py-3 font-medium">Gasto</th>
             <th className="px-4 py-3 font-medium">Lucro</th>
             <th className="px-4 py-3"></th>
@@ -52,7 +53,10 @@ export function TabelaMensalFinancas({
                     {formatMesAno(m.ano, m.mes)}
                   </td>
                   <td className="px-4 py-3 tabular-nums text-status-ok-text">
-                    {formatBRL(m.receita)}
+                    {formatBRL(m.entrada)}
+                  </td>
+                  <td className="px-4 py-3 tabular-nums text-text-primary">
+                    {formatBRL(m.faturamento)}
                   </td>
                   <td className="px-4 py-3 tabular-nums text-status-alert-text">
                     {formatBRL(m.gasto)}
@@ -75,21 +79,28 @@ export function TabelaMensalFinancas({
                 </tr>
                 {aberto && (
                   <tr key={`${key}-detalhe`} className="border-b border-border last:border-0">
-                    <td colSpan={5} className="bg-bg-surface-hover px-4 py-5">
+                    <td colSpan={6} className="bg-bg-surface-hover px-4 py-5">
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
                           <h3 className="font-display text-sm font-semibold text-text-primary">
-                            De onde vem a receita
+                            De onde vem a entrada
                           </h3>
                           <ul className="mt-2 space-y-1 text-sm">
-                            {m.gruposDetalhe.map((g) => (
+                            {m.mensalidadesDetalhe.map((p, i) => (
                               <li
-                                key={g.grupoId}
+                                key={`mensalidade-${i}`}
                                 className="flex items-center justify-between text-text-secondary"
                               >
-                                <span>{g.nome} (mensalidade vencida)</span>
+                                <span>
+                                  {p.grupoNome} ({formatDate(p.data)})
+                                  {p.viaAsaas && (
+                                    <span className="ml-2 rounded-full bg-status-accent-bg px-2 py-0.5 text-xs font-medium text-status-accent-text">
+                                      via Asaas
+                                    </span>
+                                  )}
+                                </span>
                                 <span className="tabular-nums text-text-primary">
-                                  {formatBRL(g.valor)}
+                                  {formatBRL(p.valor)}
                                 </span>
                               </li>
                             ))}
@@ -107,11 +118,10 @@ export function TabelaMensalFinancas({
                                 </span>
                               </li>
                             ))}
-                            {m.gruposDetalhe.length === 0 &&
+                            {m.mensalidadesDetalhe.length === 0 &&
                               m.clausulasDetalhe.length === 0 && (
                                 <li className="text-text-secondary">
-                                  Nenhuma mensalidade vencida ou cláusula neste
-                                  mês.
+                                  Nenhum pagamento registrado neste mês.
                                 </li>
                               )}
                           </ul>
@@ -119,22 +129,46 @@ export function TabelaMensalFinancas({
 
                         <div>
                           <h3 className="font-display text-sm font-semibold text-text-primary">
-                            De onde vem o gasto
+                            Faturamento vendido este mês
                           </h3>
-                          <p className="mt-1 text-xs text-text-secondary">
-                            Custo fixo de referência (atual): {" "}
-                            {formatBRL(custosFixosAtual)}. Enquanto não há
-                            itens lançados à mão para este mês, o gasto usa
-                            essa referência. Assim que você lançar ao menos um
-                            item, o gasto passa a ser a soma dos itens abaixo.
-                          </p>
-                          <div className="mt-2">
-                            <CustosFixosMensaisEditor
-                              ano={m.ano}
-                              mes={m.mes}
-                              itens={m.custosFixosItens}
-                            />
-                          </div>
+                          <ul className="mt-2 space-y-1 text-sm">
+                            {m.vendasDetalhe.map((v, i) => (
+                              <li
+                                key={`venda-${i}`}
+                                className="flex items-center justify-between text-text-secondary"
+                              >
+                                <span>{v.grupoNome} (fechou acompanhamento)</span>
+                                <span className="tabular-nums text-text-primary">
+                                  {formatBRL(v.valor)}
+                                </span>
+                              </li>
+                            ))}
+                            {m.vendasDetalhe.length === 0 && (
+                              <li className="text-text-secondary">
+                                Nenhum grupo novo fechado neste mês.
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="mt-6">
+                        <h3 className="font-display text-sm font-semibold text-text-primary">
+                          De onde vem o gasto
+                        </h3>
+                        <p className="mt-1 text-xs text-text-secondary">
+                          Custo fixo de referência (atual): {" "}
+                          {formatBRL(custosFixosAtual)}. Enquanto não há itens
+                          lançados à mão para este mês, o gasto usa essa
+                          referência. Assim que você lançar ao menos um item,
+                          o gasto passa a ser a soma dos itens abaixo.
+                        </p>
+                        <div className="mt-2">
+                          <CustosFixosMensaisEditor
+                            ano={m.ano}
+                            mes={m.mes}
+                            itens={m.custosFixosItens}
+                          />
                         </div>
                       </div>
 
@@ -159,7 +193,7 @@ export function TabelaMensalFinancas({
           })}
           {meses.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-4 py-8 text-center text-text-secondary">
+              <td colSpan={6} className="px-4 py-8 text-center text-text-secondary">
                 Sem dados suficientes ainda para montar a tabela mensal.
               </td>
             </tr>

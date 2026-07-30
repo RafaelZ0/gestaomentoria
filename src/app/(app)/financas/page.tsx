@@ -2,7 +2,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL } from "@/lib/format";
 import { calcTabelaMensal } from "@/lib/finance";
-import { LancamentosList } from "@/components/LancamentosList";
 import { TabelaMensalFinancas } from "@/components/TabelaMensalFinancas";
 
 export default async function FinancasPage() {
@@ -53,9 +52,10 @@ export default async function FinancasPage() {
     itensCustosFixosMensaisMap
   );
 
-  const receitaTotal = tabelaMensal.reduce((acc, m) => acc + m.receita, 0);
+  const entradaTotal = tabelaMensal.reduce((acc, m) => acc + m.entrada, 0);
+  const faturamentoTotal = tabelaMensal.reduce((acc, m) => acc + m.faturamento, 0);
   const gastoTotal = tabelaMensal.reduce((acc, m) => acc + m.gasto, 0);
-  const lucroAcumulado = receitaTotal - gastoTotal;
+  const lucroAcumulado = entradaTotal - gastoTotal;
 
   const valorClausulas = (pagamentos ?? [])
     .filter((p) => p.tipo === "CLAUSULA_CANCELAMENTO")
@@ -72,8 +72,9 @@ export default async function FinancasPage() {
           Finanças
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Visão consolidada da consultoria: faturamento dos grupos de gestão
-          somado a receitas e despesas avulsas, mês a mês.
+          Visão consolidada da consultoria: entrada de caixa real (pagamentos
+          registrados) comparada ao faturamento vendido, mais custos e
+          despesas, mês a mês.
         </p>
       </div>
 
@@ -87,12 +88,17 @@ export default async function FinancasPage() {
           {formatBRL(lucroAcumulado)}
         </p>
         <p className="mt-1 text-xs text-text-secondary">
-          Receita total − gasto total, somando todos os meses
+          Entrada total − gasto total, somando todos os meses
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <InfoCard label="Receita total" value={formatBRL(receitaTotal)} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <InfoCard label="Entrada total" value={formatBRL(entradaTotal)} />
+        <InfoCard
+          label="Faturamento vendido"
+          value={formatBRL(faturamentoTotal)}
+          hint="Valor total dos acompanhamentos fechados"
+        />
         <InfoCard label="Gasto total" value={formatBRL(gastoTotal)} />
         <InfoCard
           label="Custos fixos mensais"
@@ -112,27 +118,21 @@ export default async function FinancasPage() {
           Por mês
         </h2>
         <p className="mt-1 text-xs text-text-secondary">
-          Receita = mensalidades que venceram no mês (pagamento na entrada de
-          cada grupo, e a cada mês seguinte) + cláusulas recebidas + receitas
-          avulsas. Gasto = custos fixos do mês (por padrão, o valor atual de{" "}
+          Entrada = pagamentos de verdade registrados no mês (lançados à mão
+          ou vindos do Asaas) + cláusulas recebidas + receitas avulsas.
+          Faturamento = valor total vendido (valor mensal × 12) dos grupos
+          fechados naquele mês — não é dinheiro em caixa, é quanto foi
+          vendido. Gasto = custos fixos do mês (por padrão, o valor atual de{" "}
           {formatBRL(custosFixosMensais)} — substituível por itens lançados à
           mão naquele mês) + despesas avulsas lançadas no mês. Clique em um
-          mês para ver a composição e editar.
+          mês para ver a composição, editar e lançar receitas/despesas
+          avulsas daquele mês.
         </p>
         <TabelaMensalFinancas
           meses={tabelaMensal}
           lancamentos={lancamentos ?? []}
           custosFixosAtual={custosFixosMensais}
         />
-      </section>
-
-      <section>
-        <h2 className="font-display text-lg font-semibold text-text-primary">
-          Todos os lançamentos
-        </h2>
-        <div className="mt-3">
-          <LancamentosList lancamentos={lancamentos ?? []} />
-        </div>
       </section>
     </div>
   );

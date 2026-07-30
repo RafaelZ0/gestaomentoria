@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate } from "@/lib/format";
 import { NovoPagamentoForm } from "@/components/NovoPagamentoForm";
+import { PagamentoParceladoForm } from "@/components/PagamentoParceladoForm";
 import { AsaasCustomerIdField } from "@/components/AsaasCustomerIdField";
 import { getGrupo } from "@/lib/data/grupo";
 
@@ -50,7 +51,10 @@ export default async function PagamentosPage({
             automática de mensalidade.
           </p>
         </div>
-        <NovoPagamentoForm grupoId={id} valorSugerido={Number(grupo?.valor_mensal ?? 0)} />
+        <div className="flex flex-col items-end gap-2">
+          <NovoPagamentoForm grupoId={id} valorSugerido={Number(grupo?.valor_mensal ?? 0)} />
+          <PagamentoParceladoForm grupoId={id} />
+        </div>
       </div>
 
       <AsaasCustomerIdField
