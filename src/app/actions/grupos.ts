@@ -99,18 +99,8 @@ export async function updateTrafego(grupoId: string, formData: FormData) {
   revalidatePath("/grupos");
 }
 
-export async function cancelarGrupo(
-  grupoId: string,
-  aplicarClausula: boolean,
-  dataCancelamento?: string
-) {
+export async function cancelarGrupo(grupoId: string, dataCancelamento?: string) {
   const supabase = await createClient();
-
-  const { data: grupo } = await supabase
-    .from("grupos_gestao")
-    .select("*")
-    .eq("id", grupoId)
-    .single();
 
   const data = dataCancelamento || new Date().toISOString().slice(0, 10);
 
@@ -118,16 +108,6 @@ export async function cancelarGrupo(
     .from("grupos_gestao")
     .update({ status: "Inativo", data_termino: data })
     .eq("id", grupoId);
-
-  if (aplicarClausula && grupo) {
-    await supabase.from("pagamentos").insert({
-      grupo_id: grupoId,
-      data,
-      valor: grupo.valor_mensal,
-      tipo: "CLAUSULA_CANCELAMENTO",
-      observacao: "Parcela da cláusula de cancelamento",
-    });
-  }
 
   revalidatePath(`/grupos/${grupoId}`);
   revalidatePath("/grupos");

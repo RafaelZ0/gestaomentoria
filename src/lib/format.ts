@@ -35,35 +35,6 @@ export function addMonths(data: Date, meses: number): Date {
   return alvo;
 }
 
-// Datas em que a mensalidade vence: na própria data de início (pagamento de
-// entrada), e a cada mês seguinte, até (e incluindo) `fim`.
-export function datasVencimento(dataInicio: Date, fim: Date): Date[] {
-  const vencimentos: Date[] = [];
-  let cursor = new Date(
-    dataInicio.getFullYear(),
-    dataInicio.getMonth(),
-    dataInicio.getDate()
-  );
-  while (cursor <= fim) {
-    vencimentos.push(cursor);
-    cursor = addMonths(cursor, 1);
-  }
-  return vencimentos;
-}
-
-export function calcFaturamentoEstimado(
-  valorMensal: number,
-  dataInicio: string,
-  dataTermino: string | null
-): number {
-  const inicio = new Date(dataInicio + "T00:00:00");
-  const fim = dataTermino
-    ? new Date(dataTermino + "T00:00:00")
-    : new Date(new Date().toDateString());
-  const qtdVencimentos = datasVencimento(inicio, fim).length;
-  return valorMensal * qtdVencimentos;
-}
-
 export function formatMesAno(ano: number, mes: number): string {
   const nome = new Date(ano, mes - 1, 1).toLocaleDateString("pt-BR", {
     month: "long",

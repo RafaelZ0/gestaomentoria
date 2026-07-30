@@ -8,13 +8,13 @@ import type { StatusSaude } from "@/lib/saude";
 const DIAS_SEM_SINAL_DE_VIDA = 30;
 
 export function GruposResumo({
-  faturamentoTotal,
+  totalPago,
   ativosCount,
   totalCount,
   semSinalDeVidaCount,
   saudeGrupos,
 }: {
-  faturamentoTotal: number;
+  totalPago: number;
   ativosCount: number;
   totalCount: number;
   semSinalDeVidaCount: number;
@@ -26,9 +26,9 @@ export function GruposResumo({
     <>
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="card-hero rounded-xl border border-border bg-bg-surface p-6 sm:col-span-1">
-          <p className="text-sm text-text-secondary">Faturamento total (estimado)</p>
+          <p className="text-sm text-text-secondary">Total recebido</p>
           <p className="mt-2 font-display text-4xl font-bold tracking-tight tabular-nums text-text-primary">
-            {formatBRL(faturamentoTotal)}
+            {formatBRL(totalPago)}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-bg-surface p-6">

@@ -1,12 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import {
-  formatBRL,
-  formatDate,
-  calcDuracaoDias,
-  calcFaturamentoEstimado,
-  formatDuracao,
-} from "@/lib/format";
+import { formatBRL, formatDate, calcDuracaoDias, formatDuracao } from "@/lib/format";
 import { calcSaudeGrupo, calcTendenciaRoas } from "@/lib/saude";
 import { CancelarGrupoButton } from "@/components/CancelarGrupoModal";
 import { ChecklistEntregas } from "@/components/ChecklistEntregas";
@@ -110,11 +104,6 @@ export default async function GrupoOverviewPage({
   const ultimoPagamento = (pagamentos ?? [])[0] ?? null;
 
   const duracaoDias = calcDuracaoDias(grupo.data_inicio, grupo.data_termino);
-  const faturamentoEstimado = calcFaturamentoEstimado(
-    Number(grupo.valor_mensal),
-    grupo.data_inicio,
-    grupo.data_termino
-  );
 
   const diasDesdeUltimaReuniao = ultimaReuniao
     ? calcDuracaoDias(ultimaReuniao.data, null)
@@ -167,10 +156,7 @@ export default async function GrupoOverviewPage({
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <ValorMensalCard grupoId={grupo.id} valorMensal={Number(grupo.valor_mensal)} />
-        <InfoCard
-          label="Faturamento estimado"
-          value={formatBRL(faturamentoEstimado)}
-        />
+        <InfoCard label="Total pago" value={formatBRL(recebidoRegistrado)} />
         <InfoCard label="Duração" value={formatDuracao(duracaoDias)} />
         <TrafegoCard
           grupoId={grupo.id}
@@ -232,9 +218,6 @@ export default async function GrupoOverviewPage({
       <div className="text-sm text-text-secondary">
         <DataInicioField grupoId={grupo.id} dataInicio={grupo.data_inicio} />
         {grupo.data_termino && <> · Encerrado em {formatDate(grupo.data_termino)}</>}
-        {recebidoRegistrado > 0 && (
-          <> · {formatBRL(recebidoRegistrado)} recebido em pagamentos registrados</>
-        )}
       </div>
 
       <ObservacoesField grupoId={grupo.id} observacoes={grupo.observacoes} />
@@ -299,16 +282,11 @@ export default async function GrupoOverviewPage({
           Zona de risco
         </h2>
         <p className="mt-1 text-xs text-text-secondary">
-          Cancelar o grupo marca o contrato como encerrado e pode gerar uma
-          cobrança de cláusula. Essa ação pede confirmação antes de ser
-          aplicada.
+          Cancelar o grupo marca o contrato como encerrado. Essa ação pede
+          confirmação antes de ser aplicada.
         </p>
         <div className="mt-3">
-          <CancelarGrupoButton
-            grupoId={grupo.id}
-            status={grupo.status}
-            valorMensal={Number(grupo.valor_mensal)}
-          />
+          <CancelarGrupoButton grupoId={grupo.id} status={grupo.status} />
         </div>
       </section>
     </div>

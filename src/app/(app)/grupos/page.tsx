@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { calcFaturamentoEstimado } from "@/lib/format";
 import { calcSaudeGrupo, calcTendenciaRoas } from "@/lib/saude";
 import { GruposTable } from "@/components/GruposTable";
 import { GruposResumo } from "@/components/GruposResumo";
@@ -17,6 +16,7 @@ export default async function GruposPage() {
     { data: resultados },
     { data: processosAtivos },
     { data: entregas },
+    { data: pagamentos },
   ] = await Promise.all([
     supabase
       .from("grupos_gestao")
@@ -34,16 +34,11 @@ export default async function GruposPage() {
       ),
     supabase.from("tipos_entrega").select("id").eq("ativo", true),
     supabase.from("entregas_grupo").select("grupo_id, tipo_entrega_id, feito"),
+    supabase.from("pagamentos").select("valor"),
   ]);
 
-  const faturamentoTotal = (grupos ?? []).reduce(
-    (acc, g) =>
-      acc +
-      calcFaturamentoEstimado(
-        Number(g.valor_mensal),
-        g.data_inicio,
-        g.data_termino
-      ),
+  const totalPago = (pagamentos ?? []).reduce(
+    (acc, p) => acc + Number(p.valor),
     0
   );
 
@@ -170,7 +165,7 @@ export default async function GruposPage() {
       </div>
 
       <GruposResumo
-        faturamentoTotal={faturamentoTotal}
+        totalPago={totalPago}
         ativosCount={ativos.length}
         totalCount={(grupos ?? []).length}
         semSinalDeVidaCount={semSinalDeVida.length}

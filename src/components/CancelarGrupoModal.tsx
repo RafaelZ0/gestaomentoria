@@ -2,16 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { cancelarGrupo, reativarGrupo } from "@/app/actions/grupos";
-import { formatBRL } from "@/lib/format";
 
 export function CancelarGrupoButton({
   grupoId,
   status,
-  valorMensal,
 }: {
   grupoId: string;
   status: string;
-  valorMensal: number;
 }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -51,15 +48,9 @@ export function CancelarGrupoButton({
               Cancelar grupo
             </h2>
             <p className="mt-2 text-sm text-text-secondary">
-              Este cancelamento se enquadra na cláusula de cancelamento
-              (pagamento de +1 parcela além do que já foi pago)?
-            </p>
-            <p className="mt-2 text-sm text-text-secondary">
-              Se sim, um pagamento extra de{" "}
-              <span className="tabular-nums text-text-primary">
-                {formatBRL(valorMensal)}
-              </span>{" "}
-              será registrado automaticamente.
+              O contrato será marcado como encerrado. Se houver cláusula de
+              cancelamento a cobrar, registre o pagamento manualmente (ou via
+              Asaas) na aba Pagamentos do grupo.
             </p>
 
             <div className="mt-4">
@@ -79,25 +70,13 @@ export function CancelarGrupoButton({
                 disabled={isPending}
                 onClick={() =>
                   startTransition(async () => {
-                    await cancelarGrupo(grupoId, true, dataCancelamento);
+                    await cancelarGrupo(grupoId, dataCancelamento);
                     setOpen(false);
                   })
                 }
                 className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
               >
-                Sim, aplicar cláusula e cancelar
-              </button>
-              <button
-                disabled={isPending}
-                onClick={() =>
-                  startTransition(async () => {
-                    await cancelarGrupo(grupoId, false, dataCancelamento);
-                    setOpen(false);
-                  })
-                }
-                className="rounded-lg border border-border px-4 py-2 text-sm text-text-primary hover:bg-bg-surface-hover disabled:opacity-60"
-              >
-                Não, cancelar sem cláusula
+                Confirmar cancelamento
               </button>
               <button
                 disabled={isPending}
