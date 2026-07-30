@@ -113,10 +113,14 @@ export function AsaasCustomerIdField({
                 if (r.atualizados > 0) {
                   partes.push(`${r.atualizados} atualizado(s) (ex: virou Pago)`);
                 }
+                const debug = Object.entries(r.porStatus)
+                  .map(([status, qtd]) => `${status}: ${qtd}`)
+                  .join(", ");
                 setResultadoImport(
-                  partes.length > 0
-                    ? `${partes.join(", ")} — de ${r.totalEncontrados} encontrados no Asaas (inclui pagos, pendentes e atrasados).`
-                    : `Nada novo — todos os ${r.totalEncontrados} encontrados no Asaas já estavam atualizados.`
+                  (partes.length > 0
+                    ? `${partes.join(", ")} — de ${r.totalEncontrados} encontrados no Asaas.`
+                    : `Nada novo — todos os ${r.totalEncontrados} encontrados no Asaas já estavam atualizados.`) +
+                    ` (por status no Asaas: ${debug})`
                 );
               });
             }}

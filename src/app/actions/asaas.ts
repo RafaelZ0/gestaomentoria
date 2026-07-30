@@ -31,11 +31,16 @@ type Resultado<T> = ({ ok: true } & T) | { ok: false; error: string };
 async function buscarPagamentosAsaas(
   customerId: string,
   apiKey: string
-): Promise<(AsaasPayment & { statusAsaas: string })[]> {
+): Promise<{
+  pagamentos: (AsaasPayment & { statusAsaas: string })[];
+  porStatus: Record<string, number>;
+}> {
   const encontrados = new Map<string, AsaasPayment & { statusAsaas: string }>();
+  const porStatus: Record<string, number> = {};
 
   for (const status of Object.keys(STATUS_MAP)) {
     let offset = 0;
+    let total = 0;
     while (true) {
       const url = `${ASAAS_BASE_URL}/payments?customer=${encodeURIComponent(customerId)}&status=${status}&limit=100&offset=${offset}`;
       const res = await fetch(url, {
@@ -43,21 +48,26 @@ async function buscarPagamentosAsaas(
         cache: "no-store",
       });
       if (!res.ok) {
-        throw new Error(`Erro ao consultar o Asaas (status ${res.status}).`);
+        throw new Error(
+          `Erro ao consultar o Asaas pra status=${status} (HTTP ${res.status}).`
+        );
       }
       const json = (await res.json()) as {
         data?: AsaasPayment[];
         hasMore?: boolean;
+        totalCount?: number;
       };
       for (const p of json.data ?? []) {
         encontrados.set(p.id, { ...p, statusAsaas: status });
+        total += 1;
       }
       if (!json.hasMore) break;
       offset += 100;
     }
+    porStatus[status] = total;
   }
 
-  return [...encontrados.values()];
+  return { pagamentos: [...encontrados.values()], porStatus };
 }
 
 export async function buscarClienteAsaasPorDocumento(
@@ -108,7 +118,14 @@ export async function buscarClienteAsaasPorDocumento(
 
 export async function importarHistoricoAsaas(
   grupoId: string
-): Promise<Resultado<{ importados: number; atualizados: number; totalEncontrados: number }>> {
+): Promise<
+  Resultado<{
+    importados: number;
+    atualizados: number;
+    totalEncontrados: number;
+    porStatus: Record<string, number>;
+  }>
+> {
   const apiKey = process.env.ASAAS_API_KEY;
   if (!apiKey) {
     return { ok: false, error: "ASAAS_API_KEY não configurada no servidor." };
@@ -130,7 +147,7 @@ export async function importarHistoricoAsaas(
   }
 
   try {
-    const pagamentosAsaas = await buscarPagamentosAsaas(
+    const { pagamentos: pagamentosAsaas, porStatus } = await buscarPagamentosAsaas(
       grupo.asaas_customer_id,
       apiKey
     );
@@ -203,6 +220,7 @@ export async function importarHistoricoAsaas(
       importados: novos.length,
       atualizados: atualizacoes.length,
       totalEncontrados: pagamentosAsaas.length,
+      porStatus,
     };
   } catch (e) {
     return {
