@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { createPagamentoParcelado } from "@/app/actions/pagamentos";
+import { createPagamentoCartao } from "@/app/actions/pagamentos";
 
 export function PagamentoParceladoForm({ grupoId }: { grupoId: string }) {
   const [open, setOpen] = useState(false);
@@ -11,7 +11,7 @@ export function PagamentoParceladoForm({ grupoId }: { grupoId: string }) {
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} className="btn-secondary text-sm">
-        + Pagamento parcelado (cartão)
+        + Pagamento no cartão
       </button>
     );
   }
@@ -21,7 +21,7 @@ export function PagamentoParceladoForm({ grupoId }: { grupoId: string }) {
       action={(formData) => {
         setError(null);
         startTransition(async () => {
-          const r = await createPagamentoParcelado(grupoId, formData);
+          const r = await createPagamentoCartao(grupoId, formData);
           if (!r.ok) {
             setError(r.error);
             return;
@@ -37,9 +37,8 @@ export function PagamentoParceladoForm({ grupoId }: { grupoId: string }) {
         </div>
       )}
       <p className="text-xs text-text-secondary">
-        Informe o valor total pago no cartão e a data da 1ª parcela — o
-        sistema lança as 12 parcelas mensais automaticamente (valor total ÷
-        12).
+        No cartão, o valor total entra de uma vez, no mês do pagamento —
+        mesmo que o cliente tenha parcelado em 12x com a operadora do cartão.
       </p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
@@ -57,11 +56,11 @@ export function PagamentoParceladoForm({ grupoId }: { grupoId: string }) {
         </div>
         <div>
           <label className="mb-1 block text-sm text-text-secondary">
-            Data da 1ª parcela
+            Data do pagamento
           </label>
           <input
             type="date"
-            name="dataInicial"
+            name="data"
             defaultValue={new Date().toISOString().slice(0, 10)}
             required
             className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
@@ -74,7 +73,7 @@ export function PagamentoParceladoForm({ grupoId }: { grupoId: string }) {
           disabled={isPending}
           className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
         >
-          {isPending ? "Gerando…" : "Gerar 12 parcelas"}
+          {isPending ? "Registrando…" : "Registrar pagamento"}
         </button>
         <button type="button" onClick={() => setOpen(false)} className="btn-secondary">
           Cancelar
