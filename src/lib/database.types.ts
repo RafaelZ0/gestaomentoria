@@ -44,6 +44,7 @@ export type Reuniao = {
   compareceu: boolean;
   link_reuniao: string | null;
   hora: string | null;
+  duracao_min: number;
   created_at: string;
 };
 

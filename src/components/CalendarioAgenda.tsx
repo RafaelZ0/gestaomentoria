@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  horariosPablo,
-  blocosClinicaPablo,
-} from "@/lib/disponibilidadePablo";
+import { blocosClinicaPablo } from "@/lib/disponibilidadePablo";
 import { formatDiaSemanaCurto, formatDiaMesCurto, somarDias } from "@/lib/calendario";
 import { AgendarSlotForm } from "@/components/AgendarSlotForm";
 import { MiniCalendario } from "@/components/MiniCalendario";
@@ -13,6 +10,7 @@ import { MiniCalendario } from "@/components/MiniCalendario";
 export type ReuniaoDoDia = {
   id: string;
   hora: string | null;
+  duracaoMin: number;
   grupoNome: string;
   responsavelId: string | null;
   responsavelNome: string | null;
@@ -34,16 +32,13 @@ function linhaDoHorario(hhmm: string): number {
   return Math.floor(minutos / 30) + 1;
 }
 
-function linhasDeDuracao(inicio: string, fim: string): number {
-  return Math.max(
-    1,
-    Math.round((minutosDoHorario(fim) - minutosDoHorario(inicio)) / 30)
-  );
+function linhasDeDuracao(minutos: number): number {
+  return Math.max(1, Math.round(minutos / 30));
 }
 
-function somarUmaHora(hhmm: string): string {
-  const minutos = minutosDoHorario(hhmm) + 60;
-  const h = Math.floor(minutos / 60) % 24;
+function horaDaLinha(indice: number): string {
+  const minutos = HORA_INICIO_GRADE * 60 + indice * 30;
+  const h = Math.floor(minutos / 60);
   const m = minutos % 60;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
@@ -113,6 +108,11 @@ export function CalendarioAgenda({
           </span>
         </div>
 
+        <p className="text-xs text-text-secondary">
+          Dois cliques em qualquer intervalo de 30 min agenda uma reunião ali
+          — mesmo em cima de um compromisso da clínica.
+        </p>
+
         <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
           <div
             className="grid min-w-[880px]"
@@ -167,12 +167,6 @@ export function CalendarioAgenda({
                 (r) => r.hora
               );
               const blocos = blocosClinicaPablo(diaISO);
-              const slotsPablo = pabloId ? horariosPablo(diaISO) : [];
-              const horasOcupadasPablo = new Set(
-                reunioesDoDia
-                  .filter((r) => r.responsavelId === pabloId)
-                  .map((r) => r.hora!.slice(0, 5))
-              );
               const passou = diaISO < hoje;
 
               return (
@@ -189,7 +183,14 @@ export function CalendarioAgenda({
                   {Array.from({ length: LINHAS_TOTAIS }, (_, i) => (
                     <div
                       key={i}
-                      className="border-t border-border/60"
+                      role={pabloId && !passou ? "button" : undefined}
+                      onDoubleClick={() => {
+                        if (!pabloId || passou) return;
+                        setSlotAberto({ data: diaISO, hora: horaDaLinha(i) });
+                      }}
+                      className={`border-t border-border/60 ${
+                        pabloId && !passou ? "cursor-pointer hover:bg-bg-surface-hover" : ""
+                      }`}
                       style={{ gridRow: i + 1 }}
                     />
                   ))}
@@ -203,33 +204,15 @@ export function CalendarioAgenda({
                     .map((b, i) => (
                       <div
                         key={`bloco-${i}`}
-                        className="m-0.5 overflow-hidden rounded bg-bg-surface-hover px-1.5 py-1 text-[10px] text-text-secondary"
+                        className="pointer-events-none m-0.5 overflow-hidden rounded bg-bg-surface-hover px-1.5 py-1 text-[10px] text-text-secondary"
                         style={{
-                          gridRow: `${linhaDoHorario(b.inicio)} / span ${linhasDeDuracao(b.inicio, b.fim)}`,
+                          gridRow: `${linhaDoHorario(b.inicio)} / span ${linhasDeDuracao(minutosDoHorario(b.fim) - minutosDoHorario(b.inicio))}`,
                         }}
                         title={b.label}
                       >
                         {b.label}
                       </div>
                     ))}
-
-                  {pabloId &&
-                    !passou &&
-                    slotsPablo
-                      .filter((h) => !horasOcupadasPablo.has(h))
-                      .map((h) => (
-                        <button
-                          key={`slot-${h}`}
-                          type="button"
-                          onClick={() => setSlotAberto({ data: diaISO, hora: h })}
-                          className="m-0.5 overflow-hidden rounded border border-dashed border-status-ok-text/50 bg-status-ok-bg px-1.5 py-1 text-left text-[10px] font-medium text-status-ok-text hover:bg-status-ok-bg/70"
-                          style={{
-                            gridRow: `${linhaDoHorario(h)} / span ${linhasDeDuracao(h, somarUmaHora(h))}`,
-                          }}
-                        >
-                          {h} livre
-                        </button>
-                      ))}
 
                   {reunioesDoDia.map((r) => {
                     const hora = r.hora!.slice(0, 5);
@@ -238,7 +221,7 @@ export function CalendarioAgenda({
                         key={r.id}
                         className="m-0.5 overflow-hidden rounded bg-status-accent-bg px-1.5 py-1 text-[10px] font-medium text-status-accent-text"
                         style={{
-                          gridRow: `${linhaDoHorario(hora)} / span ${linhasDeDuracao(hora, somarUmaHora(hora))}`,
+                          gridRow: `${linhaDoHorario(hora)} / span ${linhasDeDuracao(r.duracaoMin)}`,
                         }}
                         title={`${hora} ${r.grupoNome}${r.responsavelNome ? ` — ${r.responsavelNome}` : ""}`}
                       >

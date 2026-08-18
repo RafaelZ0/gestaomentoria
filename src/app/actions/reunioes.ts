@@ -38,6 +38,8 @@ export async function createReuniao(grupoId: string, formData: FormData) {
   const link_reuniao = linkReuniaoRaw || null;
   const horaRaw = String(formData.get("hora") ?? "").trim();
   const hora = horaRaw || null;
+  const duracaoRaw = String(formData.get("duracao_min") ?? "").trim();
+  const duracao_min = duracaoRaw ? Number(duracaoRaw) : 60;
   const entregasFeitas = formData.getAll("entrega_feita").map(String);
   const participantes = formData.getAll("participante_id").map(String);
   const responsavelIdRaw = String(formData.get("responsavel_id") ?? "").trim();
@@ -59,6 +61,7 @@ export async function createReuniao(grupoId: string, formData: FormData) {
       compareceu,
       link_reuniao,
       hora,
+      duracao_min,
       ...(data ? { data } : {}),
     })
     .select("*")
@@ -108,6 +111,8 @@ export async function updateReuniao(reuniaoId: string, formData: FormData) {
   const link_reuniao = linkReuniaoRaw || null;
   const horaRaw = String(formData.get("hora") ?? "").trim();
   const hora = horaRaw || null;
+  const duracaoRaw = String(formData.get("duracao_min") ?? "").trim();
+  const duracao_min = duracaoRaw ? Number(duracaoRaw) : 60;
   const participantes = formData.getAll("participante_id").map(String);
   const responsavelIdRaw = String(formData.get("responsavel_id") ?? "").trim();
   const responsavel_id = responsavelIdRaw || null;
@@ -132,6 +137,7 @@ export async function updateReuniao(reuniaoId: string, formData: FormData) {
       compareceu,
       link_reuniao,
       hora,
+      duracao_min,
       ...(data ? { data } : {}),
     })
     .eq("id", reuniaoId)

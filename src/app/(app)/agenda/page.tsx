@@ -23,7 +23,9 @@ export default async function AgendaPage({
     await Promise.all([
       supabase
         .from("reunioes")
-        .select("id, data, hora, responsavel_id, link_reuniao, grupos_gestao(nome)")
+        .select(
+          "id, data, hora, duracao_min, responsavel_id, link_reuniao, grupos_gestao(nome)"
+        )
         .gte("data", dataInicio)
         .lte("data", dataFim),
       supabase.from("responsaveis").select("*").order("nome"),
@@ -38,6 +40,7 @@ export default async function AgendaPage({
     id: string;
     data: string;
     hora: string | null;
+    duracao_min: number;
     responsavel_id: string | null;
     link_reuniao: string | null;
     grupos_gestao: { nome: string } | null;
@@ -56,6 +59,7 @@ export default async function AgendaPage({
     lista.push({
       id: r.id,
       hora: r.hora,
+      duracaoMin: r.duracao_min,
       grupoNome: r.grupos_gestao?.nome ?? "—",
       responsavelId: r.responsavel_id,
       responsavelNome: r.responsavel_id
@@ -74,8 +78,9 @@ export default async function AgendaPage({
         Agenda
       </h1>
       <p className="mt-1 text-sm text-text-secondary">
-        Semana com as reuniões marcadas, os compromissos da clínica do Pablo
-        (contexto) e os horários livres dele pra agendar direto.
+        Semana com as reuniões marcadas e os compromissos da clínica do
+        Pablo (contexto). Dois cliques em qualquer intervalo de 30 min
+        agenda uma reunião ali, em qualquer horário.
       </p>
 
       <div className="mt-4">
