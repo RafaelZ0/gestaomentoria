@@ -1,5 +1,9 @@
 import { Sidebar } from "@/components/Sidebar";
 import { createClient } from "@/lib/supabase/server";
+import {
+  calcularGruposParaAgendar,
+  calcularGruposPorReuniao,
+} from "@/lib/agendaStatus";
 import type {
   NotificacaoAgendar,
   NotificacaoHoje,
@@ -9,7 +13,7 @@ import type {
 // futura já agendada, avisa que está na hora de marcar a próxima — mais
 // cedo que o "sem sinal de vida" (+30d) porque aqui a ideia é agir antes
 // de virar um sinal de alerta mais sério.
-const DIAS_PARA_AGENDAR = 20;
+export const DIAS_PARA_AGENDAR = 20;
 
 export default async function AppLayout({
   children,
@@ -41,58 +45,18 @@ export default async function AppLayout({
   type ParticipanteRow = { reuniao_id: string; mentorados: { grupo_id: string } | null };
 
   const reunioesRows = (reunioes ?? []) as unknown as ReuniaoRow[];
+  const gruposPorReuniao = calcularGruposPorReuniao(
+    reunioesRows,
+    (participantes ?? []) as unknown as ParticipanteRow[]
+  );
 
-  // Uma reunião "conta" pra todo grupo com participante nela, não só pro
-  // grupo dono — reunião conjunta vale sinal de vida pra quem participou,
-  // igual valeria se fosse uma reunião só daquele grupo.
-  const gruposPorReuniao = new Map<string, Set<string>>();
-  for (const r of reunioesRows) {
-    gruposPorReuniao.set(r.id, new Set([r.grupo_id]));
-  }
-  for (const p of (participantes ?? []) as unknown as ParticipanteRow[]) {
-    const grupoId = p.mentorados?.grupo_id;
-    if (!grupoId) continue;
-    gruposPorReuniao.get(p.reuniao_id)?.add(grupoId);
-  }
-
-  const porGrupo = new Map<string, { ultima: string | null; temFutura: boolean }>();
-  for (const g of gruposAtivos ?? []) {
-    porGrupo.set(g.id, { ultima: null, temFutura: false });
-  }
-  for (const r of reunioesRows) {
-    const gruposEnvolvidos = gruposPorReuniao.get(r.id) ?? new Set([r.grupo_id]);
-    for (const gid of gruposEnvolvidos) {
-      const info = porGrupo.get(gid);
-      if (!info) continue;
-      if (r.data > hoje && r.compareceu) info.temFutura = true;
-      if (r.data <= hoje && (!info.ultima || r.data > info.ultima)) {
-        info.ultima = r.data;
-      }
-    }
-  }
-
-  function diasDesde(data: string) {
-    return Math.floor(
-      (Date.now() - new Date(data + "T00:00:00").getTime()) /
-        (1000 * 60 * 60 * 24)
-    );
-  }
-
-  const notifAgendar: NotificacaoAgendar[] = (gruposAtivos ?? [])
-    .filter((g) => {
-      const info = porGrupo.get(g.id)!;
-      if (info.temFutura) return false;
-      if (!info.ultima) return true;
-      return diasDesde(info.ultima) > DIAS_PARA_AGENDAR;
-    })
-    .map((g) => {
-      const ultima = porGrupo.get(g.id)!.ultima;
-      return {
-        id: g.id,
-        nome: g.nome,
-        diasSemReuniao: ultima ? diasDesde(ultima) : null,
-      };
-    });
+  const notifAgendar: NotificacaoAgendar[] = calcularGruposParaAgendar(
+    gruposAtivos ?? [],
+    reunioesRows,
+    gruposPorReuniao,
+    hoje,
+    DIAS_PARA_AGENDAR
+  );
 
   const notifHoje: NotificacaoHoje[] = reunioesRows
     .filter((r) => r.data === hoje && r.compareceu)
