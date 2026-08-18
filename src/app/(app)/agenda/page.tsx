@@ -1,32 +1,21 @@
 import { createClient } from "@/lib/supabase/server";
-import {
-  gerarGradeMes,
-  mesAnterior,
-  proximoMes,
-  formatMesAnoLongo,
-} from "@/lib/calendario";
+import { diasDaSemana } from "@/lib/calendario";
 import { CalendarioAgenda, type ReuniaoDoDia } from "@/components/CalendarioAgenda";
 
 export default async function AgendaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mes?: string }>;
+  searchParams: Promise<{ data?: string }>;
 }) {
-  const { mes: mesParam } = await searchParams;
-  const hoje = new Date();
-  let ano = hoje.getFullYear();
-  let mes = hoje.getMonth() + 1;
+  const { data: dataParam } = await searchParams;
+  const hoje = new Date().toISOString().slice(0, 10);
 
-  if (mesParam && /^\d{4}-\d{2}$/.test(mesParam)) {
-    const [anoStr, mesStr] = mesParam.split("-");
-    ano = Number(anoStr);
-    mes = Number(mesStr);
-  }
+  const dataRef =
+    dataParam && /^\d{4}-\d{2}-\d{2}$/.test(dataParam) ? dataParam : hoje;
 
-  const semanas = gerarGradeMes(ano, mes - 1);
-  const dias = semanas.flat();
+  const dias = diasDaSemana(dataRef);
   const dataInicio = dias[0];
-  const dataFim = dias[dias.length - 1];
+  const dataFim = dias[6];
 
   const supabase = await createClient();
 
@@ -77,31 +66,27 @@ export default async function AgendaPage({
     reunioesPorDia[r.data] = lista;
   }
 
-  const anterior = mesAnterior(ano, mes);
-  const proximo = proximoMes(ano, mes);
+  const [anoRef, mesRef] = dataRef.split("-").map(Number);
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-6xl">
       <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
         Agenda
       </h1>
       <p className="mt-1 text-sm text-text-secondary">
-        Calendário com as reuniões marcadas e os horários livres do Pablo,
-        conforme a grade fixa dele. Clique num dia pra ver os detalhes e
-        agendar.
+        Semana com as reuniões marcadas, os compromissos da clínica do Pablo
+        (contexto) e os horários livres dele pra agendar direto.
       </p>
 
       <div className="mt-4">
         <CalendarioAgenda
-          semanas={semanas}
-          mesAtual={mes}
+          dias={dias}
           reunioesPorDia={reunioesPorDia}
           pabloId={pablo?.id ?? null}
           grupos={grupos ?? []}
-          tituloMes={formatMesAnoLongo(ano, mes)}
-          hrefMesAnterior={`/agenda?mes=${anterior.ano}-${String(anterior.mes).padStart(2, "0")}`}
-          hrefProximoMes={`/agenda?mes=${proximo.ano}-${String(proximo.mes).padStart(2, "0")}`}
-          hoje={hoje.toISOString().slice(0, 10)}
+          hoje={hoje}
+          miniAno={anoRef}
+          miniMes={mesRef}
         />
       </div>
     </div>
