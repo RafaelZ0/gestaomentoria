@@ -13,6 +13,7 @@ import {
 const NAV_ITEMS = [
   { href: "/grupos", label: "Grupos de gestão" },
   { href: "/reunioes", label: "Reuniões" },
+  { href: "/agenda", label: "Agenda" },
   { href: "/financas", label: "Finanças" },
   { href: "/resultados", label: "Resultados" },
   { href: "/tipos-entrega", label: "Processos" },

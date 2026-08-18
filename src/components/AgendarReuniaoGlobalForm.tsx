@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { createReuniao } from "@/app/actions/reunioes";
 import { ResponsavelField } from "@/components/ResponsavelField";
-import { HorarioReuniaoField } from "@/components/HorarioReuniaoField";
 import type { Responsavel } from "@/lib/database.types";
 
 function amanha() {
@@ -23,10 +22,6 @@ export function AgendarReuniaoGlobalForm({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [grupoId, setGrupoId] = useState("");
-  const [data, setData] = useState(amanha());
-  const [responsavelId, setResponsavelId] = useState("");
-  const pablo = responsaveis.find((r) => r.nome.trim().toLowerCase() === "pablo");
-  const ehPablo = !!pablo && responsavelId === pablo.id;
 
   if (!open) {
     return (
@@ -88,18 +83,22 @@ export function AgendarReuniaoGlobalForm({
           <input
             type="date"
             name="data"
-            value={data}
+            defaultValue={amanha()}
             min={amanha()}
-            onChange={(e) => setData(e.target.value)}
             className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
           />
         </div>
-        <HorarioReuniaoField
-          data={data}
-          ehPablo={ehPablo}
-          pabloId={pablo?.id ?? null}
-        />
-        <ResponsavelField responsaveis={responsaveis} onChange={setResponsavelId} />
+        <div>
+          <label className="mb-1 block text-sm text-text-secondary">
+            Horário (opcional)
+          </label>
+          <input
+            type="time"
+            name="hora"
+            className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+          />
+        </div>
+        <ResponsavelField responsaveis={responsaveis} />
       </div>
 
       <div>
