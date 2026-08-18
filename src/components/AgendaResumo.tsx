@@ -20,38 +20,29 @@ export function AgendaResumo({
   paraAgendar: GrupoParaAgendar[];
 }) {
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div className="w-full max-w-[260px] space-y-4">
       <section>
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+        <h3 className="px-1 text-xs font-semibold text-text-secondary">
           Próximas reuniões
-        </h2>
+        </h3>
         {proximas.length === 0 ? (
-          <p className="mt-2 text-sm text-text-secondary">
-            Nenhuma reunião agendada.
-          </p>
+          <p className="mt-1 px-1 text-xs text-text-secondary">Nenhuma.</p>
         ) : (
-          <ul className="mt-3 space-y-2">
-            {proximas.map((r) => (
+          <ul className="mt-1.5 space-y-1">
+            {proximas.slice(0, 5).map((r) => (
               <li key={r.id}>
                 <Link
                   href={`/grupos/${r.grupoId}/reunioes`}
                   prefetch={false}
-                  className="flex items-center justify-between rounded-lg border border-border bg-bg-surface px-4 py-3 text-sm hover:bg-bg-surface-hover"
+                  className="block rounded-lg border border-border bg-bg-surface px-2 py-1.5 text-xs hover:bg-bg-surface-hover"
                 >
-                  <span>
-                    <span className="font-medium text-text-primary">
-                      {r.grupoNome}
-                    </span>
-                    <span className="text-text-secondary">
-                      {" "}
-                      — {formatDate(r.data)}
-                      {r.hora ? ` às ${r.hora.slice(0, 5)}` : ""}
-                      {r.responsavelNome ? ` (${r.responsavelNome})` : ""}
-                    </span>
+                  <span className="block truncate font-medium text-text-primary">
+                    {r.grupoNome}
                   </span>
-                  {r.linkReuniao && (
-                    <span className="text-xs text-accent">Link</span>
-                  )}
+                  <span className="text-text-secondary">
+                    {formatDate(r.data)}
+                    {r.hora ? ` ${r.hora.slice(0, 5)}` : ""}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -60,29 +51,29 @@ export function AgendaResumo({
       </section>
 
       <section>
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+        <h3 className="px-1 text-xs font-semibold text-text-secondary">
           Quem ainda precisa agendar
-        </h2>
+        </h3>
         {paraAgendar.length === 0 ? (
-          <p className="mt-2 text-sm text-text-secondary">
-            Todo mundo com reunião futura marcada.
+          <p className="mt-1 px-1 text-xs text-text-secondary">
+            Todo mundo em dia.
           </p>
         ) : (
-          <ul className="mt-3 space-y-2">
-            {paraAgendar.map((g) => (
+          <ul className="mt-1.5 space-y-1">
+            {paraAgendar.slice(0, 5).map((g) => (
               <li key={g.id}>
                 <Link
                   href={`/grupos/${g.id}/reunioes`}
                   prefetch={false}
-                  className="flex items-center justify-between rounded-lg border border-status-warn-text/30 bg-status-warn-bg px-4 py-3 text-sm hover:bg-status-warn-bg/70"
+                  className="flex items-center justify-between gap-2 rounded-lg border border-status-warn-text/30 bg-status-warn-bg px-2 py-1.5 text-xs hover:bg-status-warn-bg/70"
                 >
-                  <span className="font-medium text-text-primary">
+                  <span className="truncate font-medium text-text-primary">
                     {g.nome}
                   </span>
-                  <span className="text-xs text-status-warn-text">
+                  <span className="shrink-0 text-status-warn-text">
                     {g.diasSemReuniao === null
-                      ? "nunca teve reunião"
-                      : `há ${g.diasSemReuniao} dias`}
+                      ? "nunca"
+                      : `${g.diasSemReuniao}d`}
                   </span>
                 </Link>
               </li>

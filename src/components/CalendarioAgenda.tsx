@@ -6,6 +6,8 @@ import { blocosClinicaPablo } from "@/lib/disponibilidadePablo";
 import { formatDiaSemanaCurto, formatDiaMesCurto, somarDias } from "@/lib/calendario";
 import { AgendarSlotForm } from "@/components/AgendarSlotForm";
 import { MiniCalendario } from "@/components/MiniCalendario";
+import { AgendaResumo, type ProximaReuniao } from "@/components/AgendaResumo";
+import type { GrupoParaAgendar } from "@/lib/agendaStatus";
 
 export type ReuniaoDoDia = {
   id: string;
@@ -56,6 +58,8 @@ export function CalendarioAgenda({
   hoje,
   miniAno,
   miniMes,
+  proximas,
+  paraAgendar,
 }: {
   dias: string[];
   reunioesPorDia: Record<string, ReuniaoDoDia[]>;
@@ -64,6 +68,8 @@ export function CalendarioAgenda({
   hoje: string;
   miniAno: number;
   miniMes: number;
+  proximas: ProximaReuniao[];
+  paraAgendar: GrupoParaAgendar[];
 }) {
   const [slotAberto, setSlotAberto] = useState<{ data: string; hora: string } | null>(
     null
@@ -73,13 +79,14 @@ export function CalendarioAgenda({
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row">
-      <div className="shrink-0 lg:sticky lg:top-4 lg:self-start">
+      <div className="shrink-0 space-y-4 lg:sticky lg:top-4 lg:self-start">
         <MiniCalendario
           ano={miniAno}
           mes={miniMes}
           dataSelecionada={dataSelecionadaMini}
           hoje={hoje}
         />
+        <AgendaResumo proximas={proximas} paraAgendar={paraAgendar} />
       </div>
 
       <div className="min-w-0 flex-1 space-y-4">
@@ -189,7 +196,7 @@ export function CalendarioAgenda({
                         setSlotAberto({ data: diaISO, hora: horaDaLinha(i) });
                       }}
                       className={`border-t border-border/60 ${
-                        pabloId && !passou ? "cursor-pointer hover:bg-bg-surface-hover" : ""
+                        pabloId && !passou ? "cursor-pointer hover:bg-accent/10" : ""
                       }`}
                       style={{ gridRow: i + 1 }}
                     />
@@ -204,7 +211,7 @@ export function CalendarioAgenda({
                     .map((b, i) => (
                       <div
                         key={`bloco-${i}`}
-                        className="pointer-events-none m-0.5 overflow-hidden rounded bg-bg-surface-hover px-1.5 py-1 text-[10px] text-text-secondary"
+                        className="pointer-events-none m-0.5 overflow-hidden rounded border border-border bg-bg-surface-hover px-1.5 py-1 text-[10px] font-medium leading-tight text-text-primary"
                         style={{
                           gridRow: `${linhaDoHorario(b.inicio)} / span ${linhasDeDuracao(minutosDoHorario(b.fim) - minutosDoHorario(b.inicio))}`,
                         }}
@@ -236,14 +243,24 @@ export function CalendarioAgenda({
         </div>
 
         {slotAberto && pabloId && (
-          <AgendarSlotForm
-            data={slotAberto.data}
-            hora={slotAberto.hora}
-            pabloId={pabloId}
-            grupos={grupos}
-            onCancel={() => setSlotAberto(null)}
-            onAgendado={() => setSlotAberto(null)}
-          />
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+            onClick={() => setSlotAberto(null)}
+          >
+            <div
+              className="w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <AgendarSlotForm
+                data={slotAberto.data}
+                hora={slotAberto.hora}
+                pabloId={pabloId}
+                grupos={grupos}
+                onCancel={() => setSlotAberto(null)}
+                onAgendado={() => setSlotAberto(null)}
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>

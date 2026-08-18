@@ -6,7 +6,7 @@ import {
 } from "@/lib/agendaStatus";
 import { DIAS_PARA_AGENDAR } from "@/app/(app)/layout";
 import { CalendarioAgenda, type ReuniaoDoDia } from "@/components/CalendarioAgenda";
-import { AgendaResumo, type ProximaReuniao } from "@/components/AgendaResumo";
+import type { ProximaReuniao } from "@/components/AgendaResumo";
 
 export default async function AgendaPage({
   searchParams,
@@ -153,11 +153,9 @@ export default async function AgendaPage({
           hoje={hoje}
           miniAno={anoRef}
           miniMes={mesRef}
+          proximas={proximas}
+          paraAgendar={paraAgendar}
         />
-      </div>
-
-      <div className="mt-10">
-        <AgendaResumo proximas={proximas} paraAgendar={paraAgendar} />
       </div>
     </div>
   );
