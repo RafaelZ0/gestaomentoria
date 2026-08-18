@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { createReuniao } from "@/app/actions/reunioes";
 import { ResponsavelField } from "@/components/ResponsavelField";
+import { HorarioReuniaoField } from "@/components/HorarioReuniaoField";
 import { ParticipantesFields } from "@/components/ParticipantesFields";
 import type { Responsavel } from "@/lib/database.types";
 
@@ -39,6 +40,9 @@ export function NovaReuniaoForm({
   const [data, setData] = useState(hoje);
   const [naoCompareceu, setNaoCompareceu] = useState(false);
   const agendada = data > hoje;
+  const [responsavelId, setResponsavelId] = useState("");
+  const pablo = responsaveis.find((r) => r.nome.trim().toLowerCase() === "pablo");
+  const ehPablo = !!pablo && responsavelId === pablo.id;
 
   if (!open) {
     return (
@@ -84,21 +88,16 @@ export function NovaReuniaoForm({
           />
         </div>
 
-        <ResponsavelField responsaveis={responsaveis} />
+        <ResponsavelField responsaveis={responsaveis} onChange={setResponsavelId} />
       </div>
 
       {agendada && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-sm text-text-secondary">
-              Horário (opcional)
-            </label>
-            <input
-              type="time"
-              name="hora"
-              className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
-            />
-          </div>
+          <HorarioReuniaoField
+            data={data}
+            ehPablo={ehPablo}
+            pabloId={pablo?.id ?? null}
+          />
           <div>
             <label className="mb-1 block text-sm text-text-secondary">
               Link da reunião (opcional)

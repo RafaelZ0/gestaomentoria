@@ -28,6 +28,23 @@ function revalidarGrupos(grupoIds: Iterable<string>) {
   revalidatePath("/reunioes");
 }
 
+export async function buscarHorariosOcupadosPablo(
+  responsavelId: string,
+  data: string
+): Promise<string[]> {
+  const supabase = await createClient();
+  const { data: reunioes } = await supabase
+    .from("reunioes")
+    .select("hora")
+    .eq("responsavel_id", responsavelId)
+    .eq("data", data)
+    .not("hora", "is", null);
+
+  return (reunioes ?? [])
+    .map((r) => (r.hora as string | null)?.slice(0, 5))
+    .filter((h): h is string => !!h);
+}
+
 export async function createReuniao(grupoId: string, formData: FormData) {
   const supabase = await createClient();
 

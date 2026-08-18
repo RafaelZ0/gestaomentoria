@@ -8,10 +8,12 @@ export function ResponsavelField({
   responsaveis,
   defaultResponsavelId = "",
   label = "Quem conduziu a reunião",
+  onChange,
 }: {
   responsaveis: Responsavel[];
   defaultResponsavelId?: string;
   label?: string;
+  onChange?: (responsavelId: string) => void;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +21,11 @@ export function ResponsavelField({
   const [nomeResponsavel, setNomeResponsavel] = useState("");
   const [listaResponsaveis, setListaResponsaveis] = useState(responsaveis);
   const [responsavelId, setResponsavelId] = useState(defaultResponsavelId);
+
+  function selecionar(id: string) {
+    setResponsavelId(id);
+    onChange?.(id);
+  }
 
   return (
     <div>
@@ -31,7 +38,7 @@ export function ResponsavelField({
           <select
             name="responsavel_id"
             value={responsavelId}
-            onChange={(e) => setResponsavelId(e.target.value)}
+            onChange={(e) => selecionar(e.target.value)}
             className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
           >
             <option value="">—</option>
@@ -66,7 +73,7 @@ export function ResponsavelField({
                 try {
                   const responsavel = await addResponsavel(nomeResponsavel);
                   setListaResponsaveis((atual) => [...atual, responsavel]);
-                  setResponsavelId(responsavel.id);
+                  selecionar(responsavel.id);
                   setNomeResponsavel("");
                   setNovoResponsavel(false);
                 } catch (e) {
