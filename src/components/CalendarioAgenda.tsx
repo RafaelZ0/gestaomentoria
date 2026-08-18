@@ -34,8 +34,39 @@ function linhaDoHorario(hhmm: string): number {
   return Math.floor(minutos / 30) + 1;
 }
 
+function linhaDoMinuto(minutosAbsolutos: number): number {
+  return Math.floor((minutosAbsolutos - HORA_INICIO_GRADE * 60) / 30) + 1;
+}
+
 function linhasDeDuracao(minutos: number): number {
   return Math.max(1, Math.round(minutos / 30));
+}
+
+type Intervalo = { inicio: number; fim: number };
+
+// Tira de `bloco` qualquer pedaço que já esteja coberto por um intervalo
+// ocupado (reunião marcada), pra não desenhar o compromisso da clínica
+// por baixo de uma reunião real — evita a "mordida" visual de um
+// retângulo pequeno em cima de um maior.
+function subtrairOcupados(bloco: Intervalo, ocupados: Intervalo[]): Intervalo[] {
+  let partes = [bloco];
+  for (const o of ocupados) {
+    const novasPartes: Intervalo[] = [];
+    for (const p of partes) {
+      if (o.fim <= p.inicio || o.inicio >= p.fim) {
+        novasPartes.push(p);
+        continue;
+      }
+      if (o.inicio > p.inicio) {
+        novasPartes.push({ inicio: p.inicio, fim: Math.min(o.inicio, p.fim) });
+      }
+      if (o.fim < p.fim) {
+        novasPartes.push({ inicio: Math.max(o.fim, p.inicio), fim: p.fim });
+      }
+    }
+    partes = novasPartes;
+  }
+  return partes.filter((p) => p.fim > p.inicio);
 }
 
 function horaDaLinha(indice: number): string {
@@ -207,24 +238,38 @@ export function CalendarioAgenda({
                     />
                   ))}
 
-                  {blocos
-                    .filter(
-                      (b) =>
-                        minutosDoHorario(b.inicio) >= HORA_INICIO_GRADE * 60 &&
-                        minutosDoHorario(b.fim) <= HORA_FIM_GRADE * 60
-                    )
-                    .map((b, i) => (
-                      <div
-                        key={`bloco-${i}`}
-                        className="pointer-events-none overflow-hidden bg-bg-surface-hover/60 px-2 py-1 text-[10px] font-medium leading-tight text-text-secondary"
-                        style={{
-                          gridRow: `${linhaDoHorario(b.inicio)} / span ${linhasDeDuracao(minutosDoHorario(b.fim) - minutosDoHorario(b.inicio))}`,
-                        }}
-                        title={b.label}
-                      >
-                        {b.label}
-                      </div>
-                    ))}
+                  {(() => {
+                    const ocupados: Intervalo[] = reunioesDoDia.map((r) => {
+                      const inicio = minutosDoHorario(r.hora!.slice(0, 5));
+                      return { inicio, fim: inicio + r.duracaoMin };
+                    });
+
+                    return blocos.flatMap((b, i) => {
+                      const inicioMin = minutosDoHorario(b.inicio);
+                      const fimMin = minutosDoHorario(b.fim);
+                      const partes = subtrairOcupados(
+                        { inicio: inicioMin, fim: fimMin },
+                        ocupados
+                      ).filter(
+                        (p) =>
+                          p.inicio >= HORA_INICIO_GRADE * 60 &&
+                          p.fim <= HORA_FIM_GRADE * 60
+                      );
+
+                      return partes.map((p, j) => (
+                        <div
+                          key={`bloco-${i}-${j}`}
+                          className="pointer-events-none overflow-hidden bg-bg-surface-hover/60 px-2 py-1 text-[10px] font-medium leading-tight text-text-secondary"
+                          style={{
+                            gridRow: `${linhaDoMinuto(p.inicio)} / span ${linhasDeDuracao(p.fim - p.inicio)}`,
+                          }}
+                          title={b.label}
+                        >
+                          {b.label}
+                        </div>
+                      ));
+                    });
+                  })()}
 
                   {reunioesDoDia.map((r) => {
                     const hora = r.hora!.slice(0, 5);
