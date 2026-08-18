@@ -186,15 +186,20 @@ export function CalendarioAgenda({
                     display: "grid",
                     gridTemplateRows: `repeat(${LINHAS_TOTAIS}, ${ALTURA_LINHA}px)`,
                   }}
+                  onDoubleClick={(e) => {
+                    if (!pabloId || passou) return;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const offsetY = e.clientY - rect.top;
+                    const indice = Math.max(
+                      0,
+                      Math.min(LINHAS_TOTAIS - 1, Math.floor(offsetY / ALTURA_LINHA))
+                    );
+                    setSlotAberto({ data: diaISO, hora: horaDaLinha(indice) });
+                  }}
                 >
                   {Array.from({ length: LINHAS_TOTAIS }, (_, i) => (
                     <div
                       key={i}
-                      role={pabloId && !passou ? "button" : undefined}
-                      onDoubleClick={() => {
-                        if (!pabloId || passou) return;
-                        setSlotAberto({ data: diaISO, hora: horaDaLinha(i) });
-                      }}
                       className={`border-t border-border/60 ${
                         pabloId && !passou ? "cursor-pointer hover:bg-accent/10" : ""
                       }`}
@@ -202,24 +207,31 @@ export function CalendarioAgenda({
                     />
                   ))}
 
-                  {blocos
-                    .filter(
+                  {(() => {
+                    const blocosVisiveis = blocos.filter(
                       (b) =>
                         minutosDoHorario(b.inicio) >= HORA_INICIO_GRADE * 60 &&
                         minutosDoHorario(b.fim) <= HORA_FIM_GRADE * 60
-                    )
-                    .map((b, i) => (
-                      <div
-                        key={`bloco-${i}`}
-                        className="pointer-events-none m-0.5 overflow-hidden rounded border border-border bg-bg-surface-hover px-1.5 py-1 text-[10px] font-medium leading-tight text-text-primary"
-                        style={{
-                          gridRow: `${linhaDoHorario(b.inicio)} / span ${linhasDeDuracao(minutosDoHorario(b.fim) - minutosDoHorario(b.inicio))}`,
-                        }}
-                        title={b.label}
-                      >
-                        {b.label}
-                      </div>
-                    ))}
+                    );
+                    return blocosVisiveis.map((b, i) => {
+                      const ehPrimeiro = i === 0;
+                      const ehUltimo = i === blocosVisiveis.length - 1;
+                      return (
+                        <div
+                          key={`bloco-${i}`}
+                          className={`pointer-events-none mx-0.5 overflow-hidden border-x border-border bg-bg-surface-hover px-1.5 py-1 text-[10px] font-medium leading-tight text-text-primary ${
+                            ehPrimeiro ? "mt-0.5 rounded-t border-t" : ""
+                          } ${ehUltimo ? "mb-0.5 rounded-b border-b" : ""}`}
+                          style={{
+                            gridRow: `${linhaDoHorario(b.inicio)} / span ${linhasDeDuracao(minutosDoHorario(b.fim) - minutosDoHorario(b.inicio))}`,
+                          }}
+                          title={b.label}
+                        >
+                          {b.label}
+                        </div>
+                      );
+                    });
+                  })()}
 
                   {reunioesDoDia.map((r) => {
                     const hora = r.hora!.slice(0, 5);

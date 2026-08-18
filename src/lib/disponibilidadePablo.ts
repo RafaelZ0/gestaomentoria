@@ -57,32 +57,40 @@ export function blocosClinicaPablo(dataISO: string): BlocoClinica[] {
     case 1: // segunda
       return [
         { label: "Coringa", inicio: "08:00", fim: "12:00" },
+        { label: "Almoço", inicio: "12:00", fim: "13:30" },
         { label: "Avaliação", inicio: "13:30", fim: "18:00" },
       ];
     case 2: // terça
       return [
         { label: "Cirurgia", inicio: "08:00", fim: "12:00" },
+        { label: "Almoço", inicio: "12:00", fim: "13:30" },
         { label: "Cirurgia", inicio: "13:30", fim: "19:00" },
       ];
     case 3: // quarta
       return [
         { label: "Consulta de Alta", inicio: "08:00", fim: "12:00" },
+        { label: "Almoço", inicio: "12:00", fim: "13:30" },
         { label: "Avaliação", inicio: "13:30", fim: "19:00" },
       ];
     case 4: // quinta — tarde/noite são só os horários de reunião (ver horariosPablo)
-      return [{ label: "Curso de Implante", inicio: "08:00", fim: "12:00" }];
+      return [
+        { label: "Curso de Implante", inicio: "08:00", fim: "12:00" },
+        { label: "Almoço", inicio: "12:00", fim: "13:00" },
+      ];
     case 5: // sexta
       return [
         { label: "Reunião Equipe Clínica / Coringa", inicio: "08:00", fim: "12:00" },
+        { label: "Almoço", inicio: "12:00", fim: "13:30" },
         { label: "Cirurgia curso / Coringa", inicio: "13:30", fim: "17:30" },
       ];
     case 6: // sábado
-      return semanaDeReuniao
-        ? [{ label: "Avaliação", inicio: "08:00", fim: "12:00" }]
-        : [
-            { label: "Avaliação", inicio: "08:00", fim: "12:00" },
-            { label: "Gravação", inicio: "13:15", fim: "15:30" },
-          ];
+      return [
+        { label: "Avaliação", inicio: "08:00", fim: "12:00" },
+        { label: "Almoço", inicio: "12:00", fim: "13:15" },
+        ...(semanaDeReuniao
+          ? []
+          : [{ label: "Gravação", inicio: "13:15", fim: "15:30" }]),
+      ];
     default:
       return [];
   }
