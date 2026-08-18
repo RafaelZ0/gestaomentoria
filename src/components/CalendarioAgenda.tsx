@@ -207,38 +207,31 @@ export function CalendarioAgenda({
                     />
                   ))}
 
-                  {(() => {
-                    const blocosVisiveis = blocos.filter(
+                  {blocos
+                    .filter(
                       (b) =>
                         minutosDoHorario(b.inicio) >= HORA_INICIO_GRADE * 60 &&
                         minutosDoHorario(b.fim) <= HORA_FIM_GRADE * 60
-                    );
-                    return blocosVisiveis.map((b, i) => {
-                      const ehPrimeiro = i === 0;
-                      const ehUltimo = i === blocosVisiveis.length - 1;
-                      return (
-                        <div
-                          key={`bloco-${i}`}
-                          className={`pointer-events-none mx-0.5 overflow-hidden border-x border-border bg-bg-surface-hover px-1.5 py-1 text-[10px] font-medium leading-tight text-text-primary ${
-                            ehPrimeiro ? "mt-0.5 rounded-t border-t" : ""
-                          } ${ehUltimo ? "mb-0.5 rounded-b border-b" : ""}`}
-                          style={{
-                            gridRow: `${linhaDoHorario(b.inicio)} / span ${linhasDeDuracao(minutosDoHorario(b.fim) - minutosDoHorario(b.inicio))}`,
-                          }}
-                          title={b.label}
-                        >
-                          {b.label}
-                        </div>
-                      );
-                    });
-                  })()}
+                    )
+                    .map((b, i) => (
+                      <div
+                        key={`bloco-${i}`}
+                        className="pointer-events-none overflow-hidden bg-bg-surface-hover/60 px-2 py-1 text-[10px] font-medium leading-tight text-text-secondary"
+                        style={{
+                          gridRow: `${linhaDoHorario(b.inicio)} / span ${linhasDeDuracao(minutosDoHorario(b.fim) - minutosDoHorario(b.inicio))}`,
+                        }}
+                        title={b.label}
+                      >
+                        {b.label}
+                      </div>
+                    ))}
 
                   {reunioesDoDia.map((r) => {
                     const hora = r.hora!.slice(0, 5);
                     return (
                       <div
                         key={r.id}
-                        className="m-0.5 overflow-hidden rounded bg-status-accent-bg px-1.5 py-1 text-[10px] font-medium text-status-accent-text"
+                        className="relative z-10 m-0.5 overflow-hidden rounded border border-accent/40 bg-status-accent-bg px-1.5 py-1 text-[10px] font-medium text-status-accent-text shadow-sm"
                         style={{
                           gridRow: `${linhaDoHorario(hora)} / span ${linhasDeDuracao(r.duracaoMin)}`,
                         }}
