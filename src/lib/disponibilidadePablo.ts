@@ -1,7 +1,7 @@
 // Grade fixa de horários de reunião do Pablo (agenda da clínica dele,
-// conforme PDF "horários Pablo" enviado em 2026-08-18). Segunda e sábado
-// são quinzenais (alternam com "Gravação"/sem entrega da mentoria),
-// sincronizados pela mesma referência de semana: 22/08/2026 (sábado) é
+// conforme PDF "horários Pablo" enviado em 2026-08-18, com o ajuste de
+// segunda-feira pedido em seguida). Só o sábado é quinzenal (alterna com
+// "Gravação"/sem entrega da mentoria), referência: 22/08/2026 (sábado) é
 // uma "semana de reunião".
 const REFERENCIA_SEMANA_DE_REUNIAO = new Date(2026, 7, 22);
 
@@ -21,8 +21,8 @@ export function horariosPablo(dataISO: string): string[] {
   const semanaDeReuniao = ehSemanaDeReuniao(data);
 
   switch (diaSemana) {
-    case 1: // segunda — Entrega da mentoria (quinzenal)
-      return semanaDeReuniao ? ["19:00"] : [];
+    case 1: // segunda — 3 horários toda semana
+      return ["18:00", "19:00", "20:00"];
     case 2: // terça
       return ["12:20", "19:00"];
     case 3: // quarta
