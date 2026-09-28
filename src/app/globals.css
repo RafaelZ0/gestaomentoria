@@ -128,3 +128,24 @@ input[type="number"] {
 .btn-secondary:disabled {
   opacity: 0.6;
 }
+
+/* Compromisso da clínica na /agenda: hachurado semitransparente, pra as
+   linhas da grade continuarem visíveis por baixo. */
+.agenda-compromisso {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(139, 146, 166, 0.16) 0 6px,
+    rgba(139, 146, 166, 0.07) 6px 12px
+  );
+}
+
+/* Linhas da grade da /agenda (hora cheia e meia hora), numa camada própria
+   acima dos compromissos. 56px = 2 slots de 28px (ALTURA_LINHA). */
+.agenda-linhas {
+  background-image:
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(35, 40, 56, 0.55) 1px, transparent 1px);
+  background-size:
+    100% 56px,
+    100% 28px;
+}

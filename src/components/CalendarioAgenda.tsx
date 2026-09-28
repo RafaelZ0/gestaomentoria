@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { blocosClinicaPablo } from "@/lib/disponibilidadePablo";
 import { formatDiaSemanaCurto, formatDiaMesCurto, somarDias } from "@/lib/calendario";
-import { AgendarSlotForm } from "@/components/AgendarSlotForm";
+import {
+  horarioDosMinutos,
+  minutosDoHorario,
+  type ReuniaoParaConflito,
+} from "@/lib/agendaConflitos";
+import { AgendarReuniaoModal } from "@/components/AgendarReuniaoModal";
 import { MiniCalendario } from "@/components/MiniCalendario";
 import { AgendaResumo, type ProximaReuniao } from "@/components/AgendaResumo";
 import type { GrupoParaAgendar } from "@/lib/agendaStatus";
 
 export type ReuniaoDoDia = {
   id: string;
+  grupoId: string;
   hora: string | null;
   duracaoMin: number;
   grupoNome: string;
@@ -21,70 +27,93 @@ export type ReuniaoDoDia = {
 
 const HORA_INICIO_GRADE = 8;
 const HORA_FIM_GRADE = 21;
+const MIN_INICIO = HORA_INICIO_GRADE * 60;
+const MIN_FIM = HORA_FIM_GRADE * 60;
 const LINHAS_TOTAIS = (HORA_FIM_GRADE - HORA_INICIO_GRADE) * 2;
-const ALTURA_LINHA = 28; // px
-
-function minutosDoHorario(hhmm: string): number {
-  const [h, m] = hhmm.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function linhaDoHorario(hhmm: string): number {
-  const minutos = minutosDoHorario(hhmm) - HORA_INICIO_GRADE * 60;
-  return Math.floor(minutos / 30) + 1;
-}
-
-function linhaDoMinuto(minutosAbsolutos: number): number {
-  return Math.floor((minutosAbsolutos - HORA_INICIO_GRADE * 60) / 30) + 1;
-}
-
-function linhasDeDuracao(minutos: number): number {
-  return Math.max(1, Math.round(minutos / 30));
-}
-
-type Intervalo = { inicio: number; fim: number };
-
-// Tira de `bloco` qualquer pedaço que já esteja coberto por um intervalo
-// ocupado (reunião marcada), pra não desenhar o compromisso da clínica
-// por baixo de uma reunião real — evita a "mordida" visual de um
-// retângulo pequeno em cima de um maior.
-function subtrairOcupados(bloco: Intervalo, ocupados: Intervalo[]): Intervalo[] {
-  let partes = [bloco];
-  for (const o of ocupados) {
-    const novasPartes: Intervalo[] = [];
-    for (const p of partes) {
-      if (o.fim <= p.inicio || o.inicio >= p.fim) {
-        novasPartes.push(p);
-        continue;
-      }
-      if (o.inicio > p.inicio) {
-        novasPartes.push({ inicio: p.inicio, fim: Math.min(o.inicio, p.fim) });
-      }
-      if (o.fim < p.fim) {
-        novasPartes.push({ inicio: Math.max(o.fim, p.inicio), fim: p.fim });
-      }
-    }
-    partes = novasPartes;
-  }
-  return partes.filter((p) => p.fim > p.inicio);
-}
-
-function horaDaLinha(indice: number): string {
-  const minutos = HORA_INICIO_GRADE * 60 + indice * 30;
-  const h = Math.floor(minutos / 60);
-  const m = minutos % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-}
+const ALTURA_LINHA = 28; // px por slot de 30 min
+const PX_POR_MIN = ALTURA_LINHA / 30;
 
 const HORAS_LABEL = Array.from(
   { length: HORA_FIM_GRADE - HORA_INICIO_GRADE },
   (_, i) => `${String(HORA_INICIO_GRADE + i).padStart(2, "0")}:00`
 );
 
+function horaDoSlot(indice: number): string {
+  return horarioDosMinutos(MIN_INICIO + indice * 30);
+}
+
+type Evento =
+  | {
+      tipo: "compromisso";
+      key: string;
+      inicio: number;
+      fim: number;
+      label: string;
+    }
+  | {
+      tipo: "reuniao";
+      key: string;
+      inicio: number;
+      fim: number;
+      reuniao: ReuniaoDoDia;
+    };
+
+type EventoPosicionado = Evento & { coluna: number; colunas: number; span: number };
+
+function sobrepoe(a: { inicio: number; fim: number }, b: { inicio: number; fim: number }) {
+  return a.inicio < b.fim && b.inicio < a.fim;
+}
+
+// Layout "lado a lado" (estilo Google Agenda): eventos que se cruzam formam
+// um grupo que divide a largura do dia; cada evento vai pra primeira coluna
+// livre e depois se estica pras colunas vizinhas que estiverem vagas no
+// intervalo dele.
+function posicionarLadoALado(eventos: Evento[]): EventoPosicionado[] {
+  const ordenados = [...eventos].sort(
+    (a, b) => a.inicio - b.inicio || b.fim - a.fim
+  );
+  const resultado: EventoPosicionado[] = [];
+
+  let grupo: Evento[][] = [];
+  let fimDoGrupo = -1;
+
+  function fecharGrupo() {
+    const colunas = grupo.length;
+    grupo.forEach((coluna, idx) => {
+      for (const ev of coluna) {
+        let span = 1;
+        while (
+          idx + span < colunas &&
+          !grupo[idx + span].some((outro) => sobrepoe(outro, ev))
+        ) {
+          span++;
+        }
+        resultado.push({ ...ev, coluna: idx, colunas, span });
+      }
+    });
+    grupo = [];
+    fimDoGrupo = -1;
+  }
+
+  for (const ev of ordenados) {
+    if (grupo.length > 0 && ev.inicio >= fimDoGrupo) fecharGrupo();
+    const livre = grupo.find((coluna) => coluna[coluna.length - 1].fim <= ev.inicio);
+    if (livre) livre.push(ev);
+    else grupo.push([ev]);
+    fimDoGrupo = Math.max(fimDoGrupo, ev.fim);
+  }
+  if (grupo.length > 0) fecharGrupo();
+
+  return resultado;
+}
+
+type Tooltip = { x: number; y: number; titulo: string; linhas: string[] };
+
 export function CalendarioAgenda({
   dias,
   reunioesPorDia,
   pabloId,
+  responsaveis,
   grupos,
   hoje,
   miniAno,
@@ -95,6 +124,7 @@ export function CalendarioAgenda({
   dias: string[];
   reunioesPorDia: Record<string, ReuniaoDoDia[]>;
   pabloId: string | null;
+  responsaveis: { id: string; nome: string }[];
   grupos: { id: string; nome: string }[];
   hoje: string;
   miniAno: number;
@@ -105,8 +135,187 @@ export function CalendarioAgenda({
   const [slotAberto, setSlotAberto] = useState<{ data: string; hora: string } | null>(
     null
   );
+  const [slotHover, setSlotHover] = useState<{ data: string; indice: number } | null>(
+    null
+  );
+  const [tooltip, setTooltip] = useState<Tooltip | null>(null);
+  // "todos" ou o id do responsável
+  const [filtro, setFiltro] = useState("todos");
 
   const dataSelecionadaMini = dias[0] === hoje ? hoje : dias[0];
+  const podeAgendar = responsaveis.length > 0;
+
+  const nomeResponsavel = useCallback(
+    (id: string | null, nome: string | null) =>
+      id && id === pabloId ? "Dr. Pablo" : (nome ?? "Sem responsável"),
+    [pabloId]
+  );
+
+  const reunioesPorData = useMemo(() => {
+    const mapa: Record<string, ReuniaoParaConflito[]> = {};
+    for (const d of dias) {
+      mapa[d] = (reunioesPorDia[d] ?? [])
+        .filter((r) => r.hora)
+        .map((r) => ({
+          id: r.id,
+          hora: r.hora!.slice(0, 5),
+          duracaoMin: r.duracaoMin,
+          responsavelId: r.responsavelId,
+          grupoNome: r.grupoNome,
+        }));
+    }
+    return mapa;
+  }, [dias, reunioesPorDia]);
+
+  const mostrarCompromissos = filtro === "todos" || filtro === pabloId;
+
+  const eventosPorDia = useMemo(() => {
+    const mapa: Record<string, EventoPosicionado[]> = {};
+    for (const d of dias) {
+      const eventos: Evento[] = [];
+      if (mostrarCompromissos) {
+        blocosClinicaPablo(d).forEach((b, i) => {
+          eventos.push({
+            tipo: "compromisso",
+            key: `c-${i}`,
+            inicio: minutosDoHorario(b.inicio),
+            fim: minutosDoHorario(b.fim),
+            label: b.label,
+          });
+        });
+      }
+      for (const r of reunioesPorDia[d] ?? []) {
+        if (!r.hora) continue;
+        if (filtro !== "todos" && r.responsavelId !== filtro) continue;
+        const inicio = minutosDoHorario(r.hora.slice(0, 5));
+        eventos.push({
+          tipo: "reuniao",
+          key: r.id,
+          inicio,
+          fim: inicio + r.duracaoMin,
+          reuniao: r,
+        });
+      }
+      mapa[d] = posicionarLadoALado(
+        eventos
+          .map((e) => ({
+            ...e,
+            inicio: Math.max(e.inicio, MIN_INICIO),
+            fim: Math.min(e.fim, MIN_FIM),
+          }))
+          .filter((e) => e.fim > e.inicio)
+      );
+    }
+    return mapa;
+  }, [dias, reunioesPorDia, filtro, mostrarCompromissos]);
+
+  function mostrarTooltip(e: React.MouseEvent | React.FocusEvent, t: Omit<Tooltip, "x" | "y">) {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const LARGURA_TOOLTIP = 256;
+    const x =
+      rect.right + 6 + LARGURA_TOOLTIP > window.innerWidth
+        ? rect.left - 6 - LARGURA_TOOLTIP
+        : rect.right + 6;
+    setTooltip({ ...t, x, y: rect.top });
+  }
+
+  function corDaReuniao(r: ReuniaoDoDia): string {
+    if (r.responsavelId && r.responsavelId === pabloId) {
+      return "border-accent bg-accent/25 text-text-primary";
+    }
+    if (r.responsavelId) {
+      return "border-status-ok-text bg-status-ok-text/20 text-text-primary";
+    }
+    return "border-text-tertiary bg-status-neutral-bg text-text-primary";
+  }
+
+  // O corpo do evento não captura o mouse (o clique cai no slot de baixo);
+  // só o ícone de detalhes captura.
+  function renderEvento(ev: EventoPosicionado) {
+    const estilo = {
+      top: (ev.inicio - MIN_INICIO) * PX_POR_MIN + 1,
+      height: (ev.fim - ev.inicio) * PX_POR_MIN - 2,
+      left: `calc(${(ev.coluna / ev.colunas) * 100}% + 2px)`,
+      width: `calc(${(ev.span / ev.colunas) * 100}% - 4px)`,
+    };
+    const horario = `${horarioDosMinutos(ev.inicio)}–${horarioDosMinutos(ev.fim)}`;
+
+    if (ev.tipo === "compromisso") {
+      const detalhes = {
+        titulo: ev.label,
+        linhas: [
+          horario,
+          "Compromisso da clínica do Dr. Pablo",
+          "Grade fixa (PDF de horários) · só leitura",
+        ],
+      };
+      return (
+        <div
+          key={ev.key}
+          className="agenda-compromisso pointer-events-none absolute overflow-hidden rounded border-l-2 border-text-tertiary/60 py-0.5 pl-1.5 pr-5 text-[10px] leading-tight text-text-secondary"
+          style={estilo}
+        >
+          <p className="truncate font-medium">{ev.label}</p>
+          <p className="truncate tabular-nums text-text-tertiary">{horario}</p>
+          <button
+            type="button"
+            aria-label={`Detalhes: ${ev.label}`}
+            className="pointer-events-auto absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] text-text-tertiary hover:bg-bg-surface-hover hover:text-text-primary"
+            onMouseEnter={(e) => mostrarTooltip(e, detalhes)}
+            onFocus={(e) => mostrarTooltip(e, detalhes)}
+            onMouseLeave={() => setTooltip(null)}
+            onBlur={() => setTooltip(null)}
+          >
+            ⓘ
+          </button>
+        </div>
+      );
+    }
+
+    const r = ev.reuniao;
+    const responsavel = nomeResponsavel(r.responsavelId, r.responsavelNome);
+    const detalhes = {
+      titulo: r.grupoNome,
+      linhas: [
+        horario,
+        `Responsável: ${responsavel}`,
+        ...(r.linkReuniao ? [r.linkReuniao] : []),
+        "Clique pra abrir as reuniões do grupo",
+      ],
+    };
+    return (
+      <div
+        key={ev.key}
+        className={`pointer-events-none absolute overflow-hidden rounded border-l-2 py-0.5 pl-1.5 pr-5 text-[10px] leading-tight shadow-sm ${corDaReuniao(r)}`}
+        style={estilo}
+      >
+        <p className="truncate font-semibold">{r.grupoNome}</p>
+        <p className="truncate tabular-nums text-text-secondary">
+          {horario} · {responsavel}
+        </p>
+        <Link
+          href={`/grupos/${r.grupoId}/reunioes`}
+          prefetch={false}
+          aria-label={`Abrir reuniões de ${r.grupoNome}`}
+          className="pointer-events-auto absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] text-text-secondary hover:bg-bg-surface hover:text-text-primary"
+          onMouseEnter={(e) => mostrarTooltip(e, detalhes)}
+          onFocus={(e) => mostrarTooltip(e, detalhes)}
+          onMouseLeave={() => setTooltip(null)}
+          onBlur={() => setTooltip(null)}
+        >
+          ↗
+        </Link>
+      </div>
+    );
+  }
+
+  const opcoesFiltro = [
+    { valor: "todos", label: "Todos" },
+    ...responsaveis
+      .filter((r) => r.id !== pabloId)
+      .map((r) => ({ valor: r.id, label: r.nome })),
+    ...(pabloId ? [{ valor: pabloId, label: "Dr. Pablo" }] : []),
+  ];
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row">
@@ -120,8 +329,8 @@ export function CalendarioAgenda({
         <AgendaResumo proximas={proximas} paraAgendar={paraAgendar} />
       </div>
 
-      <div className="min-w-0 flex-1 space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="min-w-0 flex-1 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Link
               href={`/agenda?data=${somarDias(dias[0], -7)}`}
@@ -140,21 +349,57 @@ export function CalendarioAgenda({
             >
               ›
             </Link>
+            <span className="ml-1 text-sm text-text-secondary">
+              {formatDiaMesCurto(dias[0])} — {formatDiaMesCurto(dias[6])}
+            </span>
           </div>
-          <span className="text-sm text-text-secondary">
-            {formatDiaMesCurto(dias[0])} — {formatDiaMesCurto(dias[6])}
-          </span>
+
+          <div
+            role="radiogroup"
+            aria-label="Filtrar por responsável"
+            className="flex rounded-lg border border-border bg-bg-surface p-0.5"
+          >
+            {opcoesFiltro.map((o) => (
+              <button
+                key={o.valor}
+                type="button"
+                role="radio"
+                aria-checked={filtro === o.valor}
+                onClick={() => setFiltro(o.valor)}
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                  filtro === o.valor
+                    ? "bg-accent text-white"
+                    : "text-text-secondary hover:text-text-primary"
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <p className="text-xs text-text-secondary">
-          Dois cliques em qualquer intervalo de 30 min agenda uma reunião ali
-          — mesmo em cima de um compromisso da clínica.
-        </p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
+          <span className="flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-sm border-l-2 border-accent bg-accent/25" />
+            Reunião Dr. Pablo
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-sm border-l-2 border-status-ok-text bg-status-ok-text/20" />
+            Reunião Rafael
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="agenda-compromisso h-3 w-3 rounded-sm border-l-2 border-text-tertiary/60" />
+            Compromisso da clínica
+          </span>
+          <span className="text-text-tertiary">
+            · Clique em qualquer horário pra agendar
+          </span>
+        </div>
 
         <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
           <div
             className="grid min-w-[880px]"
-            style={{ gridTemplateColumns: "56px repeat(7, 1fr)" }}
+            style={{ gridTemplateColumns: "56px repeat(7, minmax(0, 1fr))" }}
           >
             <div className="border-b border-r border-border" />
             {dias.map((d) => {
@@ -182,135 +427,108 @@ export function CalendarioAgenda({
 
             <div
               className="relative border-r border-border"
-              style={{
-                gridColumn: 1,
-                gridRow: `2 / span ${LINHAS_TOTAIS}`,
-                display: "grid",
-                gridTemplateRows: `repeat(${LINHAS_TOTAIS}, ${ALTURA_LINHA}px)`,
-              }}
+              style={{ height: LINHAS_TOTAIS * ALTURA_LINHA }}
             >
               {HORAS_LABEL.map((h, i) => (
                 <span
                   key={h}
-                  className="border-t border-border px-1 text-right text-[10px] text-text-secondary"
-                  style={{ gridRow: `${i * 2 + 1} / span 2` }}
+                  className="absolute right-1 -translate-y-1/2 text-[10px] tabular-nums text-text-secondary"
+                  style={{ top: i * 2 * ALTURA_LINHA }}
                 >
-                  {h}
+                  {i === 0 ? "" : h}
                 </span>
               ))}
             </div>
 
-            {dias.map((diaISO, colIdx) => {
-              const reunioesDoDia = (reunioesPorDia[diaISO] ?? []).filter(
-                (r) => r.hora
-              );
-              const blocos = blocosClinicaPablo(diaISO);
+            {dias.map((diaISO) => {
               const passou = diaISO < hoje;
+              const clicavel = podeAgendar && !passou;
+              const hoverAqui = slotHover?.data === diaISO ? slotHover.indice : null;
 
               return (
                 <div
                   key={diaISO}
-                  className="relative border-r border-border last:border-r-0"
-                  style={{
-                    gridColumn: colIdx + 2,
-                    gridRow: `2 / span ${LINHAS_TOTAIS}`,
-                    display: "grid",
-                    gridTemplateRows: `repeat(${LINHAS_TOTAIS}, ${ALTURA_LINHA}px)`,
-                  }}
-                  onDoubleClick={(e) => {
-                    if (!pabloId || passou) return;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const offsetY = e.clientY - rect.top;
-                    const indice = Math.max(
-                      0,
-                      Math.min(LINHAS_TOTAIS - 1, Math.floor(offsetY / ALTURA_LINHA))
-                    );
-                    setSlotAberto({ data: diaISO, hora: horaDaLinha(indice) });
-                  }}
+                  className={`relative border-r border-border last:border-r-0 ${
+                    passou ? "bg-bg-base/40" : ""
+                  }`}
+                  style={{ height: LINHAS_TOTAIS * ALTURA_LINHA }}
+                  onMouseLeave={() => setSlotHover(null)}
                 >
+                  {/* Camada 1: slots de 30 min, largura total. São eles que
+                      recebem o clique, inclusive embaixo de compromissos e
+                      reuniões (que deixam o clique passar). */}
                   {Array.from({ length: LINHAS_TOTAIS }, (_, i) => (
-                    <div
+                    <button
                       key={i}
-                      className={`border-t border-border/60 ${
-                        pabloId && !passou ? "cursor-pointer hover:bg-accent/10" : ""
+                      type="button"
+                      tabIndex={clicavel ? 0 : -1}
+                      disabled={!clicavel}
+                      aria-label={`Agendar ${formatDiaMesCurto(diaISO)} às ${horaDoSlot(i)}`}
+                      onMouseEnter={() => clicavel && setSlotHover({ data: diaISO, indice: i })}
+                      onFocus={() => clicavel && setSlotHover({ data: diaISO, indice: i })}
+                      onClick={() => setSlotAberto({ data: diaISO, hora: horaDoSlot(i) })}
+                      className={`absolute inset-x-0 block outline-none ${
+                        clicavel ? "cursor-pointer" : "cursor-default"
                       }`}
-                      style={{ gridRow: i + 1 }}
+                      style={{ top: i * ALTURA_LINHA, height: ALTURA_LINHA }}
                     />
                   ))}
 
-                  {(() => {
-                    const ocupados: Intervalo[] = reunioesDoDia.map((r) => {
-                      const inicio = minutosDoHorario(r.hora!.slice(0, 5));
-                      return { inicio, fim: inicio + r.duracaoMin };
-                    });
+                  {/* Camada 2: compromissos, depois as linhas da grade por
+                      cima deles (pra continuarem visíveis), depois reuniões. */}
+                  {eventosPorDia[diaISO]
+                    .filter((ev) => ev.tipo === "compromisso")
+                    .map(renderEvento)}
+                  <div aria-hidden className="agenda-linhas pointer-events-none absolute inset-0" />
+                  {eventosPorDia[diaISO]
+                    .filter((ev) => ev.tipo === "reuniao")
+                    .map(renderEvento)}
 
-                    return blocos.flatMap((b, i) => {
-                      const inicioMin = minutosDoHorario(b.inicio);
-                      const fimMin = minutosDoHorario(b.fim);
-                      const partes = subtrairOcupados(
-                        { inicio: inicioMin, fim: fimMin },
-                        ocupados
-                      ).filter(
-                        (p) =>
-                          p.inicio >= HORA_INICIO_GRADE * 60 &&
-                          p.fim <= HORA_FIM_GRADE * 60
-                      );
-
-                      return partes.map((p, j) => (
-                        <div
-                          key={`bloco-${i}-${j}`}
-                          className="pointer-events-none overflow-hidden bg-bg-surface-hover/60 px-2 py-1 text-[10px] font-medium leading-tight text-text-secondary"
-                          style={{
-                            gridRow: `${linhaDoMinuto(p.inicio)} / span ${linhasDeDuracao(p.fim - p.inicio)}`,
-                          }}
-                          title={b.label}
-                        >
-                          {b.label}
-                        </div>
-                      ));
-                    });
-                  })()}
-
-                  {reunioesDoDia.map((r) => {
-                    const hora = r.hora!.slice(0, 5);
-                    return (
-                      <div
-                        key={r.id}
-                        className="relative z-10 m-0.5 overflow-hidden rounded border border-accent/40 bg-status-accent-bg px-1.5 py-1 text-[10px] font-medium text-status-accent-text shadow-sm"
-                        style={{
-                          gridRow: `${linhaDoHorario(hora)} / span ${linhasDeDuracao(r.duracaoMin)}`,
-                        }}
-                        title={`${hora} ${r.grupoNome}${r.responsavelNome ? ` — ${r.responsavelNome}` : ""}`}
-                      >
-                        {hora} {r.grupoNome}
-                      </div>
-                    );
-                  })}
+                  {/* Camada 3: destaque do slot sob o mouse, por cima de tudo,
+                      com o horário que vai abrir no modal. */}
+                  {hoverAqui != null && (
+                    <div
+                      className="pointer-events-none absolute inset-x-0 z-10 rounded-sm bg-accent/10 ring-1 ring-inset ring-accent/70"
+                      style={{ top: hoverAqui * ALTURA_LINHA, height: ALTURA_LINHA }}
+                    >
+                      <span className="absolute left-1 top-1/2 -translate-y-1/2 rounded bg-accent px-1 text-[10px] font-semibold tabular-nums text-white">
+                        {horaDoSlot(hoverAqui)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
 
-        {slotAberto && pabloId && (
+        {tooltip && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
-            onClick={() => setSlotAberto(null)}
+            role="tooltip"
+            className="pointer-events-none fixed z-40 max-w-64 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-xs shadow-xl"
+            style={{ left: tooltip.x, top: tooltip.y }}
           >
-            <div
-              className="w-full max-w-md"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <AgendarSlotForm
-                data={slotAberto.data}
-                hora={slotAberto.hora}
-                pabloId={pabloId}
-                grupos={grupos}
-                onCancel={() => setSlotAberto(null)}
-                onAgendado={() => setSlotAberto(null)}
-              />
-            </div>
+            <p className="font-medium text-text-primary">{tooltip.titulo}</p>
+            {tooltip.linhas.map((l) => (
+              <p key={l} className="break-words text-text-secondary">
+                {l}
+              </p>
+            ))}
           </div>
+        )}
+
+        {slotAberto && (
+          <AgendarReuniaoModal
+            dataInicial={slotAberto.data}
+            horaInicial={slotAberto.hora}
+            responsavelInicial={filtro === "todos" ? "" : filtro}
+            hoje={hoje}
+            grupos={grupos}
+            responsaveis={responsaveis}
+            pabloId={pabloId}
+            reunioesPorData={reunioesPorData}
+            onClose={() => setSlotAberto(null)}
+          />
         )}
       </div>
     </div>

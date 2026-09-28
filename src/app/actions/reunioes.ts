@@ -2,6 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import {
+  calcularConflitos,
+  minutosDoHorario,
+  type Conflito,
+} from "@/lib/agendaConflitos";
 
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -99,6 +104,102 @@ export async function createReuniao(grupoId: string, formData: FormData) {
   }
 
   revalidarGrupos(gruposEnvolvidos);
+}
+
+export type ResultadoAgendamento =
+  | { ok: true }
+  | { ok: false; error: string; conflitos?: Conflito[] };
+
+// Agendamento pela grade da /agenda. Retorna {ok, error} em vez de throw
+// (erro lançado não chega no cliente via startTransition nesta versão).
+export async function agendarReuniao(input: {
+  grupoId: string;
+  responsavelId: string;
+  data: string;
+  hora: string;
+  duracaoMin: number;
+  linkReuniao: string;
+  resumo: string;
+  forcarEncaixe: boolean;
+}): Promise<ResultadoAgendamento> {
+  const { grupoId, responsavelId, data, hora, duracaoMin, forcarEncaixe } = input;
+
+  if (!grupoId) return { ok: false, error: "Escolha o grupo." };
+  if (!responsavelId) return { ok: false, error: "Escolha o responsável." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) return { ok: false, error: "Data inválida." };
+  if (!/^\d{2}:\d{2}$/.test(hora)) return { ok: false, error: "Horário inválido." };
+  if (!Number.isFinite(duracaoMin) || duracaoMin < 5 || duracaoMin > 12 * 60) {
+    return { ok: false, error: "Duração inválida." };
+  }
+  if (minutosDoHorario(hora) + duracaoMin > 24 * 60) {
+    return { ok: false, error: "A reunião passaria da meia-noite." };
+  }
+
+  const supabase = await createClient();
+
+  const [{ data: responsaveis }, { data: reunioesDoDia }] = await Promise.all([
+    supabase.from("responsaveis").select("id, nome"),
+    supabase
+      .from("reunioes")
+      .select("id, hora, duracao_min, responsavel_id, grupos_gestao(nome)")
+      .eq("data", data)
+      .not("hora", "is", null),
+  ]);
+
+  if (!(responsaveis ?? []).some((r) => r.id === responsavelId)) {
+    return { ok: false, error: "Responsável não encontrado." };
+  }
+  const pabloId =
+    (responsaveis ?? []).find((r) => r.nome.trim().toLowerCase() === "pablo")?.id ??
+    null;
+
+  if (!forcarEncaixe) {
+    type Row = {
+      id: string;
+      hora: string;
+      duracao_min: number;
+      responsavel_id: string | null;
+      grupos_gestao: { nome: string } | null;
+    };
+    const conflitos = calcularConflitos({
+      data,
+      hora,
+      duracaoMin,
+      responsavelId,
+      pabloId,
+      reunioesDoDia: ((reunioesDoDia ?? []) as unknown as Row[]).map((r) => ({
+        id: r.id,
+        hora: r.hora.slice(0, 5),
+        duracaoMin: r.duracao_min,
+        responsavelId: r.responsavel_id,
+        grupoNome: r.grupos_gestao?.nome ?? "—",
+      })),
+    });
+    if (conflitos.length > 0) {
+      return {
+        ok: false,
+        error: "Esse horário tem conflito. Marque \"Forçar encaixe\" pra salvar mesmo assim.",
+        conflitos,
+      };
+    }
+  }
+
+  const { error } = await supabase.from("reunioes").insert({
+    grupo_id: grupoId,
+    data,
+    hora,
+    duracao_min: duracaoMin,
+    responsavel_id: responsavelId,
+    link_reuniao: input.linkReuniao.trim() || null,
+    resumo: input.resumo.trim(),
+    compareceu: true,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidarGrupos([grupoId]);
+  revalidatePath("/agenda");
+  return { ok: true };
 }
 
 export async function updateReuniao(reuniaoId: string, formData: FormData) {

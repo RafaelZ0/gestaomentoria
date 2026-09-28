@@ -35,7 +35,7 @@ export default async function AgendaPage({
     supabase
       .from("reunioes")
       .select(
-        "id, data, hora, duracao_min, responsavel_id, link_reuniao, grupos_gestao(nome)"
+        "id, grupo_id, data, hora, duracao_min, responsavel_id, link_reuniao, grupos_gestao(nome)"
       )
       .gte("data", dataInicio)
       .lte("data", dataFim),
@@ -57,6 +57,7 @@ export default async function AgendaPage({
 
   type ReuniaoRow = {
     id: string;
+    grupo_id: string;
     data: string;
     hora: string | null;
     duracao_min: number;
@@ -90,6 +91,7 @@ export default async function AgendaPage({
     const lista = reunioesPorDia[r.data] ?? [];
     lista.push({
       id: r.id,
+      grupoId: r.grupo_id,
       hora: r.hora,
       duracaoMin: r.duracao_min,
       grupoNome: r.grupos_gestao?.nome ?? "—",
@@ -139,9 +141,8 @@ export default async function AgendaPage({
         Agenda
       </h1>
       <p className="mt-1 text-sm text-text-secondary">
-        Semana com as reuniões marcadas e os compromissos da clínica do
-        Pablo (contexto). Dois cliques em qualquer intervalo de 30 min
-        agenda uma reunião ali, em qualquer horário.
+        Reuniões do Rafael e do Dr. Pablo e os compromissos da clínica, na
+        mesma semana. Clique em qualquer horário pra agendar.
       </p>
 
       <div className="mt-4">
@@ -149,6 +150,7 @@ export default async function AgendaPage({
           dias={dias}
           reunioesPorDia={reunioesPorDia}
           pabloId={pablo?.id ?? null}
+          responsaveis={(responsaveis ?? []).map((r) => ({ id: r.id, nome: r.nome }))}
           grupos={grupos ?? []}
           hoje={hoje}
           miniAno={anoRef}
