@@ -4,6 +4,7 @@ import { calcSaudeGrupo, calcTendenciaRoas } from "@/lib/saude";
 import { GruposTable } from "@/components/GruposTable";
 import { GruposResumo } from "@/components/GruposResumo";
 import { calcularSemSinalDeVida } from "@/lib/agendaStatus";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export default async function GruposPage() {
   const supabase = await createClient();
@@ -140,19 +141,15 @@ export default async function GruposPage() {
     });
 
   return (
-    <div className="max-w-6xl">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
-          Grupos de gestão
-        </h1>
-        <Link
-          href="/grupos/novo"
-          prefetch={false}
-          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold transition-colors hover:bg-gold-hover"
-        >
-          + Novo grupo
-        </Link>
-      </div>
+    <div className="mx-auto flex max-w-[960px] flex-col gap-9">
+      <PageHeader
+        titulo="Grupos de gestão"
+        acoes={
+          <Link href="/grupos/novo" prefetch={false} className="btn-primary">
+            Novo grupo
+          </Link>
+        }
+      />
 
       <GruposResumo
         totalPago={totalPago}

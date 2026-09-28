@@ -1,42 +1,38 @@
-const VARIANTS = {
-  ok: "bg-ok/10 text-ok",
-  alert: "bg-danger/10 text-danger",
-  warn: "bg-warn/10 text-warn",
-  neutral: "bg-off/10 text-muted",
-  accent: "bg-gold/10 text-gold",
-} as const;
+import { StatusDot, sentenceCase, tomStatusGrupo, tomTrafego, type Tom } from "@/components/ui/StatusDot";
 
-type Variant = keyof typeof VARIANTS;
+// Compatibilidade: as telas que ainda usam StatusBadge passam a mostrar o
+// novo formato (ponto + texto em sentence case), sem etiqueta preenchida.
+const TOM_POR_VARIANTE = {
+  ok: "ok",
+  alert: "danger",
+  warn: "warn",
+  neutral: "off",
+  accent: "info",
+  paused: "paused",
+} as const satisfies Record<string, Tom>;
 
-export function StatusBadge({
-  label,
-  variant,
-}: {
-  label: string;
-  variant: Variant;
-}) {
+type Variant = keyof typeof TOM_POR_VARIANTE;
+
+export function StatusBadge({ label, variant }: { label: string; variant: Variant }) {
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${VARIANTS[variant]}`}
-    >
-      {label}
-    </span>
+    <StatusDot tom={TOM_POR_VARIANTE[variant]} className="text-[13.5px]">
+      {sentenceCase(label)}
+    </StatusDot>
   );
 }
 
 export function statusGrupoVariant(status: string): Variant {
-  return status === "Ativo" ? "ok" : "alert";
+  return tomStatusGrupo(status) === "ok" ? "ok" : "neutral";
 }
 
 export function trafegoPagoVariant(trafego: string | null): Variant {
-  switch (trafego) {
-    case "SIM":
+  switch (tomTrafego(trafego)) {
+    case "ok":
       return "ok";
-    case "PARADO":
-      return "warn";
-    case "EM IMPLEMENTAÇÃO":
+    case "paused":
+      return "paused";
+    case "info":
       return "accent";
-    case "NÃO":
     default:
       return "neutral";
   }

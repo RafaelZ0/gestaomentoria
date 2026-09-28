@@ -1,17 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { formatBRL, formatDate } from "@/lib/format";
-import {
-  StatusBadge,
-  statusGrupoVariant,
-  trafegoPagoVariant,
-} from "@/components/StatusBadge";
+import Link from "next/link";
+import { displayGroupName, formatBRL, formatDate } from "@/lib/format";
+import { Icon } from "@/components/ui/Icon";
+import { Segmented } from "@/components/ui/Segmented";
+import { StatusDot, sentenceCase, tomStatusGrupo, tomTrafego } from "@/components/ui/StatusDot";
 import type { GrupoGestao } from "@/lib/database.types";
 
-type SortKey = "nome" | "status" | "trafego_pago" | "valor_mensal" | "data_inicio";
+type SortKey = "nome" | "trafego_pago" | "valor_mensal" | "data_inicio";
 type SortDir = "asc" | "desc";
+type FiltroStatus = "Ativo" | "Inativo" | "todos";
 
 const TRAFEGO_ORDEM: Record<string, number> = {
   SIM: 0,
@@ -20,14 +19,13 @@ const TRAFEGO_ORDEM: Record<string, number> = {
   NÃO: 3,
 };
 
+const COLUNAS = "grid-cols-[2fr_1.4fr_1fr_1fr]";
+
 export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
-  const router = useRouter();
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [busca, setBusca] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState<"todos" | "Ativo" | "Inativo">(
-    "todos"
-  );
+  const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("Ativo");
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -42,7 +40,11 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
     const buscaNormalizada = busca.trim().toLowerCase();
     return grupos.filter((g) => {
       if (filtroStatus !== "todos" && g.status !== filtroStatus) return false;
-      if (buscaNormalizada && !g.nome.toLowerCase().includes(buscaNormalizada)) {
+      if (
+        buscaNormalizada &&
+        !g.nome.toLowerCase().includes(buscaNormalizada) &&
+        !displayGroupName(g.nome).toLowerCase().includes(buscaNormalizada)
+      ) {
         return false;
       }
       return true;
@@ -50,16 +52,9 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
   }, [grupos, filtroStatus, busca]);
 
   const gruposOrdenados = useMemo(() => {
-    if (!sortKey) return gruposFiltrados;
-
     const fator = sortDir === "asc" ? 1 : -1;
-
     return [...gruposFiltrados].sort((a, b) => {
       switch (sortKey) {
-        case "nome":
-          return fator * a.nome.localeCompare(b.nome, "pt-BR");
-        case "status":
-          return fator * a.status.localeCompare(b.status, "pt-BR");
         case "trafego_pago": {
           const ra = a.trafego_pago ? TRAFEGO_ORDEM[a.trafego_pago] ?? 99 : 99;
           const rb = b.trafego_pago ? TRAFEGO_ORDEM[b.trafego_pago] ?? 99 : 99;
@@ -69,142 +64,125 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
           return fator * (Number(a.valor_mensal) - Number(b.valor_mensal));
         case "data_inicio":
           return fator * a.data_inicio.localeCompare(b.data_inicio);
+        case "nome":
+          return fator * displayGroupName(a.nome).localeCompare(displayGroupName(b.nome), "pt-BR");
         default:
-          return 0;
+          return displayGroupName(a.nome).localeCompare(displayGroupName(b.nome), "pt-BR");
       }
     });
   }, [gruposFiltrados, sortKey, sortDir]);
 
   return (
-    <div className="mt-8">
-      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-line bg-hover p-3">
-        <div>
-          <label className="mb-1 block text-xs text-text-2">Buscar</label>
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Segmented
+            rotulo="Filtrar por status"
+            valor={filtroStatus}
+            onChange={setFiltroStatus}
+            opcoes={[
+              { valor: "Ativo", label: "Ativos" },
+              { valor: "Inativo", label: "Inativos" },
+              { valor: "todos", label: "Todos" },
+            ]}
+          />
+          <span className="text-[13px] text-subtle">
+            {gruposOrdenados.length} grupo{gruposOrdenados.length === 1 ? "" : "s"}
+          </span>
+        </div>
+        <label className="flex h-9 w-full items-center gap-2 rounded-[10px] bg-surface px-3 text-subtle focus-within:ring-2 focus-within:ring-gold/40 sm:w-[280px]">
+          <Icon nome="busca" tamanho={16} traco={1.8} />
           <input
             type="text"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Nome do grupo"
-            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold"
+            placeholder="Buscar grupo"
+            aria-label="Buscar grupo"
+            className="w-full border-0 bg-transparent text-sm text-text shadow-none outline-none placeholder:text-subtle focus:shadow-none"
           />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs text-text-2">Status</label>
-          <select
-            value={filtroStatus}
-            onChange={(e) =>
-              setFiltroStatus(e.target.value as "todos" | "Ativo" | "Inativo")
-            }
-            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
-          >
-            <option value="todos">Todos</option>
-            <option value="Ativo">Ativos</option>
-            <option value="Inativo">Inativos</option>
-          </select>
-        </div>
-        <p className="ml-auto text-sm text-text-2">
-          {gruposOrdenados.length} grupo{gruposOrdenados.length === 1 ? "" : "s"}
-        </p>
+        </label>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-line bg-surface">
-        <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-line text-text-2">
-            <SortableHeader label="Nome" sortKey="nome" current={sortKey} dir={sortDir} onSort={handleSort} />
-            <SortableHeader label="Status" sortKey="status" current={sortKey} dir={sortDir} onSort={handleSort} />
-            <SortableHeader
-              label="Tráfego pago"
-              sortKey="trafego_pago"
-              current={sortKey}
-              dir={sortDir}
-              onSort={handleSort}
-            />
-            <SortableHeader
-              label="Valor mensal"
-              sortKey="valor_mensal"
-              current={sortKey}
-              dir={sortDir}
-              onSort={handleSort}
-            />
-            <SortableHeader label="Início" sortKey="data_inicio" current={sortKey} dir={sortDir} onSort={handleSort} />
-            <th className="px-4 py-3"></th>
-          </tr>
-        </thead>
-        <tbody>
+      <div className="overflow-x-auto">
+        <div className="min-w-[600px]">
+          <div className={`grid ${COLUNAS} border-b border-line px-3 pb-2.5 pt-3 text-[12.5px] text-subtle`}>
+            <CabecalhoOrdenavel label="Grupo" chave="nome" atual={sortKey} dir={sortDir} onSort={handleSort} />
+            <CabecalhoOrdenavel label="Tráfego pago" chave="trafego_pago" atual={sortKey} dir={sortDir} onSort={handleSort} />
+            <CabecalhoOrdenavel label="Valor mensal" chave="valor_mensal" atual={sortKey} dir={sortDir} onSort={handleSort} direita />
+            <CabecalhoOrdenavel label="Início" chave="data_inicio" atual={sortKey} dir={sortDir} onSort={handleSort} direita />
+          </div>
+
           {gruposOrdenados.map((g) => (
-            <tr
+            <Link
               key={g.id}
-              onClick={() => router.push(`/grupos/${g.id}`)}
-              className="cursor-pointer border-b border-line last:border-0 hover:bg-hover"
+              href={`/grupos/${g.id}`}
+              prefetch={false}
+              className={`grid ${COLUNAS} h-[50px] items-center border-b border-line-soft px-3 text-[14.5px] text-text transition-colors last:border-b-0 hover:bg-hover`}
             >
-              <td className="px-4 py-3 font-medium text-text">{g.nome}</td>
-              <td className="px-4 py-3">
-                <StatusBadge label={g.status} variant={statusGrupoVariant(g.status)} />
-              </td>
-              <td className="px-4 py-3">
-                {g.trafego_pago ? (
-                  <StatusBadge
-                    label={g.trafego_pago}
-                    variant={trafegoPagoVariant(g.trafego_pago)}
+              <span className="flex min-w-0 items-center gap-2">
+                {filtroStatus === "todos" && (
+                  <span
+                    title={g.status}
+                    className={`h-[7px] w-[7px] shrink-0 rounded-full ${
+                      tomStatusGrupo(g.status) === "ok" ? "bg-ok" : "bg-off"
+                    }`}
                   />
-                ) : (
-                  <span className="text-text-2">—</span>
                 )}
-              </td>
-              <td className="px-4 py-3 tabular-nums text-text">
-                {formatBRL(Number(g.valor_mensal))}
-              </td>
-              <td className="px-4 py-3 tabular-nums text-text-2">
+                <span className="truncate">{displayGroupName(g.nome)}</span>
+              </span>
+              <span className="text-[13.5px]">
+                {g.trafego_pago ? (
+                  <StatusDot tom={tomTrafego(g.trafego_pago)}>{sentenceCase(g.trafego_pago)}</StatusDot>
+                ) : (
+                  <span className="text-muted">—</span>
+                )}
+              </span>
+              <span className="text-right tabular-nums">{formatBRL(Number(g.valor_mensal))}</span>
+              <span className="text-right text-[13.5px] tabular-nums text-muted">
                 {formatDate(g.data_inicio)}
-              </td>
-              <td className="px-4 py-3 text-right text-text-2">→</td>
-            </tr>
+              </span>
+            </Link>
           ))}
+
           {gruposOrdenados.length === 0 && (
-            <tr>
-              <td colSpan={6} className="px-4 py-8 text-center text-text-2">
-                {grupos.length === 0
-                  ? "Nenhum grupo cadastrado ainda."
-                  : "Nenhum grupo encontrado com esse filtro."}
-              </td>
-            </tr>
+            <p className="px-3 py-8 text-center text-sm text-muted">
+              {grupos.length === 0
+                ? "Nenhum grupo cadastrado ainda."
+                : "Nenhum grupo encontrado com esse filtro."}
+            </p>
           )}
-        </tbody>
-        </table>
+        </div>
       </div>
     </div>
   );
 }
 
-function SortableHeader({
+function CabecalhoOrdenavel({
   label,
-  sortKey,
-  current,
+  chave,
+  atual,
   dir,
   onSort,
+  direita = false,
 }: {
   label: string;
-  sortKey: SortKey;
-  current: SortKey | null;
+  chave: SortKey;
+  atual: SortKey | null;
   dir: SortDir;
   onSort: (key: SortKey) => void;
+  direita?: boolean;
 }) {
-  const active = current === sortKey;
+  const ativo = atual === chave;
   return (
-    <th className="px-4 py-3 font-medium">
-      <button
-        type="button"
-        onClick={() => onSort(sortKey)}
-        className={`flex items-center gap-1 hover:text-text ${
-          active ? "text-text" : ""
-        }`}
-      >
-        {label}
-        <span className="text-xs">
-          {active ? (dir === "asc" ? "▲" : "▼") : ""}
-        </span>
-      </button>
-    </th>
+    <button
+      type="button"
+      onClick={() => onSort(chave)}
+      className={`flex items-center gap-1 hover:text-text ${direita ? "justify-end" : ""} ${
+        ativo ? "text-text-2" : ""
+      }`}
+    >
+      {label}
+      {ativo && <span className="text-[10px]">{dir === "asc" ? "▲" : "▼"}</span>}
+    </button>
   );
 }

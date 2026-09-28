@@ -1,19 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { StatusBadge } from "@/components/StatusBadge";
+import Link from "next/link";
+import { displayGroupName } from "@/lib/format";
+import { StatusDot, type Tom } from "@/components/ui/StatusDot";
 import type { StatusSaude } from "@/lib/saude";
 
-const STATUS_LABEL: Record<StatusSaude, string> = {
-  ok: "Saudável",
-  warn: "Atenção",
-  alert: "Crítico",
-};
-
-const STATUS_VARIANT: Record<StatusSaude, "ok" | "warn" | "alert"> = {
-  ok: "ok",
-  warn: "warn",
-  alert: "alert",
+const STATUS: Record<StatusSaude, { label: string; tom: Tom }> = {
+  ok: { label: "Saudável", tom: "ok" },
+  warn: { label: "Atenção", tom: "warn" },
+  alert: { label: "Crítico", tom: "danger" },
 };
 
 export function SaudeClientesPanel({
@@ -21,46 +16,33 @@ export function SaudeClientesPanel({
 }: {
   grupos: { id: string; nome: string; status: StatusSaude; flags: string[] }[];
 }) {
-  const router = useRouter();
+  if (grupos.length === 0) {
+    return <p className="py-6 text-sm text-muted">Nenhum grupo ativo.</p>;
+  }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-line bg-surface">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-line text-text-2">
-            <th className="px-4 py-3 font-medium">Grupo</th>
-            <th className="px-4 py-3 font-medium">Status</th>
-            <th className="px-4 py-3 font-medium">Sinais</th>
-          </tr>
-        </thead>
-        <tbody>
-          {grupos.map((g) => (
-            <tr
-              key={g.id}
-              onClick={() => router.push(`/grupos/${g.id}`)}
-              className="cursor-pointer border-b border-line last:border-0 hover:bg-hover"
-            >
-              <td className="px-4 py-3 font-medium text-text">{g.nome}</td>
-              <td className="px-4 py-3">
-                <StatusBadge
-                  label={STATUS_LABEL[g.status]}
-                  variant={STATUS_VARIANT[g.status]}
-                />
-              </td>
-              <td className="px-4 py-3 text-text-2">
-                {g.flags.length > 0 ? g.flags.join(" · ") : "Nenhum sinal de alerta"}
-              </td>
-            </tr>
-          ))}
-          {grupos.length === 0 && (
-            <tr>
-              <td colSpan={3} className="px-4 py-8 text-center text-text-2">
-                Nenhum grupo ativo.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+    <div className="flex flex-col">
+      <div className="grid grid-cols-[1.4fr_1fr_2.4fr] gap-4 border-b border-line px-3 pb-2.5 pt-3 text-[12.5px] text-subtle">
+        <span>Grupo</span>
+        <span>Status</span>
+        <span>Sinais</span>
+      </div>
+      {grupos.map((g) => (
+        <Link
+          key={g.id}
+          href={`/grupos/${g.id}`}
+          prefetch={false}
+          className="grid grid-cols-[1.4fr_1fr_2.4fr] items-center gap-4 border-b border-line-soft px-3 py-3 text-[14.5px] transition-colors last:border-b-0 hover:bg-hover"
+        >
+          <span className="truncate text-text">{displayGroupName(g.nome)}</span>
+          <StatusDot tom={STATUS[g.status].tom} className="text-[13.5px]">
+            {STATUS[g.status].label}
+          </StatusDot>
+          <span className="text-[13.5px] text-muted">
+            {g.flags.length > 0 ? g.flags.join(" · ") : "Nenhum sinal de alerta"}
+          </span>
+        </Link>
+      ))}
     </div>
   );
 }

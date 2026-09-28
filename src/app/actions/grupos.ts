@@ -100,6 +100,66 @@ export async function updateTrafego(grupoId: string, formData: FormData) {
   revalidatePath("/grupos");
 }
 
+// Modo "Editar → Salvar" da Visão geral: grava de uma vez os campos que antes
+// eram editados soltos (mesmas conversões de updateGrupoCampo/updateTrafego).
+export async function atualizarGrupo(
+  grupoId: string,
+  dados: {
+    nome: string;
+    valor_mensal: string;
+    data_inicio: string;
+    observacoes: string;
+    trafego_pago: TrafegoPago | "";
+    trafego_pago_desde: string;
+    valor_investido_dia: string;
+    meta_roas: string;
+    meta_cpl: string;
+  }
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const nome = dados.nome.trim();
+  if (!nome) return { ok: false, error: "O nome do grupo não pode ficar vazio." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dados.data_inicio)) {
+    return { ok: false, error: "Informe a data de início do contrato." };
+  }
+
+  const numeroOuNull = (v: string) => {
+    const limpo = v.trim().replace(",", ".");
+    if (limpo === "") return null;
+    const n = Number(limpo);
+    return Number.isFinite(n) ? n : NaN;
+  };
+
+  const valor_mensal = numeroOuNull(dados.valor_mensal) ?? 0;
+  const valor_investido_dia = numeroOuNull(dados.valor_investido_dia);
+  const meta_roas = numeroOuNull(dados.meta_roas);
+  const meta_cpl = numeroOuNull(dados.meta_cpl);
+  if ([valor_mensal, valor_investido_dia, meta_roas, meta_cpl].some((n) => Number.isNaN(n))) {
+    return { ok: false, error: "Confira os valores numéricos." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("grupos_gestao")
+    .update({
+      nome,
+      valor_mensal,
+      data_inicio: dados.data_inicio,
+      observacoes: dados.observacoes.trim() || null,
+      trafego_pago: dados.trafego_pago || null,
+      trafego_pago_desde: dados.trafego_pago_desde.trim() || null,
+      valor_investido_dia,
+      meta_roas,
+      meta_cpl,
+    })
+    .eq("id", grupoId);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/grupos/${grupoId}`, "layout");
+  revalidatePath("/grupos");
+  return { ok: true };
+}
+
 export async function cancelarGrupo(grupoId: string, dataCancelamento?: string) {
   const supabase = await createClient();
 

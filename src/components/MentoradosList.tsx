@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { addMentorado, removeMentorado, updateMentorado } from "@/app/actions/grupos";
 import { formatTelefone } from "@/lib/format";
+import { RowMenu } from "@/components/ui/RowMenu";
 import type { Mentorado } from "@/lib/database.types";
 
 export function MentoradosList({
@@ -16,17 +17,27 @@ export function MentoradosList({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className="space-y-3">
-      {mentorados.length === 0 && !adding && (
-        <p className="text-sm text-text-2">Nenhum mentorado cadastrado.</p>
-      )}
-      <ul className="space-y-2">
-        {mentorados.map((m) => (
-          <MentoradoRow key={m.id} grupoId={grupoId} mentorado={m} />
-        ))}
-      </ul>
+    <section className="flex flex-col">
+      <div className="mb-1.5 flex items-center justify-between">
+        <h2 className="text-[15px] font-semibold text-text">Mentorados</h2>
+        {!adding && (
+          <button type="button" onClick={() => setAdding(true)} className="link text-[13.5px]">
+            Adicionar
+          </button>
+        )}
+      </div>
 
-      {adding ? (
+      {mentorados.length === 0 && !adding && (
+        <p className="border-b border-line-soft py-3 text-sm text-muted">
+          Nenhum mentorado cadastrado.
+        </p>
+      )}
+
+      {mentorados.map((m) => (
+        <MentoradoRow key={m.id} grupoId={grupoId} mentorado={m} />
+      ))}
+
+      {adding && (
         <form
           action={(formData) =>
             startTransition(async () => {
@@ -34,108 +45,103 @@ export function MentoradosList({
               setAdding(false);
             })
           }
-          className="flex items-end gap-3"
+          className="flex flex-wrap items-end gap-3 border-b border-line-soft py-3"
         >
-          <div className="flex-1">
-            <label className="mb-1 block text-sm text-text-2">Nome</label>
-            <input
-              name="nome"
-              required
-              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
-            />
+          <label className="flex min-w-40 flex-1 flex-col gap-1.5">
+            <span className="rotulo">Nome</span>
+            <input name="nome" required autoFocus className="campo" />
+          </label>
+          <label className="flex min-w-40 flex-1 flex-col gap-1.5">
+            <span className="rotulo">Telefone</span>
+            <input name="telefone" className="campo" />
+          </label>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setAdding(false)} className="btn-secondary">
+              Cancelar
+            </button>
+            <button type="submit" disabled={isPending} className="btn-secondary">
+              {isPending ? "Adicionando…" : "Adicionar"}
+            </button>
           </div>
-          <div className="flex-1">
-            <label className="mb-1 block text-sm text-text-2">Telefone</label>
-            <input
-              name="telefone"
-              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isPending}
-            className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
-          >
-            Adicionar
-          </button>
-          <button
-            type="button"
-            onClick={() => setAdding(false)}
-            className="btn-secondary"
-          >
-            Cancelar
-          </button>
         </form>
-      ) : (
-        <button
-          onClick={() => setAdding(true)}
-          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
-        >
-          + Adicionar mentorado
-        </button>
       )}
-    </div>
+    </section>
   );
 }
 
-function MentoradoRow({
-  grupoId,
-  mentorado,
-}: {
-  grupoId: string;
-  mentorado: Mentorado;
-}) {
+function MentoradoRow({ grupoId, mentorado }: { grupoId: string; mentorado: Mentorado }) {
   const [isPending, startTransition] = useTransition();
+  const [editando, setEditando] = useState(false);
   const [nome, setNome] = useState(mentorado.nome);
   const [telefone, setTelefone] = useState(mentorado.telefone ?? "");
-  const [editandoTelefone, setEditandoTelefone] = useState(false);
 
-  function salvar(novoNome: string, novoTelefone: string) {
-    if (!novoNome.trim()) {
-      setNome(mentorado.nome);
-      return;
-    }
-    if (novoNome === mentorado.nome && novoTelefone === (mentorado.telefone ?? "")) {
-      return;
-    }
-    startTransition(() =>
-      updateMentorado(grupoId, mentorado.id, novoNome, novoTelefone)
+  function cancelar() {
+    setNome(mentorado.nome);
+    setTelefone(mentorado.telefone ?? "");
+    setEditando(false);
+  }
+
+  if (editando) {
+    return (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!nome.trim()) return;
+          startTransition(async () => {
+            await updateMentorado(grupoId, mentorado.id, nome, telefone);
+            setEditando(false);
+          });
+        }}
+        className="flex flex-wrap items-end gap-3 border-b border-line-soft py-3"
+      >
+        <label className="flex min-w-40 flex-1 flex-col gap-1.5">
+          <span className="rotulo">Nome</span>
+          <input value={nome} onChange={(e) => setNome(e.target.value)} required autoFocus className="campo" />
+        </label>
+        <label className="flex min-w-40 flex-1 flex-col gap-1.5">
+          <span className="rotulo">Telefone</span>
+          <input value={telefone} onChange={(e) => setTelefone(e.target.value)} className="campo" />
+        </label>
+        <div className="flex gap-2">
+          <button type="button" onClick={cancelar} className="btn-secondary">
+            Cancelar
+          </button>
+          <button type="submit" disabled={isPending} className="btn-secondary">
+            {isPending ? "Salvando…" : "Salvar"}
+          </button>
+        </div>
+      </form>
     );
   }
 
   return (
-    <li className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3 text-sm hover:bg-hover">
-      <div className="flex flex-1 gap-3">
-        <input
-          value={nome}
-          disabled={isPending}
-          onChange={(e) => setNome(e.target.value)}
-          onBlur={() => salvar(nome, telefone)}
-          className="flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text outline-none hover:border-line focus:border-gold"
+    <div className="flex h-12 items-center justify-between gap-3 border-b border-line-soft text-[14.5px]">
+      <span className="truncate text-text">{mentorado.nome}</span>
+      <span className="flex shrink-0 items-center gap-4 text-[13.5px] text-muted">
+        {mentorado.telefone ? formatTelefone(mentorado.telefone) : "—"}
+        <RowMenu
+          rotulo={`Mais opções de ${mentorado.nome}`}
+          acoes={[
+            { label: "Editar", onSelect: () => setEditando(true) },
+            {
+              label: "Remover",
+              destrutiva: true,
+              confirmar: {
+                titulo: `Remover ${mentorado.nome}?`,
+                texto: "O mentorado sai deste grupo.",
+                botao: "Remover",
+              },
+              onSelect: () =>
+                new Promise<void>((resolve) =>
+                  startTransition(async () => {
+                    await removeMentorado(grupoId, mentorado.id);
+                    resolve();
+                  })
+                ),
+            },
+          ]}
         />
-        <input
-          value={editandoTelefone ? telefone : formatTelefone(telefone)}
-          placeholder="Telefone"
-          disabled={isPending}
-          onFocus={() => setEditandoTelefone(true)}
-          onChange={(e) => setTelefone(e.target.value)}
-          onBlur={() => {
-            setEditandoTelefone(false);
-            salvar(nome, telefone);
-          }}
-          className="w-40 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text-2 outline-none hover:border-line focus:border-gold"
-        />
-      </div>
-      <button
-        disabled={isPending}
-        onClick={() => {
-          if (!confirm(`Remover ${mentorado.nome} deste grupo?`)) return;
-          startTransition(() => removeMentorado(grupoId, mentorado.id));
-        }}
-        className="rounded-lg border border-danger/40 px-3 py-1.5 text-xs text-danger hover:bg-danger/10 disabled:opacity-60"
-      >
-        Remover
-      </button>
-    </li>
+      </span>
+    </div>
   );
 }

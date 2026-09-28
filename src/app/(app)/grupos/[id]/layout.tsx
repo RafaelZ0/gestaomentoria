@@ -1,12 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  StatusBadge,
-  statusGrupoVariant,
-} from "@/components/StatusBadge";
+import { createClient } from "@/lib/supabase/server";
 import { GrupoTabs } from "@/components/GrupoTabs";
-import { NomeGrupoField } from "@/components/NomeGrupoField";
-import { getGrupo } from "@/lib/data/grupo";
+import { GrupoCabecalho } from "@/components/GrupoCabecalho";
+import { getGrupo, getSaudeGrupo } from "@/lib/data/grupo";
 
 export default async function GrupoLayout({
   children,
@@ -16,24 +12,34 @@ export default async function GrupoLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const grupo = await getGrupo(id);
+  const supabase = await createClient();
+  const [grupo, saude, { data: responsaveis }] = await Promise.all([
+    getGrupo(id),
+    getSaudeGrupo(id),
+    supabase.from("responsaveis").select("id, nome").order("nome"),
+  ]);
 
   if (!grupo) notFound();
 
-  return (
-    <div className="max-w-5xl">
-      <Link href="/grupos" prefetch={false} className="text-sm text-text-2 hover:text-text">
-        ← Grupos de gestão
-      </Link>
+  const pabloId =
+    (responsaveis ?? []).find((r) => r.nome.trim().toLowerCase() === "pablo")?.id ?? null;
 
-      <div className="mt-2 flex items-center gap-3">
-        <NomeGrupoField grupoId={grupo.id} nome={grupo.nome} />
-        <StatusBadge label={grupo.status} variant={statusGrupoVariant(grupo.status)} />
-      </div>
+  return (
+    <div className="mx-auto flex max-w-[960px] flex-col gap-8">
+      <GrupoCabecalho
+        grupo={grupo}
+        saude={saude}
+        responsaveis={(responsaveis ?? []).map((r) => ({
+          id: r.id,
+          nome: r.id === pabloId ? "Dr. Pablo" : r.nome,
+        }))}
+        pabloId={pabloId}
+        hoje={new Date().toISOString().slice(0, 10)}
+      />
 
       <GrupoTabs grupoId={grupo.id} />
 
-      <div className="mt-6">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }

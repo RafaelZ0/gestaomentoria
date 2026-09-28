@@ -1,39 +1,43 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate, calcDuracaoDias, formatDuracao } from "@/lib/format";
-import { calcSaudeGrupo, calcTendenciaRoas } from "@/lib/saude";
-import { CancelarGrupoButton } from "@/components/CancelarGrupoModal";
 import { ChecklistEntregas } from "@/components/ChecklistEntregas";
 import { MentoradosList } from "@/components/MentoradosList";
-import { TrafegoCard } from "@/components/TrafegoCard";
-import { ValorMensalCard } from "@/components/ValorMensalCard";
-import { DataInicioField } from "@/components/DataInicioField";
-import { ObservacoesField } from "@/components/ObservacoesField";
-import { StatusBadge } from "@/components/StatusBadge";
-import { MetaComparacaoCard } from "@/components/MetaComparacaoCard";
+import { EditarGrupoForm } from "@/components/EditarGrupoForm";
 import { RaioXResumoCard } from "@/components/onboarding/RaioXResumoCard";
-import { getGrupo } from "@/lib/data/grupo";
+import { LinhaInfo, Metric } from "@/components/ui/Metric";
+import { StatusDot, sentenceCase, tomTrafego } from "@/components/ui/StatusDot";
+import { getGrupo, getSaudeGrupo } from "@/lib/data/grupo";
+
+function formatRoas(v: number) {
+  return `${v.toFixed(1)}x`;
+}
 
 export default async function GrupoOverviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ editar?: string }>;
 }) {
   const { id } = await params;
+  const { editar } = await searchParams;
   const supabase = await createClient();
+  const hojeISO = new Date().toISOString().slice(0, 10);
 
   const [
-    { data: grupo },
+    grupo,
+    saude,
     { data: mentorados },
     { data: entregas },
     { data: pagamentos },
     { data: tarefasPendentes },
-    { data: ultimaReuniao },
     { data: resultados },
     { data: proximaReuniao },
     { data: onboarding },
   ] = await Promise.all([
-    getGrupo(id).then((data) => ({ data })),
+    getGrupo(id),
+    getSaudeGrupo(id),
     supabase.from("mentorados").select("*").eq("grupo_id", id).order("nome"),
     supabase
       .from("entregas_grupo")
@@ -44,33 +48,19 @@ export default async function GrupoOverviewPage({
       .select("data, valor, status")
       .eq("grupo_id", id)
       .order("data", { ascending: false }),
-    supabase
-      .from("tarefas")
-      .select("id")
-      .eq("grupo_id", id)
-      .eq("concluida", false),
-    supabase
-      .from("reunioes")
-      .select("data")
-      .eq("grupo_id", id)
-      .lte("data", new Date().toISOString().slice(0, 10))
-      .order("data", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+    supabase.from("tarefas").select("id").eq("grupo_id", id).eq("concluida", false),
     supabase
       .from("resultados_grupo")
-      .select(
-        "data, investimento, leads, faturamento_campanha_interna, faturamento_trafego_pago"
-      )
+      .select("data, investimento, leads, faturamento_campanha_interna, faturamento_trafego_pago")
       .eq("grupo_id", id)
       .order("data", { ascending: false })
       .order("created_at", { ascending: false }),
     supabase
       .from("reunioes")
-      .select("data, link_reuniao")
+      .select("data, hora, link_reuniao")
       .eq("grupo_id", id)
       .eq("compareceu", true)
-      .gt("data", new Date().toISOString().slice(0, 10))
+      .gt("data", hojeISO)
       .order("data", { ascending: true })
       .limit(1)
       .maybeSingle(),
@@ -107,21 +97,14 @@ export default async function GrupoOverviewPage({
       : null;
 
   const pagamentosPagos = (pagamentos ?? []).filter((p) => p.status === "PAGO");
-  const recebidoRegistrado = pagamentosPagos.reduce(
-    (acc, p) => acc + Number(p.valor),
-    0
-  );
+  const recebidoRegistrado = pagamentosPagos.reduce((acc, p) => acc + Number(p.valor), 0);
   const ultimoPagamento = pagamentosPagos[0] ?? null;
-  const hojeISO = new Date().toISOString().slice(0, 10);
   const emAtraso = (pagamentos ?? [])
     .filter((p) => p.status === "PENDENTE" && p.data < hojeISO)
     .reduce((acc, p) => acc + Number(p.valor), 0);
 
   const duracaoDias = calcDuracaoDias(grupo.data_inicio, grupo.data_termino);
-
-  const diasDesdeUltimaReuniao = ultimaReuniao
-    ? calcDuracaoDias(ultimaReuniao.data, null)
-    : null;
+  const diasDesdeUltimaReuniao = saude.diasSemReuniao;
 
   type EntregaRow = {
     id: string;
@@ -129,7 +112,6 @@ export default async function GrupoOverviewPage({
     data_feito: string | null;
     tipos_entrega: { id: string; nome: string; ativo: boolean } | null;
   };
-
   const entregasAtivas = ((entregas ?? []) as unknown as EntregaRow[])
     .filter((e) => e.tipos_entrega?.ativo)
     .map((e) => ({
@@ -140,196 +122,187 @@ export default async function GrupoOverviewPage({
     }))
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
-  const resultadosPorMes = new Map<
-    string,
-    { investimento: number; faturamento: number }
-  >();
-  for (const r of resultados ?? []) {
-    const mes = r.data.slice(0, 7);
-    const atual = resultadosPorMes.get(mes) ?? { investimento: 0, faturamento: 0 };
-    atual.investimento += Number(r.investimento);
-    atual.faturamento +=
-      Number(r.faturamento_campanha_interna) + Number(r.faturamento_trafego_pago);
-    resultadosPorMes.set(mes, atual);
-  }
-  const tendenciaRoas = calcTendenciaRoas(
-    [...resultadosPorMes.entries()].map(([mes, v]) => ({ mes, ...v }))
-  );
-  const processosIncompletos = entregasAtivas.filter((e) => !e.feito).length;
-  const saude = calcSaudeGrupo({
-    diasSemReuniao: diasDesdeUltimaReuniao,
-    tendenciaRoas,
-    processosIncompletos,
-  });
-  const saudeVariant =
-    saude.status === "ok" ? "ok" : saude.status === "warn" ? "warn" : "alert";
-  const saudeLabel =
-    saude.status === "ok" ? "Saudável" : saude.status === "warn" ? "Atenção" : "Crítico";
+  const metaRoas = grupo.meta_roas !== null ? Number(grupo.meta_roas) : null;
+  const metaCpl = grupo.meta_cpl !== null ? Number(grupo.meta_cpl) : null;
+
+  const base = `/grupos/${grupo.id}`;
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-8">
       <RaioXResumoCard grupoId={grupo.id} onboarding={onboarding} />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <ValorMensalCard grupoId={grupo.id} valorMensal={Number(grupo.valor_mensal)} />
-        <InfoCard label="Total pago" value={formatBRL(recebidoRegistrado)} />
-        <InfoCard label="Duração" value={formatDuracao(duracaoDias)} />
-        <TrafegoCard
-          grupoId={grupo.id}
-          trafegoPago={grupo.trafego_pago}
-          trafegoPagoDesde={grupo.trafego_pago_desde}
-          valorInvestidoDia={
-            grupo.valor_investido_dia !== null
-              ? Number(grupo.valor_investido_dia)
-              : null
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <ResumoLink
+          href={`${base}/reunioes`}
+          rotulo="Próxima reunião"
+          valor={
+            proximaReuniao
+              ? `${formatDate(proximaReuniao.data)}${proximaReuniao.hora ? ` às ${proximaReuniao.hora.slice(0, 5)}` : ""}`
+              : "Não agendada"
           }
         />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <MetaComparacaoCard
-          grupoId={grupo.id}
-          label="ROAS"
-          campo="meta_roas"
-          realizado={roas}
-          meta={grupo.meta_roas !== null ? Number(grupo.meta_roas) : null}
-          unidade="roas"
-          melhorQuandoMaior
-        />
-        <MetaComparacaoCard
-          grupoId={grupo.id}
-          label="Último CPL"
-          campo="meta_cpl"
-          realizado={ultimoCpl}
-          meta={grupo.meta_cpl !== null ? Number(grupo.meta_cpl) : null}
-          unidade="brl"
-          melhorQuandoMaior={false}
-        />
-        <Link
-          href={`/grupos/${grupo.id}/pagamentos`}
-          prefetch={false}
-          className="rounded-xl border border-line bg-surface p-5 hover:bg-hover"
-        >
-          <p className="text-sm text-text-2">Último pagamento</p>
-          <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text">
-            {ultimoPagamento
-              ? `${formatBRL(Number(ultimoPagamento.valor))} em ${formatDate(ultimoPagamento.data)}`
-              : "Nenhum registrado"}
-          </p>
-        </Link>
-        <Link
-          href={`/grupos/${grupo.id}/pagamentos`}
-          prefetch={false}
-          className="rounded-xl border border-line bg-surface p-5 hover:bg-hover"
-        >
-          <p className="text-sm text-text-2">Em atraso</p>
-          <p
-            className={`mt-2 font-display text-xl font-semibold tracking-tight tabular-nums ${
-              emAtraso > 0 ? "text-danger" : "text-text"
-            }`}
-          >
-            {formatBRL(emAtraso)}
-          </p>
-        </Link>
-      </div>
-
-      <div className="rounded-xl border border-line bg-surface p-5">
-        <div className="flex items-center gap-2">
-          <p className="text-sm text-text-2">Saúde do cliente</p>
-          <StatusBadge label={saudeLabel} variant={saudeVariant} />
-        </div>
-        <p className="mt-1 text-sm text-text-2">
-          {saude.flags.length > 0
-            ? saude.flags.join(" · ")
-            : "Nenhum sinal de alerta no momento."}
-        </p>
-      </div>
-
-      <div className="text-sm text-text-2">
-        <DataInicioField grupoId={grupo.id} dataInicio={grupo.data_inicio} />
-        {grupo.data_termino && <> · Encerrado em {formatDate(grupo.data_termino)}</>}
-      </div>
-
-      <ObservacoesField grupoId={grupo.id} observacoes={grupo.observacoes} />
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Link
-          href={`/grupos/${grupo.id}/tarefas`}
-          prefetch={false}
-          className="rounded-lg border border-line bg-hover px-4 py-3 text-sm hover:bg-surface"
-        >
-          <span className="text-text-2">Tarefas pendentes</span>{" "}
-          <span className="font-medium text-text">
-            {(tarefasPendentes ?? []).length}
-          </span>
-        </Link>
-        <Link
-          href={`/grupos/${grupo.id}/reunioes`}
-          prefetch={false}
-          className="rounded-lg border border-line bg-hover px-4 py-3 text-sm hover:bg-surface"
-        >
-          <span className="text-text-2">Última reunião</span>{" "}
-          <span className="font-medium text-text">
-            {diasDesdeUltimaReuniao === null
-              ? "nunca teve reunião"
+        <ResumoLink
+          href={`${base}/reunioes`}
+          rotulo="Última reunião"
+          valor={
+            diasDesdeUltimaReuniao === null
+              ? "Nunca teve reunião"
               : diasDesdeUltimaReuniao === 0
-                ? "hoje"
-                : `${diasDesdeUltimaReuniao} dias atrás`}
-          </span>
-        </Link>
-        <Link
-          href={`/grupos/${grupo.id}/reunioes`}
-          prefetch={false}
-          className="rounded-lg border border-line bg-hover px-4 py-3 text-sm hover:bg-surface"
-        >
-          <span className="text-text-2">Próxima reunião</span>{" "}
-          <span className="font-medium text-text">
-            {proximaReuniao ? formatDate(proximaReuniao.data) : "não agendada"}
-          </span>
-        </Link>
+                ? "Hoje"
+                : `${diasDesdeUltimaReuniao} dias atrás`
+          }
+        />
+        <ResumoLink
+          href={`${base}/tarefas`}
+          rotulo="Tarefas pendentes"
+          valor={String((tarefasPendentes ?? []).length)}
+        />
       </div>
 
-      <section>
-        <h2 className="font-display text-lg font-semibold text-text">
-          Mentorados
-        </h2>
-        <div className="mt-3">
-          <MentoradosList grupoId={grupo.id} mentorados={mentorados ?? []} />
-        </div>
-      </section>
+      {editar ? (
+        <EditarGrupoForm
+          grupoId={grupo.id}
+          inicial={{
+            nome: grupo.nome,
+            valor_mensal: String(Number(grupo.valor_mensal)),
+            data_inicio: grupo.data_inicio,
+            observacoes: grupo.observacoes ?? "",
+            trafego_pago: grupo.trafego_pago ?? "",
+            trafego_pago_desde: grupo.trafego_pago_desde ?? "",
+            valor_investido_dia:
+              grupo.valor_investido_dia !== null ? String(Number(grupo.valor_investido_dia)) : "",
+            meta_roas: metaRoas !== null ? String(metaRoas) : "",
+            meta_cpl: metaCpl !== null ? String(metaCpl) : "",
+          }}
+        />
+      ) : (
+        <>
+          <section className="flex flex-col gap-[18px]">
+            <h2 className="text-[15px] font-semibold text-text">Contrato e pagamentos</h2>
+            <div className="grid grid-cols-2 gap-6 border-b border-line pb-6 lg:grid-cols-4">
+              <Metric rotulo="Valor mensal">{formatBRL(Number(grupo.valor_mensal))}</Metric>
+              <Metric rotulo="Total pago">
+                <Link href={`${base}/pagamentos`} prefetch={false} className="hover:text-gold">
+                  {formatBRL(recebidoRegistrado)}
+                </Link>
+              </Metric>
+              <Metric rotulo="Em atraso" tom={emAtraso > 0 ? "danger" : undefined}>
+                <Link href={`${base}/pagamentos`} prefetch={false} className="hover:opacity-80">
+                  {formatBRL(emAtraso)}
+                </Link>
+              </Metric>
+              <Metric rotulo="Duração">{formatDuracao(duracaoDias)}</Metric>
+            </div>
+          </section>
 
-      <section>
-        <h2 className="font-display text-lg font-semibold text-text">
-          Checklist de entregas
-        </h2>
-        <div className="mt-3">
-          <ChecklistEntregas grupoId={grupo.id} entregas={entregasAtivas} />
-        </div>
-      </section>
+          <div className="grid grid-cols-1 gap-x-12 gap-y-8 md:grid-cols-2">
+            <section className="flex flex-col">
+              <h2 className="mb-1.5 text-[15px] font-semibold text-text">Tráfego pago</h2>
+              <LinhaInfo rotulo="Status">
+                {grupo.trafego_pago ? (
+                  <StatusDot tom={tomTrafego(grupo.trafego_pago)}>
+                    <span className="text-text">{sentenceCase(grupo.trafego_pago)}</span>
+                  </StatusDot>
+                ) : (
+                  "—"
+                )}
+              </LinhaInfo>
+              <LinhaInfo rotulo="Ativo desde">
+                {grupo.trafego_pago_desde ? formatDate(grupo.trafego_pago_desde) : "—"}
+              </LinhaInfo>
+              <LinhaInfo rotulo="Investimento por dia">
+                {grupo.valor_investido_dia !== null
+                  ? formatBRL(Number(grupo.valor_investido_dia))
+                  : "—"}
+              </LinhaInfo>
+              <LinhaInfo rotulo="ROAS">
+                <ValorComMeta
+                  realizado={roas}
+                  meta={metaRoas}
+                  formatar={formatRoas}
+                  melhorQuandoMaior
+                />
+              </LinhaInfo>
+              <LinhaInfo rotulo="Último CPL">
+                <ValorComMeta
+                  realizado={ultimoCpl}
+                  meta={metaCpl}
+                  formatar={formatBRL}
+                  melhorQuandoMaior={false}
+                />
+              </LinhaInfo>
+            </section>
 
-      <section className="mt-10 rounded-xl border border-danger/20 bg-danger/15 p-5">
-        <h2 className="font-display text-sm font-semibold text-danger">
-          Zona de risco
-        </h2>
-        <p className="mt-1 text-xs text-text-2">
-          Cancelar o grupo marca o contrato como encerrado. Essa ação pede
-          confirmação antes de ser aplicada.
-        </p>
-        <div className="mt-3">
-          <CancelarGrupoButton grupoId={grupo.id} status={grupo.status} />
-        </div>
-      </section>
+            <section className="flex flex-col">
+              <h2 className="mb-1.5 text-[15px] font-semibold text-text">Cadastro</h2>
+              <LinhaInfo rotulo="Início do contrato">{formatDate(grupo.data_inicio)}</LinhaInfo>
+              {grupo.data_termino && (
+                <LinhaInfo rotulo="Encerrado em">{formatDate(grupo.data_termino)}</LinhaInfo>
+              )}
+              <LinhaInfo rotulo="Último pagamento">
+                {ultimoPagamento ? (
+                  <Link href={`${base}/pagamentos`} prefetch={false} className="hover:text-gold">
+                    {formatBRL(Number(ultimoPagamento.valor))} em {formatDate(ultimoPagamento.data)}
+                  </Link>
+                ) : (
+                  "Nenhum registrado"
+                )}
+              </LinhaInfo>
+              <LinhaInfo rotulo="Observações" empilhado>
+                {grupo.observacoes || <span className="text-muted">Sem observações</span>}
+              </LinhaInfo>
+            </section>
+          </div>
+        </>
+      )}
+
+      <MentoradosList grupoId={grupo.id} mentorados={mentorados ?? []} />
+
+      <ChecklistEntregas grupoId={grupo.id} entregas={entregasAtivas} />
     </div>
   );
 }
 
-function InfoCard({ label, value }: { label: string; value: string }) {
+function ResumoLink({ href, rotulo, valor }: { href: string; rotulo: string; valor: string }) {
   return (
-    <div className="rounded-xl border border-line bg-surface p-5">
-      <p className="text-sm text-text-2">{label}</p>
-      <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text">
-        {value}
-      </p>
-    </div>
+    <Link
+      href={href}
+      prefetch={false}
+      className="group -mx-2 flex flex-col gap-1 rounded-lg px-2 py-1 hover:bg-hover"
+    >
+      <span className="text-[13px] text-subtle">{rotulo}</span>
+      <span className="text-[15px] text-text">{valor}</span>
+    </Link>
+  );
+}
+
+function ValorComMeta({
+  realizado,
+  meta,
+  formatar,
+  melhorQuandoMaior,
+}: {
+  realizado: number | null;
+  meta: number | null;
+  formatar: (v: number) => string;
+  melhorQuandoMaior: boolean;
+}) {
+  const dentro =
+    realizado !== null && meta !== null
+      ? melhorQuandoMaior
+        ? realizado >= meta
+        : realizado <= meta
+      : null;
+  return (
+    <>
+      {realizado === null ? "—" : formatar(realizado)}{" "}
+      <span className="text-subtle">· meta {meta === null ? "—" : formatar(meta)}</span>
+      {dentro !== null && (
+        <span className={dentro ? "text-ok" : "text-danger"}>
+          {" "}
+          · {dentro ? "dentro" : "fora"}
+        </span>
+      )}
+    </>
   );
 }

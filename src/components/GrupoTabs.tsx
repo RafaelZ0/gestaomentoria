@@ -21,7 +21,7 @@ export function GrupoTabs({ grupoId }: { grupoId: string }) {
     // ligado, clicar numa aba disparava RSC fetch para as 5 ao mesmo tempo
     // (mais o menu lateral), rajada que o Vercel às vezes limitava com 503,
     // fazendo a navegação por clique falhar de forma intermitente.
-    <div className="mt-6 flex gap-1 border-b border-line">
+    <nav className="flex gap-7 overflow-x-auto overflow-y-hidden text-[14.5px] shadow-[inset_0_-1px_0_var(--line)]">
       {tabs.map((tab) => {
         const active = pathname === tab.href;
         return (
@@ -29,16 +29,15 @@ export function GrupoTabs({ grupoId }: { grupoId: string }) {
             key={tab.href}
             href={tab.href}
             prefetch={false}
-            className={`border-b-2 px-4 py-2 text-sm transition-colors ${
-              active
-                ? "border-gold text-text font-medium"
-                : "border-transparent text-text-2 hover:text-text"
+            aria-current={active ? "page" : undefined}
+            className={`shrink-0 border-b-2 pb-3 transition-colors ${
+              active ? "border-gold text-text" : "border-transparent text-muted hover:text-text"
             }`}
           >
             {tab.label}
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }

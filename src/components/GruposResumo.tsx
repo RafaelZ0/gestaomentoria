@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { formatBRL } from "@/lib/format";
+import { DIAS_SEM_SINAL_DE_VIDA } from "@/lib/agendaStatus";
+import { Metric } from "@/components/ui/Metric";
 import { SaudeClientesPanel } from "@/components/SaudeClientesPanel";
 import type { StatusSaude } from "@/lib/saude";
-
-const DIAS_SEM_SINAL_DE_VIDA = 30;
 
 export function GruposResumo({
   totalPago,
@@ -24,59 +24,39 @@ export function GruposResumo({
 
   return (
     <>
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="card-hero rounded-xl border border-line bg-surface p-6 sm:col-span-1">
-          <p className="text-sm text-text-2">Total recebido</p>
-          <p className="mt-2 font-display text-4xl font-bold tracking-tight tabular-nums text-text">
-            {formatBRL(totalPago)}
-          </p>
-        </div>
-        <div className="rounded-xl border border-line bg-surface p-6">
-          <p className="text-sm text-text-2">Grupos ativos</p>
-          <p className="mt-2 font-display text-2xl font-semibold tracking-tight tabular-nums text-text">
-            {ativosCount}{" "}
-            <span className="text-base font-normal text-text-2">
-              / {totalCount}
-            </span>
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setAberto((a) => !a)}
-          className="rounded-xl border border-line bg-surface p-6 text-left"
+      <div className="grid grid-cols-1 gap-x-10 gap-y-6 border-b border-line pb-7 sm:grid-cols-3">
+        <Metric rotulo="Total recebido" tamanho="lg">
+          {formatBRL(totalPago)}
+        </Metric>
+        <Metric rotulo="Grupos ativos" tamanho="lg">
+          {ativosCount} <span className="text-base font-normal text-subtle">de {totalCount}</span>
+        </Metric>
+        <Metric
+          rotulo={`Sem sinal de vida (+${DIAS_SEM_SINAL_DE_VIDA}d)`}
+          tamanho="lg"
+          tom={semSinalDeVidaCount > 0 ? "warn" : undefined}
         >
-          <p className="text-sm text-text-2">
-            Sem sinal de vida (+{DIAS_SEM_SINAL_DE_VIDA}d)
-          </p>
-          <div className="mt-2 flex items-center gap-2">
-            <p
-              className={`font-display text-2xl font-semibold tracking-tight tabular-nums ${
-                semSinalDeVidaCount > 0 ? "text-warn" : "text-text"
-              }`}
-            >
-              {semSinalDeVidaCount}
-            </p>
-            <span className="text-xs text-text-2">
-              {aberto ? "▲ ocultar" : "▼ ver saúde dos clientes"}
-            </span>
-          </div>
-        </button>
+          {semSinalDeVidaCount}{" "}
+          <button
+            type="button"
+            onClick={() => setAberto((a) => !a)}
+            aria-expanded={aberto}
+            className="link ml-1.5 align-middle text-[13px] font-normal tracking-normal"
+          >
+            {aberto ? "ocultar saúde dos clientes" : "ver saúde dos clientes"}
+          </button>
+        </Metric>
       </div>
 
       {aberto && (
-        <div className="mt-8">
-          <h2 className="font-display text-lg font-semibold text-text">
-            Saúde dos clientes
-          </h2>
-          <p className="mt-1 text-xs text-text-2">
-            Combina sinal de vida (+{DIAS_SEM_SINAL_DE_VIDA}d), tendência de
-            ROAS entre os últimos dois meses com lançamento e processos
-            ativos pendentes.
+        <section className="flex flex-col gap-2">
+          <h2 className="text-[15px] font-semibold text-text">Saúde dos clientes</h2>
+          <p className="text-[13px] text-muted">
+            Combina sinal de vida (+{DIAS_SEM_SINAL_DE_VIDA}d), tendência de ROAS entre os
+            últimos dois meses com lançamento e processos ativos pendentes.
           </p>
-          <div className="mt-3">
-            <SaudeClientesPanel grupos={saudeGrupos} />
-          </div>
-        </div>
+          <SaudeClientesPanel grupos={saudeGrupos} />
+        </section>
       )}
     </>
   );

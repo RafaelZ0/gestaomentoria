@@ -29,6 +29,7 @@ export function AgendarReuniaoModal({
   dataInicial,
   horaInicial,
   responsavelInicial,
+  grupoInicial = "",
   hoje,
   grupos,
   responsaveis,
@@ -39,6 +40,7 @@ export function AgendarReuniaoModal({
   dataInicial: string;
   horaInicial: string;
   responsavelInicial: string;
+  grupoInicial?: string;
   hoje: string;
   grupos: { id: string; nome: string }[];
   responsaveis: { id: string; nome: string }[];
@@ -51,7 +53,7 @@ export function AgendarReuniaoModal({
   const [data, setData] = useState(dataInicial);
   const [hora, setHora] = useState(horaInicial);
   const [duracaoMin, setDuracaoMin] = useState(60);
-  const [grupoId, setGrupoId] = useState("");
+  const [grupoId, setGrupoId] = useState(grupoInicial);
   const [responsavelId, setResponsavelId] = useState(responsavelInicial);
   const [linkReuniao, setLinkReuniao] = useState("");
   const [resumo, setResumo] = useState("");
