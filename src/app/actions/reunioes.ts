@@ -202,6 +202,88 @@ export async function agendarReuniao(input: {
   return { ok: true };
 }
 
+// Define (ou troca) o horário de uma reunião já existente, a partir da faixa
+// "Sem horário" da Agenda. Mesma regra de conflito do agendamento.
+export async function definirHorarioReuniao(input: {
+  reuniaoId: string;
+  hora: string;
+  duracaoMin: number;
+  forcarEncaixe: boolean;
+}): Promise<ResultadoAgendamento> {
+  const { reuniaoId, hora, duracaoMin, forcarEncaixe } = input;
+
+  if (!/^\d{2}:\d{2}$/.test(hora)) return { ok: false, error: "Informe o horário de início." };
+  if (!Number.isFinite(duracaoMin) || duracaoMin < 5 || duracaoMin > 12 * 60) {
+    return { ok: false, error: "Duração inválida." };
+  }
+  if (minutosDoHorario(hora) + duracaoMin > 24 * 60) {
+    return { ok: false, error: "A reunião passaria da meia-noite." };
+  }
+
+  const supabase = await createClient();
+
+  const { data: reuniao } = await supabase
+    .from("reunioes")
+    .select("id, grupo_id, data, responsavel_id")
+    .eq("id", reuniaoId)
+    .single();
+  if (!reuniao) return { ok: false, error: "Reunião não encontrada." };
+
+  // Sem responsável não dá pra saber com quem conflitaria.
+  if (!forcarEncaixe && reuniao.responsavel_id) {
+    const [{ data: responsaveis }, { data: reunioesDoDia }] = await Promise.all([
+      supabase.from("responsaveis").select("id, nome"),
+      supabase
+        .from("reunioes")
+        .select("id, hora, duracao_min, responsavel_id, grupos_gestao(nome)")
+        .eq("data", reuniao.data)
+        .not("hora", "is", null),
+    ]);
+    const pabloId =
+      (responsaveis ?? []).find((r) => r.nome.trim().toLowerCase() === "pablo")?.id ??
+      null;
+    type Row = {
+      id: string;
+      hora: string;
+      duracao_min: number;
+      responsavel_id: string | null;
+      grupos_gestao: { nome: string } | null;
+    };
+    const conflitos = calcularConflitos({
+      data: reuniao.data,
+      hora,
+      duracaoMin,
+      responsavelId: reuniao.responsavel_id,
+      pabloId,
+      ignorarReuniaoId: reuniao.id,
+      reunioesDoDia: ((reunioesDoDia ?? []) as unknown as Row[]).map((r) => ({
+        id: r.id,
+        hora: r.hora.slice(0, 5),
+        duracaoMin: r.duracao_min,
+        responsavelId: r.responsavel_id,
+        grupoNome: r.grupos_gestao?.nome ?? "—",
+      })),
+    });
+    if (conflitos.length > 0) {
+      return {
+        ok: false,
+        error: "Esse horário tem conflito. Marque \"Forçar encaixe\" pra salvar mesmo assim.",
+        conflitos,
+      };
+    }
+  }
+
+  const { error } = await supabase
+    .from("reunioes")
+    .update({ hora, duracao_min: duracaoMin })
+    .eq("id", reuniaoId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidarGrupos([reuniao.grupo_id]);
+  revalidatePath("/agenda");
+  return { ok: true };
+}
+
 export async function updateReuniao(reuniaoId: string, formData: FormData) {
   const supabase = await createClient();
 

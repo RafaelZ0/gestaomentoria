@@ -13,14 +13,18 @@ export function OnboardingInicio({
   grupoId,
   alunoSugerido,
   clinicaSugerida,
+  responsaveis,
 }: {
   grupoId: string;
   alunoSugerido: string;
   clinicaSugerida: string;
+  responsaveis: { id: string; nome: string }[];
 }) {
   const router = useRouter();
   const [aluno, setAluno] = useState(alunoSugerido);
   const [clinica, setClinica] = useState(clinicaSugerida);
+  const [hora, setHora] = useState("");
+  const [responsavelId, setResponsavelId] = useState("");
   const [erroManual, setErroManual] = useState<string | null>(null);
   const [iniciando, startIniciar] = useTransition();
 
@@ -55,7 +59,7 @@ export function OnboardingInicio({
   function comecar() {
     setErroManual(null);
     startIniciar(async () => {
-      const r = await iniciarOnboarding(grupoId, aluno, clinica);
+      const r = await iniciarOnboarding(grupoId, aluno, clinica, { hora, responsavelId });
       if (!r.ok) {
         setErroManual(r.error);
         return;
@@ -68,7 +72,10 @@ export function OnboardingInicio({
     if (!previa) return;
     setErroImport(null);
     startImportar(async () => {
-      const r = await importarOnboarding(grupoId, previa.respostas, previa.precisao);
+      const r = await importarOnboarding(grupoId, previa.respostas, previa.precisao, {
+        hora,
+        responsavelId,
+      });
       if (!r.ok) {
         setErroImport(r.error);
         return;
@@ -89,6 +96,46 @@ export function OnboardingInicio({
           Reuniões e o raio-X da clínica fica guardado no cadastro do grupo.
         </p>
       </div>
+
+      {/* Vale pros dois caminhos: é a reunião que o diagnóstico cria. */}
+      <section className="rounded-2xl border border-border bg-bg-surface p-6">
+        <h2 className="font-display text-xl font-semibold text-text-primary">
+          Reunião de onboarding
+        </h2>
+        <p className="mt-1 text-sm text-text-secondary">
+          Com o horário, a reunião já aparece na grade da Agenda. Sem ele, fica na faixa
+          &quot;Sem horário&quot; do dia e dá pra definir depois.
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-base font-medium text-text-primary">
+              Horário <span className="font-normal text-text-tertiary">(opcional)</span>
+            </span>
+            <input
+              type="time"
+              step={300}
+              value={hora}
+              onChange={(e) => setHora(e.target.value)}
+              className={inputClass}
+            />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-base font-medium text-text-primary">Responsável</span>
+            <select
+              value={responsavelId}
+              onChange={(e) => setResponsavelId(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">Selecione…</option>
+              {responsaveis.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.nome}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Passo a passo */}

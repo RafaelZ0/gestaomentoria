@@ -31,16 +31,30 @@ function dataValida(v: unknown): string {
   return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : hojeISO();
 }
 
+// Hora e responsável da reunião de onboarding, escolhidos na tela inicial.
+// Hora é opcional (o diagnóstico às vezes é lançado depois da reunião): sem
+// ela, a reunião aparece na faixa "Sem horário" da Agenda.
+export type DadosReuniaoOnboarding = { hora: string; responsavelId: string };
+
 async function criarOnboardingComReuniao(
   grupoId: string,
   respostas: OnboardingValores,
-  precisao: OnboardingPrecisao
+  precisao: OnboardingPrecisao,
+  dadosReuniao: DadosReuniaoOnboarding
 ): Promise<Resultado<{ id: string }>> {
   const supabase = await createClient();
 
+  const hora = /^\d{2}:\d{2}$/.test(dadosReuniao.hora) ? dadosReuniao.hora : null;
+
   const { data: reuniao, error: erroReuniao } = await supabase
     .from("reunioes")
-    .insert({ grupo_id: grupoId, resumo: RESUMO_INICIAL, data: dataValida(respostas.data) })
+    .insert({
+      grupo_id: grupoId,
+      resumo: RESUMO_INICIAL,
+      data: dataValida(respostas.data),
+      hora,
+      responsavel_id: dadosReuniao.responsavelId || null,
+    })
     .select("id")
     .single();
 
@@ -67,21 +81,24 @@ async function criarOnboardingComReuniao(
 export async function iniciarOnboarding(
   grupoId: string,
   aluno: string,
-  clinica: string
+  clinica: string,
+  dadosReuniao: DadosReuniaoOnboarding
 ): Promise<Resultado<{ id: string }>> {
   const nome = aluno.trim();
   if (!nome) return { ok: false, error: "Informe o nome do dentista para começar." };
   return criarOnboardingComReuniao(
     grupoId,
     { aluno: nome, clinica: clinica.trim(), data: hojeISO() },
-    {}
+    {},
+    dadosReuniao
   );
 }
 
 export async function importarOnboarding(
   grupoId: string,
   respostas: OnboardingValores,
-  precisao: OnboardingPrecisao
+  precisao: OnboardingPrecisao,
+  dadosReuniao: DadosReuniaoOnboarding
 ): Promise<Resultado<{ id: string }>> {
   if (!texto(respostas.aluno).trim()) {
     return {
@@ -89,7 +106,7 @@ export async function importarOnboarding(
       error: 'Não encontrei o "Nome do dentista" no documento. Confira se o arquivo segue o modelo.',
     };
   }
-  return criarOnboardingComReuniao(grupoId, respostas, precisao);
+  return criarOnboardingComReuniao(grupoId, respostas, precisao, dadosReuniao);
 }
 
 export async function salvarOnboarding(

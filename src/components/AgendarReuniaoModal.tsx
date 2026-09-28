@@ -11,7 +11,7 @@ import {
 } from "@/lib/agendaConflitos";
 import { formatDiaSemanaCurto, formatDiaMesCurto } from "@/lib/calendario";
 
-const OPCOES_DURACAO = [
+export const OPCOES_DURACAO = [
   { valor: 15, label: "15 min" },
   { valor: 30, label: "30 min" },
   { valor: 45, label: "45 min" },

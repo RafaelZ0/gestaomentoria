@@ -10,6 +10,7 @@ import {
   type ReuniaoParaConflito,
 } from "@/lib/agendaConflitos";
 import { AgendarReuniaoModal } from "@/components/AgendarReuniaoModal";
+import { ReuniaoSemHorarioModal } from "@/components/ReuniaoSemHorarioModal";
 import { MiniCalendario } from "@/components/MiniCalendario";
 import { AgendaResumo, type ProximaReuniao } from "@/components/AgendaResumo";
 import type { GrupoParaAgendar } from "@/lib/agendaStatus";
@@ -23,6 +24,7 @@ export type ReuniaoDoDia = {
   responsavelId: string | null;
   responsavelNome: string | null;
   linkReuniao: string | null;
+  resumo: string;
 };
 
 const HORA_INICIO_GRADE = 8;
@@ -139,6 +141,10 @@ export function CalendarioAgenda({
     null
   );
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
+  const [semHorarioAberta, setSemHorarioAberta] = useState<{
+    reuniao: ReuniaoDoDia;
+    data: string;
+  } | null>(null);
   // "todos" ou o id do responsável
   const [filtro, setFiltro] = useState("todos");
 
@@ -208,6 +214,19 @@ export function CalendarioAgenda({
     }
     return mapa;
   }, [dias, reunioesPorDia, filtro, mostrarCompromissos]);
+
+  // Reuniões sem `hora` não têm lugar na grade: vão pra faixa "Sem horário"
+  // logo abaixo do cabeçalho do dia (mesmo filtro por responsável).
+  const semHorarioPorDia = useMemo(() => {
+    const mapa: Record<string, ReuniaoDoDia[]> = {};
+    for (const d of dias) {
+      mapa[d] = (reunioesPorDia[d] ?? []).filter(
+        (r) => !r.hora && (filtro === "todos" || r.responsavelId === filtro)
+      );
+    }
+    return mapa;
+  }, [dias, reunioesPorDia, filtro]);
+  const temSemHorario = dias.some((d) => semHorarioPorDia[d].length > 0);
 
   function mostrarTooltip(e: React.MouseEvent | React.FocusEvent, t: Omit<Tooltip, "x" | "y">) {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -425,6 +444,32 @@ export function CalendarioAgenda({
               );
             })}
 
+            {temSemHorario && (
+              <>
+                <div className="flex items-start justify-end border-b border-r border-border px-1 pb-3.5 pt-1.5 text-right text-[10px] leading-tight text-text-tertiary">
+                  Sem horário
+                </div>
+                {dias.map((d) => (
+                  <div
+                    key={d}
+                    className="flex min-w-0 flex-col gap-1 border-b border-r border-border p-1 last:border-r-0"
+                  >
+                    {semHorarioPorDia[d].map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => setSemHorarioAberta({ reuniao: r, data: d })}
+                        title={`${r.grupoNome} · ${nomeResponsavel(r.responsavelId, r.responsavelNome)} · sem horário`}
+                        className={`block w-full truncate rounded border-l-2 px-1.5 py-1 text-left text-[10px] font-semibold leading-tight hover:brightness-125 ${corDaReuniao(r)}`}
+                      >
+                        {r.grupoNome}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </>
+            )}
+
             <div
               className="relative border-r border-border"
               style={{ height: LINHAS_TOTAIS * ALTURA_LINHA }}
@@ -435,7 +480,7 @@ export function CalendarioAgenda({
                   className="absolute right-1 -translate-y-1/2 text-[10px] tabular-nums text-text-secondary"
                   style={{ top: i * 2 * ALTURA_LINHA }}
                 >
-                  {i === 0 ? "" : h}
+                  {h}
                 </span>
               ))}
             </div>
@@ -515,6 +560,21 @@ export function CalendarioAgenda({
               </p>
             ))}
           </div>
+        )}
+
+        {semHorarioAberta && (
+          <ReuniaoSemHorarioModal
+            key={semHorarioAberta.reuniao.id}
+            reuniao={semHorarioAberta.reuniao}
+            data={semHorarioAberta.data}
+            responsavelNome={nomeResponsavel(
+              semHorarioAberta.reuniao.responsavelId,
+              semHorarioAberta.reuniao.responsavelNome
+            )}
+            pabloId={pabloId}
+            reunioesPorData={reunioesPorData}
+            onClose={() => setSemHorarioAberta(null)}
+          />
         )}
 
         {slotAberto && (

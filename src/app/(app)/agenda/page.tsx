@@ -35,7 +35,7 @@ export default async function AgendaPage({
     supabase
       .from("reunioes")
       .select(
-        "id, grupo_id, data, hora, duracao_min, responsavel_id, link_reuniao, grupos_gestao(nome)"
+        "id, grupo_id, data, hora, duracao_min, responsavel_id, link_reuniao, resumo, grupos_gestao(nome)"
       )
       .gte("data", dataInicio)
       .lte("data", dataFim),
@@ -63,6 +63,7 @@ export default async function AgendaPage({
     duracao_min: number;
     responsavel_id: string | null;
     link_reuniao: string | null;
+    resumo: string | null;
     grupos_gestao: { nome: string } | null;
   };
 
@@ -100,6 +101,7 @@ export default async function AgendaPage({
         ? (responsavelPorId.get(r.responsavel_id) ?? null)
         : null,
       linkReuniao: r.link_reuniao,
+      resumo: r.resumo ?? "",
     });
     reunioesPorDia[r.data] = lista;
   }

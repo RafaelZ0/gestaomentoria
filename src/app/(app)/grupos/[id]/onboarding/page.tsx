@@ -30,8 +30,20 @@ export default async function OnboardingPage({
   if (!onboarding) {
     const alunoSugerido =
       mentorados?.[0]?.nome ?? (grupo?.nome ?? "").replace(/^GEST[ÃA]O\s+/i, "");
+    const { data: responsaveis } = await supabase
+      .from("responsaveis")
+      .select("id, nome")
+      .order("nome");
     return (
-      <OnboardingInicio grupoId={id} alunoSugerido={alunoSugerido} clinicaSugerida="" />
+      <OnboardingInicio
+        grupoId={id}
+        alunoSugerido={alunoSugerido}
+        clinicaSugerida=""
+        responsaveis={(responsaveis ?? []).map((r) => ({
+          id: r.id,
+          nome: r.nome.trim().toLowerCase() === "pablo" ? "Dr. Pablo" : r.nome,
+        }))}
+      />
     );
   }
 
