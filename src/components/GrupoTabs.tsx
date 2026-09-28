@@ -9,6 +9,7 @@ export function GrupoTabs({ grupoId }: { grupoId: string }) {
 
   const tabs = [
     { href: base, label: "Visão geral" },
+    { href: `${base}/onboarding`, label: "Onboarding" },
     { href: `${base}/reunioes`, label: "Reuniões" },
     { href: `${base}/pagamentos`, label: "Pagamentos" },
     { href: `${base}/resultados`, label: "Resultados" },

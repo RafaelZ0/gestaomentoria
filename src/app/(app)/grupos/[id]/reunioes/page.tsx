@@ -98,13 +98,27 @@ export default async function ReunioesPage({
   );
 
   const reuniaoIds = reunioes.map((r) => r.id);
-  const { data: todosParticipantes } =
+  const [{ data: todosParticipantes }, { data: onboardingsDasReunioes }] =
     reuniaoIds.length > 0
-      ? await supabase
-          .from("reuniao_participantes")
-          .select("reuniao_id, mentorados(id, nome, grupo_id, grupos_gestao(nome))")
-          .in("reuniao_id", reuniaoIds)
-      : { data: [] };
+      ? await Promise.all([
+          supabase
+            .from("reuniao_participantes")
+            .select("reuniao_id, mentorados(id, nome, grupo_id, grupos_gestao(nome))")
+            .in("reuniao_id", reuniaoIds),
+          supabase
+            .from("onboardings")
+            .select("reuniao_id, grupo_id")
+            .in("reuniao_id", reuniaoIds),
+        ])
+      : [{ data: [] }, { data: [] }];
+
+  // A reunião é de onboarding quando tem um diagnóstico apontando pra ela.
+  const onboardingPorReuniao = new Map<string, string>();
+  for (const o of onboardingsDasReunioes ?? []) {
+    if (o.reuniao_id) {
+      onboardingPorReuniao.set(o.reuniao_id, `/grupos/${o.grupo_id}/onboarding?ver=raio-x`);
+    }
+  }
 
   type ParticipanteRow = {
     reuniao_id: string;
@@ -185,6 +199,7 @@ export default async function ReunioesPage({
         grupoDataTermino={grupoAtual?.data_termino ?? null}
         mentoradosOutrosGrupos={mentoradosOutrosGruposFormatado}
         responsaveis={responsaveis ?? []}
+        onboardingHref={onboardingPorReuniao.get(r.id)}
       />
     );
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { formatDate } from "@/lib/format";
 import { updateReuniao, removeReuniao } from "@/app/actions/reunioes";
 import { ResponsavelField } from "@/components/ResponsavelField";
@@ -30,6 +31,7 @@ export function ReuniaoItem({
   grupoDataTermino,
   mentoradosOutrosGrupos,
   responsaveis,
+  onboardingHref,
 }: {
   reuniao: {
     id: string;
@@ -55,6 +57,7 @@ export function ReuniaoItem({
     grupoDataTermino: string | null;
   }[];
   responsaveis: Responsavel[];
+  onboardingHref?: string;
 }) {
   const [editando, setEditando] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -208,6 +211,11 @@ export function ReuniaoItem({
             {formatDate(reuniao.data)}
             {reuniao.hora && ` às ${reuniao.hora.slice(0, 5)}`}
           </p>
+          {onboardingHref && (
+            <span className="rounded-full bg-status-warn-bg px-2 py-0.5 text-xs font-semibold text-status-warn-text">
+              Onboarding
+            </span>
+          )}
           {!reuniao.compareceu && (
             <span className="rounded-full bg-status-alert-bg px-2 py-0.5 text-xs font-medium text-status-alert-text">
               Não compareceu
@@ -268,6 +276,16 @@ export function ReuniaoItem({
       )}
       {reuniao.resumo && (
         <p className="mt-2 whitespace-pre-wrap text-sm text-text-secondary">{reuniao.resumo}</p>
+      )}
+      {onboardingHref && (
+        <Link
+          href={onboardingHref}
+          prefetch={false}
+          onClick={(e) => e.stopPropagation()}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-status-warn-text/40 bg-status-warn-bg px-3 py-1.5 text-sm font-medium text-status-warn-text hover:border-status-warn-text"
+        >
+          Ver raio-X da clínica →
+        </Link>
       )}
       {reuniao.link_reuniao && (
         <a

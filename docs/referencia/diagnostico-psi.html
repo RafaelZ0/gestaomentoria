@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diagnóstico da Clínica · Mentoria PSI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16213A; --ink-soft:#4A5470; --paper:#F7F3EA; --panel:#FFFFFF; --line:#E3DACA;
+  --gold:#B8903F; --gold-soft:#F1E6CF; --good:#2F7A5B; --warn:#B4552D; --bg:#EFE9DC;
+  --field:#FBF9F4;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#F2ECDF; --ink-soft:#B7BCCB; --paper:#1A2440; --panel:#212C4B; --line:#35416A;
+    --gold:#D6B06A; --gold-soft:#3A3A3A; --good:#6CC49D; --warn:#E48B63; --bg:#131B31; --field:#1B2542;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#F2ECDF; --ink-soft:#B7BCCB; --paper:#1A2440; --panel:#212C4B; --line:#35416A;
+  --gold:#D6B06A; --gold-soft:#3A3A3A; --good:#6CC49D; --warn:#E48B63; --bg:#131B31; --field:#1B2542;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Poppins,"Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.55}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:24px 20px 80px}
+header.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.brand{font-weight:600;font-size:15px;color:var(--ink-soft)}
+.brand b{color:var(--gold);font-weight:700}
+.status{font-size:13px;color:var(--ink-soft)}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:10px;cursor:pointer;font-size:14px}
+.btn:hover{border-color:var(--gold)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* ---------- trilha ---------- */
+.trail{display:grid;grid-template-columns:repeat(var(--n,8),minmax(0,1fr));gap:6px;margin:8px 0 28px;position:relative}
+.stop{background:none;border:0;cursor:pointer;padding:0;text-align:left;display:flex;flex-direction:column;gap:8px}
+.stop .bar{height:8px;border-radius:6px;background:var(--line);overflow:hidden}
+.stop .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .5s ease}
+.stop.done .bar i{background:var(--good)}
+.stop .nm{font-size:12.5px;color:var(--ink-soft);line-height:1.3}
+.stop.on .nm{color:var(--ink);font-weight:600}
+.stop .n{font-weight:700;color:var(--gold);margin-right:4px}
+.stop.done .n{color:var(--good)}
+
+/* ---------- etapa ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px}
+.stepHead{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:6px;flex-wrap:wrap}
+h1{font-size:clamp(26px,3.4vw,36px);line-height:1.15;margin:0;font-weight:700;letter-spacing:-.01em}
+.lead{color:var(--ink-soft);margin:6px 0 22px;max-width:62ch}
+.count{font-size:14px;color:var(--ink-soft);white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 22px}
+.f{display:flex;flex-direction:column;gap:6px}
+.f.wide{grid-column:1/-1}
+.f label.q{font-weight:500;font-size:15px}
+.f .hint{font-size:13px;color:var(--ink-soft);margin-top:-2px}
+input[type=text],input[type=number],input[type=date],textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--field)}
+textarea{min-height:84px;resize:vertical}
+.money{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--field)}
+.money span{padding:0 4px 0 12px;color:var(--ink-soft);font-size:14px}
+.money input{border:0;background:transparent}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{border:1px solid var(--line);background:var(--field);border-radius:999px;padding:7px 14px;cursor:pointer;font-size:14px}
+.pill[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--panel)}
+.prec{display:flex;gap:6px;flex-wrap:wrap}
+.prec button{font-size:12px;border:1px dashed var(--line);background:none;border-radius:999px;padding:3px 10px;cursor:pointer;color:var(--ink-soft)}
+.prec button[aria-pressed=true]{border-style:solid;border-color:var(--gold);color:var(--ink);background:var(--gold-soft)}
+.check{display:flex;align-items:center;gap:10px}
+
+/* ---------- funil ---------- */
+.funnel{margin-top:26px;border-top:1px solid var(--line);padding-top:22px}
+.funnel h2,.xr h2{font-size:19px;margin:0 0 4px}
+.funnel .sub{color:var(--ink-soft);font-size:14px;margin:0 0 16px}
+.fr{display:grid;grid-template-columns:130px 1fr 70px;align-items:center;gap:12px;margin:8px 0}
+.fr .lbl{font-size:14px}
+.fr .track{height:34px;background:var(--field);border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.fr .fill{height:100%;background:var(--ink);border-radius:7px 0 0 7px;transition:width .6s cubic-bezier(.2,.8,.2,1);display:flex;align-items:center;padding-left:10px;color:var(--panel);font-weight:600;font-size:14px;white-space:nowrap}
+.fr .val{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.rate{display:grid;grid-template-columns:130px 1fr;gap:12px;font-size:13px;color:var(--ink-soft);margin:-2px 0 2px}
+.rate b{color:var(--ink)}
+.rate.worst b{color:var(--warn)}
+.loss{margin-top:16px;padding:14px 16px;border-radius:12px;background:var(--gold-soft);font-size:15px}
+.note{font-size:13px;color:var(--warn);margin-top:8px}
+
+/* ---------- roteiro interno ---------- */
+.script{margin:0 0 22px;padding:14px 16px;border-left:4px solid var(--gold);background:var(--field);border-radius:0 10px 10px 0;font-size:14px}
+.script p{margin:0 0 8px}
+.script p:last-child{margin:0}
+.script em{font-style:italic}
+.hide-internal .script{display:none}
+
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:26px}
+
+/* ---------- início ---------- */
+.start{display:grid;grid-template-columns:1.1fr .9fr;gap:22px}
+.list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.list button{display:flex;justify-content:space-between;gap:12px;text-align:left;border:1px solid var(--line);background:var(--field);padding:12px 14px;border-radius:12px;cursor:pointer}
+.list button:hover{border-color:var(--gold)}
+.list small{color:var(--ink-soft)}
+.empty{color:var(--ink-soft);font-size:14px}
+
+/* ---------- raio-x ---------- */
+.xr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.xr .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+.xr .box.wide{grid-column:1/-1}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:15px}
+.kv dt{color:var(--ink-soft)}
+.kv dd{margin:0;font-weight:500}
+.quote{font-size:clamp(20px,2.4vw,26px);line-height:1.35;font-weight:500;margin:6px 0 0}
+.stack{display:flex;height:30px;border-radius:8px;overflow:hidden;margin:10px 0 10px;border:1px solid var(--line)}
+.stack i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:13px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c)}
+.todo{margin:8px 0 0;padding:0;list-style:none;counter-reset:t}
+.todo li{counter-increment:t;display:grid;grid-template-columns:32px 1fr;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.todo li:first-child{border-top:0}
+.todo li::before{content:counter(t);font-weight:700;color:var(--gold)}
+.xrTitle{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.xrTitle h1{font-size:clamp(30px,4vw,44px)}
+.pop{animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(.97);opacity:.4}100%{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:760px){
+  .grid,.start,.xr{grid-template-columns:1fr}
+  .stop .nm{display:none}
+  .fr,.rate{grid-template-columns:92px 1fr 56px}
+  .rate{grid-template-columns:92px 1fr}
+  .card{padding:20px}
+}
+</style>
+</head>
+<body>
+<div class="wrap hide-internal" id="app">
+  <header class="top">
+    <div class="brand"><b>Mentoria PSI</b> &nbsp;Diagnóstico da clínica</div>
+    <div class="tools">
+      <span class="status" id="status" aria-live="polite"></span>
+      <button class="btn ghost" id="toggleScript" aria-pressed="false">Mostrar roteiro</button>
+      <button class="btn ghost" id="home">Todos os diagnósticos</button>
+    </div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<script>
+/* ================= DEFINIÇÃO DAS ETAPAS ================= */
+const STEPS = [
+ { id:'abertura', nome:'Abertura', titulo:'Vamos começar pelo básico',
+   lead:'Quem está na reunião e qual clínica estamos olhando.',
+   roteiro:['<em>Essa reunião é só para eu entender a sua clínica. Vou perguntar bastante coisa, inclusive números. No final a gente vê juntos um raio-X do que apareceu, e na próxima reunião eu te explico como o acompanhamento segue a partir daqui.</em>',
+            '<em>Se não souber um número, me dá o aproximado. Se não souber de jeito nenhum, tudo bem: isso também é informação.</em>',
+            'Peça permissão para gravar antes de começar.'],
+   fields:[
+    {k:'aluno',t:'text',q:'Nome do dentista'},
+    {k:'clinica',t:'text',q:'Nome da clínica'},
+    {k:'data',t:'date',q:'Data da reunião'},
+    {k:'participantes',t:'text',q:'Quem mais está na reunião',hint:'Sócio, cônjuge, gerente...'},
+    {k:'gravacao',t:'pills',q:'Autorizou gravar a reunião?',o:['Sim','Não']}
+   ]},
+ { id:'historia', nome:'História', titulo:'A história da clínica',
+   lead:'De onde a clínica veio e por que decidir agora.',
+   roteiro:['A resposta de "valeu a pena se..." deve ser anotada com as palavras exatas dele. Ela volta na revisão do mês 3.'],
+   fields:[
+    {k:'anos',t:'number',q:'Há quantos anos a clínica existe?',suf:'anos'},
+    {k:'historia',t:'textarea',q:'Como a clínica chegou onde está hoje',wide:true},
+    {k:'porque',t:'textarea',q:'Por que decidiu entrar agora, e não daqui a seis meses?',wide:true},
+    {k:'sucesso',t:'textarea',q:'Daqui a 90 dias, você vai dizer que valeu a pena se...',hint:'Nas palavras dele.',wide:true}
+   ]},
+ { id:'estrutura', nome:'Estrutura', titulo:'A estrutura da clínica',
+   lead:'Espaço físico, equipamentos e como a clínica funciona no dia a dia.',
+   roteiro:['Aqui é levantamento de fato: não precisa aprofundar, só registrar como está hoje.'],
+   fields:[
+    {k:'unidades',t:'number',q:'Quantas unidades (endereços) a clínica tem?'},
+    {k:'imovel',t:'pills',q:'O imóvel é...',o:['Próprio','Alugado','Dividido com outra clínica']},
+    {k:'cadeiras',t:'number',q:'Quantas cadeiras?'},
+    {k:'ocupacao',t:'pills',q:'Como as cadeiras ficam ao longo da semana?',o:['Quase sempre livres','Metade do tempo ocupadas','Quase sempre cheias']},
+    {k:'salaCirurgia',t:'pills',q:'Tem sala de cirurgia separada?',o:['Sim','Não']},
+    {k:'laboratorio',t:'pills',q:'Laboratório de prótese',o:['Próprio','Terceirizado','Os dois']},
+    {k:'equipamentos',t:'multi',q:'Equipamentos que a clínica tem',o:['Raio-X periapical','Panorâmico','Tomógrafo','Scanner intraoral','Impressora 3D','Fresadora','Nenhum destes'],wide:true},
+    {k:'sistema',t:'pills',q:'Como a agenda e os pacientes são controlados?',o:['Sistema de gestão','Planilha','Agenda de papel','Não há controle'],wide:true},
+    {k:'sistemaNome',t:'text',q:'Se usa sistema, qual?'},
+    {k:'horario',t:'text',q:'Horário de funcionamento'},
+    {k:'sabado',t:'pills',q:'Atende sábado?',o:['Sim','Não','Às vezes']},
+    {k:'particular',t:'range',q:'Proporção de pacientes particulares',hint:'O restante é convênio.'},
+    {k:'procedimentos',t:'text',q:'Procedimentos que mais faz hoje'},
+    {k:'querMais',t:'text',q:'Procedimentos que gostaria de fazer mais'},
+    {k:'regiao',t:'text',q:'Cidade e região de onde vêm os pacientes',wide:true}
+   ]},
+ { id:'equipe', nome:'Equipe', titulo:'Quem trabalha na clínica',
+   lead:'O tamanho da equipe e quem faz o quê.',
+   roteiro:['Se não houver ninguém fixo na recepção ou ninguém responsável pelo administrativo, anote. São dos pontos que mais pesam quando a clínica passa a receber mais pacientes.'],
+   fields:[
+    {k:'funcionarios',t:'number',q:'Quantos funcionários no total?',hint:'Sem contar os dentistas.'},
+    {k:'clt',t:'number',q:'Quantos são registrados (CLT)?'},
+    {k:'dentistas',t:'number',q:'Quantos dentistas atendem, contando você?'},
+    {k:'vinculo',t:'pills',q:'Os outros dentistas são...',o:['Não há outros','Sócios','Contratados fixos','Autônomos por porcentagem','Misto']},
+    {k:'especialidades',t:'text',q:'Especialidades atendidas na clínica',wide:true},
+    {k:'quemImplanta',t:'pills',q:'Quem faz os implantes?',o:['Só eu','Eu e outro dentista','Outro dentista']},
+    {k:'diasCadeira',t:'number',q:'Quantos dias por semana você atende na cadeira?',suf:'dias'},
+    {k:'recepcao',t:'number',q:'Quantas pessoas na recepção?'},
+    {k:'recepcaoFixa',t:'pills',q:'Tem alguém fixo na recepção o dia todo?',o:['Sim','Não','Às vezes']},
+    {k:'auxiliares',t:'number',q:'Quantas auxiliares (ASB/TSB)?'},
+    {k:'admin',t:'pills',q:'Quem cuida do administrativo e financeiro?',o:['Eu mesmo','Gerente ou administrativo','Cônjuge ou familiar','Contador externo','Ninguém definido']},
+    {k:'decisor',t:'pills',q:'Quem decide as questões da clínica?',o:['Só eu','Eu e um sócio','Eu e o cônjuge','Outro arranjo']}
+   ]},
+ { id:'numeros', nome:'Números', titulo:'Os números de hoje',
+   lead:'Não é avaliação. É o ponto de partida, para daqui a 90 dias colocar o antes e o depois lado a lado.',
+   roteiro:['<em>Esses números não são para te avaliar. Sem o "antes", não tem como medir o "depois".</em>','Marque ao lado de cada número se é exato, aproximado ou se ele não sabe.'],
+   fields:[
+    {k:'fat',t:'money',q:'Faturamento médio mensal (últimos 3 meses)',prec:true},
+    {k:'fatTipo',t:'pills',q:'Esse faturamento é...',o:['Vendido no mês','Recebido no mês','Não sabe dizer']},
+    {k:'pctImplante',t:'range',q:'Quanto do faturamento vem de implante e prótese?'},
+    {k:'ticket',t:'money',q:'Valor médio de um tratamento de implante',prec:true},
+    {k:'contatos',t:'number',q:'Contatos novos por mês',hint:'WhatsApp, telefone e Instagram somados.',prec:true},
+    {k:'agendados',t:'number',q:'Avaliações agendadas por mês',prec:true},
+    {k:'compareceram',t:'number',q:'Avaliações realizadas por mês',hint:'Quantos de fato vieram.',prec:true},
+    {k:'fecharam',t:'number',q:'Tratamentos fechados por mês',prec:true},
+    {k:'origem',t:'origem',q:'De onde vêm os pacientes novos (proporção aproximada)',wide:true},
+    {k:'registro',t:'pills',q:'Onde esses números ficam registrados?',o:['Sistema','Planilha','Caderno','Não registra'],wide:true}
+   ]},
+ { id:'comercial', nome:'Atendimento', titulo:'Do primeiro contato ao fechamento',
+   lead:'O caminho que o paciente percorre dentro da clínica.',
+   roteiro:['Se não existe retorno para orçamento parado, pergunte quantos ele estima que existam. É a oportunidade mais barata da clínica.'],
+   fields:[
+    {k:'quemResponde',t:'text',q:'Quem responde o paciente novo?'},
+    {k:'tempoResp',t:'pills',q:'Em quanto tempo, em média?',o:['Até 15 min','Até 1 hora','Algumas horas','No dia seguinte ou mais']},
+    {k:'preco',t:'pills',q:'O que a recepção faz quando perguntam o preço?',o:['Passa o valor','Não passa, convida para avaliação','Depende de quem atende']},
+    {k:'avaliacao',t:'pills',q:'A avaliação é...',o:['Gratuita','Paga']},
+    {k:'orcamento',t:'pills',q:'Como o orçamento é apresentado?',o:['Na hora, pelo dentista','Depois, pela recepção','Por WhatsApp','Varia']},
+    {k:'followup',t:'pills',q:'Alguém volta a falar com quem não fechou?',o:['Sim, sempre','Às vezes','Não']},
+    {k:'parados',t:'number',q:'Quantos orçamentos parados você estima ter hoje?'},
+    {k:'confirma',t:'pills',q:'Confirma as consultas na véspera?',o:['Sim','Às vezes','Não']},
+    {k:'pagamento',t:'multi',q:'Formas de pagamento oferecidas',o:['Pix','Cartão','Boleto próprio','Financeira','Dinheiro'],wide:true}
+   ]},
+ { id:'divulgacao', nome:'Divulgação', titulo:'Como a clínica aparece',
+   lead:'O que já foi tentado para atrair pacientes.',
+   roteiro:['Nesta reunião não entramos em implantação. Só registrar o histórico e a disponibilidade de verba.','Deixe claro que a verba de anúncio é separada do valor do acompanhamento: ela vai direto para a plataforma.'],
+   fields:[
+    {k:'trafego',t:'pills',q:'Você já fez tráfego pago (anúncio no Instagram ou Google)?',o:['Nunca','Já fiz por conta própria','Já fiz com agência ou gestor','Faço hoje']},
+    {k:'trafegoComo',t:'textarea',q:'Como foi essa experiência?',wide:true},
+    {k:'verbaDisp',t:'pills',q:'Hoje você teria verba disponível para investir em anúncios?',o:['Sim','Não no momento','Ainda não sei']},
+    {k:'verba',t:'money',q:'Quanto teria disponível por mês?',hint:'O mínimo para iniciar o tráfego é R$ 1.200 por mês, pago direto à plataforma de anúncios.'},
+    {k:'instagram',t:'pills',q:'Quem cuida do Instagram da clínica?',o:['Eu mesmo','Alguém da equipe','Agência ou social media','Ninguém']},
+    {k:'consultoria',t:'pills',q:'Já contratou consultoria ou mentoria antes?',o:['Não','Sim, foi bom','Sim, não foi bom']}
+   ]},
+ { id:'objetivo', nome:'Objetivo', titulo:'O que precisa mudar',
+   lead:'O foco dos próximos 90 dias e o que pode atrapalhar.',
+   roteiro:['<em>Não é promessa de resultado. É o que vamos acompanhar juntos para saber se estamos no caminho.</em>','Encerre marcando a próxima reunião, onde você explica como o acompanhamento segue.'],
+   fields:[
+    {k:'indicador',t:'pills',q:'Dos números que vimos, qual mais importa melhorar?',o:['Mais contatos','Mais agendamentos','Mais comparecimento','Mais fechamentos','Ticket maior','Ainda não sei'],wide:true},
+    {k:'riscos',t:'textarea',q:'O que pode atrapalhar nos próximos meses?',hint:'Tempo, equipe, férias, reforma, troca de recepção...',wide:true},
+    {k:'canal',t:'text',q:'Melhor canal e horário para falar com você'},
+    {k:'proxima',t:'date',q:'Data da próxima reunião'}
+   ]}
+];
+
+/* ================= ESTADO E PERSISTÊNCIA ================= */
+let S = null;            // diagnóstico aberto
+let stepIdx = 0;
+let db = null, saveT = null;
+const LS_IDX = 'psi-diag-index';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num = v => (v === '' || v == null || isNaN(+v)) ? null : +v;
+const brl = v => v == null ? '—' : 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+const pct = v => v == null ? '—' : Math.round(v * 100) + '%';
+
+function lsGet(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+function setStatus(t){ $('#status').textContent = t; }
+
+async function initDb(){
+  try{
+    if (window.claude && typeof window.claude.use === 'function'){
+      db = await window.claude.use('db');
+    }
+  }catch(e){ db = null; }
+  if (!S) renderHome();
+}
+
+async function listAll(){
+  const local = lsGet(LS_IDX, []);
+  if (!db) return local;
+  try{
+    const snap = await db.collection('diagnosticos').orderBy('updatedAt','desc').limit(200).get();
+    return snap.docs.map(d => { const x = d.data() || {}; return { id: d.id, aluno: x.v?.aluno, clinica: x.v?.clinica, updatedAt: x.updatedAt }; });
+  }catch(e){ return local; }
+}
+
+function queueSave(){
+  setStatus('Salvando...');
+  clearTimeout(saveT);
+  saveT = setTimeout(saveNow, 900);
+}
+async function saveNow(){
+  if (!S) return;
+  S.updatedAt = new Date().toISOString();
+  lsSet('psi-diag:' + S.id, S);
+  const idx = lsGet(LS_IDX, []).filter(x => x.id !== S.id);
+  idx.unshift({ id:S.id, aluno:S.v.aluno, clinica:S.v.clinica, updatedAt:S.updatedAt });
+  lsSet(LS_IDX, idx.slice(0,200));
+  if (db){
+    try{ await db.collection('diagnosticos').doc(S.id).set(JSON.parse(JSON.stringify(S))); setStatus('Salvo'); }
+    catch(e){ setStatus('Salvo só neste navegador'); }
+  } else setStatus('Salvo só neste navegador');
+}
+
+async function openDiag(id){
+  let d = null;
+  if (db){ try{ const s = await db.collection('diagnosticos').doc(id).get(); if (s.exists) d = s.data(); }catch(e){} }
+  if (!d) d = lsGet('psi-diag:' + id, null);
+  if (!d){ setStatus('Não foi possível abrir este diagnóstico'); return; }
+  S = JSON.parse(JSON.stringify(d));
+  S.v = S.v || {}; S.p = S.p || {};
+  stepIdx = 0; renderStep();
+}
+
+function newDiag(aluno, clinica){
+  const id = (aluno || 'aluno').normalize('NFD').replace(/[^\w]+/g,'-').toLowerCase().slice(0,40) + '-' + Date.now().toString(36);
+  S = { id, v:{ aluno, clinica, data:new Date().toISOString().slice(0,10) }, p:{}, createdAt:new Date().toISOString() };
+  stepIdx = 0; queueSave(); renderStep();
+}
+
+/* ================= CÁLCULOS ================= */
+function isFilled(f){
+  const v = S.v[f.k];
+  if (f.prec && S.p[f.k] === 'naosei') return true;
+  if (f.k === 'verba' && (S.v.verbaDisp === 'Não no momento' || S.v.verbaDisp === 'Ainda não sei')) return true;
+  if (f.t === 'multi') return Array.isArray(v) && v.length > 0;
+  if (f.t === 'origem') return v && Object.values(v).some(x => num(x) != null && +x > 0);
+  return v !== undefined && v !== null && String(v).trim() !== '';
+}
+function stepProgress(i){
+  const fs = STEPS[i].fields; return fs.filter(isFilled).length / fs.length;
+}
+function funnel(){
+  const v = S.v, g = k => S.p[k] === 'naosei' ? null : num(v[k]);
+  const c = g('contatos'), a = g('agendados'), r = g('compareceram'), f = g('fecharam');
+  const rates = [
+    { nome:'Agendamento', de:'contato', para:'avaliação agendada', v: c && a != null ? a / c : null },
+    { nome:'Comparecimento', de:'agendado', para:'avaliação realizada', v: a && r != null ? r / a : null },
+    { nome:'Fechamento', de:'avaliação', para:'tratamento fechado', v: r && f != null ? f / r : null }
+  ];
+  const valid = rates.filter(x => x.v != null);
+  const worst = valid.length >= 2 ? valid.reduce((m, x) => x.v < m.v ? x : m) : null;
+  const issues = [];
+  if (c != null && a != null && a > c) issues.push('agendados maior que contatos');
+  if (a != null && r != null && r > a) issues.push('realizadas maior que agendadas');
+  if (r != null && f != null && f > r) issues.push('fechamentos maior que avaliações realizadas');
+  return { c, a, r, f, rates, worst, issues };
+}
+
+/* ================= RENDER: INÍCIO ================= */
+async function renderHome(){
+  S = null;
+  const view = $('#view');
+  view.innerHTML = `
+  <section class="start">
+    <div class="card">
+      <h1>Novo diagnóstico</h1>
+      <p class="lead">Preencha junto com o dentista, com a tela compartilhada. No final aparece o raio-X da clínica.</p>
+      <div class="grid" style="grid-template-columns:1fr">
+        <div class="f"><label class="q" for="nAluno">Nome do dentista</label><input type="text" id="nAluno" autocomplete="off"></div>
+        <div class="f"><label class="q" for="nClin">Nome da clínica</label><input type="text" id="nClin" autocomplete="off"></div>
+      </div>
+      <div class="nav"><span></span><button class="btn primary" id="nGo">Começar diagnóstico</button></div>
+    </div>
+    <div class="card">
+      <h2 style="margin:0;font-size:19px">Diagnósticos salvos</h2>
+      <div class="list" id="list"><p class="empty">Carregando...</p></div>
+    </div>
+  </section>`;
+  $('#nGo').onclick = () => {
+    const a = $('#nAluno').value.trim(), c = $('#nClin').value.trim();
+    if (!a){ $('#nAluno').focus(); setStatus('Informe o nome do dentista para começar'); return; }
+    newDiag(a, c);
+  };
+  const items = await listAll();
+  const list = $('#list'); if (!list) return;
+  list.innerHTML = items.length ? items.map(x => `<button data-id="${esc(x.id)}"><span><b>${esc(x.aluno || 'Sem nome')}</b><br><small>${esc(x.clinica || '')}</small></span><small>${x.updatedAt ? new Date(x.updatedAt).toLocaleDateString('pt-BR') : ''}</small></button>`).join('')
+    : '<p class="empty">Nenhum diagnóstico ainda. Comece um ao lado.</p>';
+  list.querySelectorAll('button').forEach(b => b.onclick = () => openDiag(b.dataset.id));
+}
+
+/* ================= RENDER: ETAPA ================= */
+function fieldHtml(f){
+  const v = S.v[f.k], id = 'f_' + f.k;
+  let inner = '';
+  if (f.t === 'text') inner = `<input type="text" id="${id}" data-k="${f.k}" value="${esc(v)}" autocomplete="off">`;
+  else if (f.t === 'textarea') inner = `<textarea id="${id}" data-k="${f.k}">${esc(v)}</textarea>`;
+  else if (f.t === 'date') inner = `<input type="date" id="${id}" data-k="${f.k}" value="${esc(v)}">`;
+  else if (f.t === 'number') inner = `<input type="number" inputmode="numeric" min="0" id="${id}" data-k="${f.k}" value="${esc(v)}"${S.p[f.k]==='naosei'?' disabled':''}>`;
+  else if (f.t === 'money') inner = `<div class="money"><span>R$</span><input type="number" inputmode="numeric" min="0" id="${id}" data-k="${f.k}" value="${esc(v)}"${S.p[f.k]==='naosei'?' disabled':''}></div>`;
+  else if (f.t === 'range') inner = `<div class="check"><input type="range" min="0" max="100" step="5" id="${id}" data-k="${f.k}" value="${v ?? 50}" style="flex:1"><b id="${id}_o" style="min-width:48px;text-align:right">${v != null ? v + '%' : '—'}</b></div>`;
+  else if (f.t === 'pills' || f.t === 'multi') inner = `<div class="pills" role="group" aria-label="${esc(f.q)}">${f.o.map(o => {
+      const on = f.t === 'multi' ? (Array.isArray(v) && v.includes(o)) : v === o;
+      return `<button type="button" class="pill" data-k="${f.k}" data-t="${f.t}" data-o="${esc(o)}" aria-pressed="${on}">${esc(o)}</button>`; }).join('')}</div>`;
+  else if (f.t === 'origem'){
+    const o = v || {}, parts = ['Indicação','Convênio','Instagram','Anúncio','Outros'];
+    inner = `<div class="grid" style="grid-template-columns:repeat(5,minmax(0,1fr));gap:10px">${parts.map(p => `
+      <div class="f"><label class="hint" for="or_${p}">${p}</label><div class="money"><input type="number" min="0" max="100" id="or_${p}" data-origem="${p}" value="${esc(o[p])}"><span style="padding:0 12px 0 0">%</span></div></div>`).join('')}</div>
+      <div class="hint" id="orSum"></div>`;
+  }
+  const prec = f.prec ? `<div class="prec" role="group" aria-label="Precisão">${[['exato','Exato'],['aprox','Aproximado'],['naosei','Não sabe']].map(([k,l]) => `<button type="button" data-prec="${f.k}" data-pv="${k}" aria-pressed="${S.p[f.k]===k}">${l}</button>`).join('')}</div>` : '';
+  const lab = (f.t === 'pills' || f.t === 'multi' || f.t === 'origem') ? `<span class="q" style="font-weight:500">${esc(f.q)}</span>` : `<label class="q" for="${id}">${esc(f.q)}</label>`;
+  return `<div class="f${f.wide ? ' wide' : ''}">${lab}${f.hint ? `<span class="hint">${esc(f.hint)}</span>` : ''}${inner}${prec}</div>`;
+}
+
+function renderTrail(){
+  return `<nav class="trail" aria-label="Etapas" style="--n:${STEPS.length}">${STEPS.map((s, i) => {
+    const p = stepProgress(i), done = p >= .999;
+    return `<button class="stop${i === stepIdx ? ' on' : ''}${done ? ' done' : ''}" data-step="${i}" aria-current="${i === stepIdx ? 'step' : 'false'}">
+      <span class="bar"><i style="width:${Math.round(p * 100)}%"></i></span>
+      <span class="nm"><span class="n">${done ? '✓' : i + 1}</span>${s.nome}</span></button>`; }).join('')}
+    </nav>`;
+}
+
+function renderStep(){
+  const s = STEPS[stepIdx], last = stepIdx === STEPS.length - 1;
+  $('#view').innerHTML = `
+    ${renderTrail()}
+    <section class="card pop" aria-labelledby="stTitle">
+      <div class="stepHead"><h1 id="stTitle">${s.titulo}</h1><span class="count" id="cnt"></span></div>
+      <p class="lead">${s.lead}</p>
+      <div class="script">${s.roteiro.map(r => `<p>${r}</p>`).join('')}</div>
+      <div class="grid">${s.fields.map(fieldHtml).join('')}</div>
+      ${s.id === 'numeros' ? '<div class="funnel" id="funnel"></div>' : ''}
+      ${s.id === 'divulgacao' ? '<p class="note" id="verbaNote" aria-live="polite"></p>' : ''}
+      <div class="nav">
+        <button class="btn" id="prev" ${stepIdx === 0 ? 'disabled' : ''}>Voltar</button>
+        <button class="btn primary" id="next">${last ? 'Ver o raio-X da clínica' : 'Próxima etapa'}</button>
+      </div>
+    </section>`;
+  bindStep(); refreshLive();
+  window.scrollTo({ top:0 });
+}
+
+function refreshLive(){
+  const s = STEPS[stepIdx];
+  const filled = s.fields.filter(isFilled).length;
+  const cnt = $('#cnt'); if (cnt) cnt.textContent = `${filled} de ${s.fields.length} respondidas`;
+  document.querySelectorAll('.stop').forEach((el, i) => {
+    const p = stepProgress(i), done = p >= .999;
+    el.querySelector('.bar i').style.width = Math.round(p * 100) + '%';
+    el.classList.toggle('done', done);
+    el.querySelector('.n').textContent = done ? '✓' : i + 1;
+  });
+  if (s.id === 'numeros'){ renderFunnel($('#funnel')); origemSum(); }
+  if (s.id === 'divulgacao'){ const n = $('#verbaNote'); if (n){ const st = verbaStatus(); n.textContent = st ? st.txt : ''; n.style.color = st && st.ok ? 'var(--good)' : 'var(--warn)'; } }
+}
+
+function origemSum(){
+  const el = $('#orSum'); if (!el) return;
+  const o = S.v.origem || {}; const t = Object.values(o).reduce((a, x) => a + (num(x) || 0), 0);
+  el.textContent = t ? `Soma: ${t}%${t !== 100 ? ' (o ideal é somar 100%)' : ''}` : '';
+}
+
+function renderFunnel(el){
+  if (!el) return;
+  const F = funnel();
+  const base = F.c || Math.max(F.a || 0, F.r || 0, F.f || 0) || 1;
+  const rows = [['Contatos', F.c], ['Agendados', F.a], ['Vieram', F.r], ['Fecharam', F.f]];
+  let html = `<h2>O funil da sua clínica</h2><p class="sub">Calculado com os números que você acabou de passar.</p>`;
+  rows.forEach(([l, v], i) => {
+    const w = v == null ? 0 : Math.max(6, Math.min(100, v / base * 100));
+    html += `<div class="fr"><span class="lbl">${l}</span><div class="track"><div class="fill" style="width:${w}%"></div></div><span class="val">${v ?? '—'}</span></div>`;
+    if (i < 3){ const r = F.rates[i]; html += `<div class="rate${F.worst && F.worst.nome === r.nome ? ' worst' : ''}"><span></span><span>${r.nome}: <b>${pct(r.v)}</b></span></div>`; }
+  });
+  if (F.worst){
+    const lost = { Agendamento:[F.c, F.a], Comparecimento:[F.a, F.r], Fechamento:[F.r, F.f] }[F.worst.nome];
+    html += `<div class="loss">A maior perda está no <b>${F.worst.nome.toLowerCase()}</b>: de cada 10 pessoas nessa etapa, cerca de ${Math.round((1 - F.worst.v) * 10)} não avançam${lost ? ` (${lost[0] - lost[1]} por mês)` : ''}.</div>`;
+  } else html += `<p class="sub" style="margin-top:12px">Preencha pelo menos três números do funil para ver onde o paciente mais se perde.</p>`;
+  if (F.issues.length) html += `<p class="note">Vale conferir: ${F.issues.join('; ')}.</p>`;
+  el.innerHTML = html;
+}
+
+function bindStep(){
+  const view = $('#view');
+  view.querySelectorAll('[data-k]').forEach(el => {
+    if (el.classList.contains('pill')) return;
+    const ev = el.type === 'range' ? 'input' : 'input';
+    el.addEventListener(ev, () => {
+      S.v[el.dataset.k] = el.type === 'range' ? +el.value : el.value;
+      if (el.type === 'range') $('#' + el.id + '_o').textContent = el.value + '%';
+      queueSave(); refreshLive();
+    });
+  });
+  view.querySelectorAll('.pill').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.k, o = b.dataset.o;
+    if (b.dataset.t === 'multi'){
+      const arr = Array.isArray(S.v[k]) ? S.v[k].slice() : [];
+      const i = arr.indexOf(o); i >= 0 ? arr.splice(i, 1) : arr.push(o); S.v[k] = arr;
+      b.setAttribute('aria-pressed', i < 0);
+    } else {
+      S.v[k] = S.v[k] === o ? '' : o;
+      b.parentElement.querySelectorAll('.pill').forEach(x => x.setAttribute('aria-pressed', x.dataset.o === S.v[k]));
+    }
+    queueSave(); refreshLive();
+  }));
+  view.querySelectorAll('[data-prec]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.prec, pv = b.dataset.pv;
+    S.p[k] = S.p[k] === pv ? '' : pv;
+    b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.pv === S.p[k]));
+    const inp = $('#f_' + k); if (inp){ inp.disabled = S.p[k] === 'naosei'; if (inp.disabled){ inp.value = ''; S.v[k] = ''; } }
+    queueSave(); refreshLive();
+  }));
+  view.querySelectorAll('[data-origem]').forEach(el => el.addEventListener('input', () => {
+    S.v.origem = Object.assign({}, S.v.origem, { [el.dataset.origem]: el.value });
+    queueSave(); refreshLive();
+  }));
+  view.querySelectorAll('.stop').forEach(b => b.onclick = () => { stepIdx = +b.dataset.step; renderStep(); });
+  $('#prev').onclick = () => { if (stepIdx > 0){ stepIdx--; renderStep(); } };
+  $('#next').onclick = () => { if (stepIdx < STEPS.length - 1){ stepIdx++; renderStep(); } else renderXray(); };
+}
+
+/* ================= VERBA ================= */
+const VERBA_MIN = 1200;
+function verbaStatus(){
+  const d = S.v.verbaDisp, v = num(S.v.verba);
+  if (d === 'Não no momento') return { ok:false, txt:'Sem verba disponível para anúncios no momento.' };
+  if (d === 'Ainda não sei') return { ok:false, txt:'Verba para anúncios ainda indefinida.' };
+  if (v == null) return null;
+  if (v < VERBA_MIN) return { ok:false, txt:`${brl(v)} por mês: abaixo do mínimo de ${brl(VERBA_MIN)} para iniciar o tráfego.` };
+  return { ok:true, txt:`${brl(v)} por mês: atende o mínimo de ${brl(VERBA_MIN)} para iniciar o tráfego.` };
+}
+
+/* ================= RAIO-X ================= */
+function pontos(){
+  const v = S.v, F = funnel(), out = [];
+  if (F.worst) out.push(`Maior perda do funil está no ${F.worst.nome.toLowerCase()} (${pct(F.worst.v)}).`);
+  if (v.recepcaoFixa === 'Não' || v.recepcaoFixa === 'Às vezes') out.push('Não há alguém fixo na recepção durante todo o horário.');
+  if (v.admin === 'Ninguém definido') out.push('Não há um responsável definido pelo administrativo e financeiro.');
+  if (v.sistema === 'Agenda de papel' || v.sistema === 'Não há controle') out.push('Agenda e pacientes não são controlados em sistema ou planilha.');
+  if (v.tempoResp === 'Algumas horas' || v.tempoResp === 'No dia seguinte ou mais') out.push(`O paciente novo espera ${v.tempoResp.toLowerCase()} pela resposta.`);
+  if (v.followup === 'Não' || v.followup === 'Às vezes') out.push(`Quem não fecha nem sempre recebe retorno${num(v.parados) ? ` (cerca de ${v.parados} orçamentos parados)` : ''}.`);
+  if (v.confirma === 'Não' || v.confirma === 'Às vezes') out.push('As consultas nem sempre são confirmadas na véspera.');
+  const naosei = Object.values(S.p).filter(x => x === 'naosei').length;
+  if (v.registro === 'Não registra' || naosei >= 2) out.push('Os números da clínica não estão registrados de forma consistente.');
+  const vs = verbaStatus(); if (vs && !vs.ok) out.push(vs.txt);
+  if (v.fatTipo === 'Não sabe dizer') out.push('Não está claro se o faturamento informado é vendido ou recebido.');
+  return out;
+}
+
+function renderXray(){
+  const v = S.v, F = funnel();
+  const prec = Object.values(S.p); const c = t => prec.filter(x => x === t).length;
+  const cores = { 'Indicação':'var(--ink)','Convênio':'var(--ink-soft)','Instagram':'var(--gold)','Anúncio':'var(--good)','Outros':'var(--line)' };
+  const o = v.origem || {}; const tot = Object.values(o).reduce((a, x) => a + (num(x) || 0), 0);
+  const pts = pontos();
+  $('#view').innerHTML = `
+    ${renderTrail()}
+    <div class="xrTitle pop">
+      <div><p class="lead" style="margin:0 0 4px">Raio-X da clínica</p><h1>${esc(v.clinica || v.aluno || 'Clínica')}</h1></div>
+      <div class="tools"><button class="btn" id="back">Voltar ao preenchimento</button><button class="btn primary" id="dl">Baixar resumo</button></div>
+    </div>
+    <section class="xr">
+      ${v.sucesso ? `<div class="box wide"><h2>Valeu a pena se...</h2><p class="quote">“${esc(v.sucesso)}”</p></div>` : ''}
+      <div class="box"><h2>A clínica</h2><dl class="kv">
+        <dt>Existe há</dt><dd>${v.anos ? esc(v.anos) + ' anos' : '—'}</dd>
+        <dt>Unidades</dt><dd>${esc(v.unidades) || '—'}${v.imovel ? ` · ${esc(v.imovel.toLowerCase())}` : ''}</dd>
+        <dt>Cadeiras</dt><dd>${esc(v.cadeiras) || '—'}${v.ocupacao ? ` · ${esc(v.ocupacao.toLowerCase())}` : ''}</dd>
+        <dt>Sala de cirurgia</dt><dd>${esc(v.salaCirurgia) || '—'}</dd>
+        <dt>Laboratório</dt><dd>${esc(v.laboratorio) || '—'}</dd>
+        <dt>Equipamentos</dt><dd>${Array.isArray(v.equipamentos) && v.equipamentos.length ? esc(v.equipamentos.join(', ')) : '—'}</dd>
+        <dt>Controle</dt><dd>${esc(v.sistema) || '—'}${v.sistemaNome ? ` (${esc(v.sistemaNome)})` : ''}</dd>
+        <dt>Particular</dt><dd>${v.particular != null ? v.particular + '%' : '—'}</dd>
+      </dl></div>
+      <div class="box"><h2>A equipe</h2><dl class="kv">
+        <dt>Funcionários</dt><dd>${esc(v.funcionarios) || '—'}${num(v.clt) != null ? ` · ${esc(v.clt)} CLT` : ''}</dd>
+        <dt>Dentistas</dt><dd>${esc(v.dentistas) || '—'}${v.vinculo && v.vinculo !== 'Não há outros' ? ` · ${esc(v.vinculo.toLowerCase())}` : ''}</dd>
+        <dt>Implantes</dt><dd>${esc(v.quemImplanta) || '—'}</dd>
+        <dt>Na cadeira</dt><dd>${v.diasCadeira ? esc(v.diasCadeira) + ' dias por semana' : '—'}</dd>
+        <dt>Recepção</dt><dd>${esc(v.recepcao) || '—'}${v.recepcaoFixa ? ` · fixa: ${esc(v.recepcaoFixa.toLowerCase())}` : ''}</dd>
+        <dt>Auxiliares</dt><dd>${esc(v.auxiliares) || '—'}</dd>
+        <dt>Administrativo</dt><dd>${esc(v.admin) || '—'}</dd>
+        <dt>Decisão</dt><dd>${esc(v.decisor) || '—'}</dd>
+      </dl></div>
+      <div class="box wide"><h2>Números de hoje</h2><dl class="kv">
+        <dt>Faturamento</dt><dd>${S.p.fat === 'naosei' ? 'não sabe' : brl(num(v.fat))}${v.fatTipo && v.fatTipo !== 'Não sabe dizer' ? ` <small>(${esc(v.fatTipo.toLowerCase())})</small>` : ''}</dd>
+        <dt>Implante e prótese</dt><dd>${v.pctImplante != null ? v.pctImplante + '% do faturamento' : '—'}</dd>
+        <dt>Valor médio</dt><dd>${S.p.ticket === 'naosei' ? 'não sabe' : brl(num(v.ticket))}</dd>
+        <dt>Precisão</dt><dd>${c('exato')} exatos · ${c('aprox')} aproximados · ${c('naosei')} não sabe</dd>
+      </dl></div>
+      <div class="box wide funnel" id="xFunnel" style="margin:0;border-top:0;padding-top:22px"></div>
+      <div class="box"><h2>De onde vêm os pacientes</h2>
+        ${tot ? `<div class="stack">${Object.entries(o).filter(([,x]) => num(x)).map(([k, x]) => `<i style="width:${x / tot * 100}%;background:${cores[k]}" title="${k} ${x}%"></i>`).join('')}</div>
+        <div class="legend">${Object.entries(o).filter(([,x]) => num(x)).map(([k, x]) => `<span style="--c:${cores[k]}">${k} ${x}%</span>`).join('')}</div>` : '<p class="empty">Não informado.</p>'}
+        <p class="hint" style="margin-top:14px">Tráfego pago: ${esc(v.trafego || 'não informado')}</p>
+        <p class="hint">Verba para anúncios: ${(() => { const st = verbaStatus(); return st ? esc(st.txt) : 'não informada'; })()}</p>
+      </div>
+      <div class="box"><h2>Foco dos 90 dias</h2><p class="quote" style="font-size:22px">${esc(v.indicador || 'A definir')}</p>
+        ${v.riscos ? `<p class="hint" style="margin-top:12px">O que pode atrapalhar: ${esc(v.riscos)}</p>` : ''}</div>
+      <div class="box wide"><h2>O que apareceu no diagnóstico</h2>
+        ${pts.length ? `<ol class="todo">${pts.map(p => `<li>${esc(p)}</li>`).join('')}</ol>` : '<p class="empty">Nada se destacou com as respostas preenchidas.</p>'}
+        <p class="hint" style="margin-top:14px">${v.proxima ? `Na próxima reunião, em ${new Date(v.proxima + 'T12:00').toLocaleDateString('pt-BR')}, apresentamos como o acompanhamento segue a partir daqui.` : 'Próxima reunião: a marcar.'}</p>
+      </div>
+    </section>`;
+  renderFunnel($('#xFunnel'));
+  document.querySelectorAll('.stop').forEach(b => b.onclick = () => { stepIdx = +b.dataset.step; renderStep(); });
+  $('#back').onclick = () => renderStep();
+  $('#dl').onclick = download;
+  window.scrollTo({ top:0 });
+}
+
+function resumoTexto(){
+  const v = S.v, F = funnel(), L = [];
+  L.push(`# Diagnóstico · ${v.clinica || ''} (${v.aluno || ''})`, `Data: ${v.data || '—'}`, '');
+  STEPS.forEach(s => {
+    L.push(`## ${s.titulo}`);
+    s.fields.forEach(f => {
+      let x = v[f.k];
+      if (f.t === 'origem') x = x ? Object.entries(x).filter(([,y]) => num(y)).map(([k, y]) => `${k} ${y}%`).join(', ') : '';
+      else if (Array.isArray(x)) x = x.join(', ');
+      else if (f.t === 'range' && x != null) x = x + '%';
+      if (f.prec && S.p[f.k]) x = (S.p[f.k] === 'naosei' ? 'não sabe' : `${x ?? ''} (${S.p[f.k] === 'aprox' ? 'aproximado' : 'exato'})`);
+      L.push(`- ${f.q}: ${x == null || x === '' ? '—' : x}`);
+    }); L.push('');
+  });
+  L.push('## Funil', ...F.rates.map(r => `- ${r.nome}: ${pct(r.v)}`), '');
+  L.push('## O que apareceu no diagnóstico', ...pontos().map((p, i) => `${i + 1}. ${p}`));
+  return L.join('\n');
+}
+async function download(){
+  const txt = resumoTexto();
+  const fname = `diagnostico-${(S.v.aluno || 'aluno').normalize('NFD').replace(/[^\w]+/g,'-').toLowerCase()}.md`;
+  try{
+    const dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null;
+    if (dl){ await dl.save({ filename: fname, data: txt }); setStatus('Resumo enviado para download'); return; }
+  }catch(e){ if (e && e.code === 'cancelled') return; }
+  // aberto direto no navegador: download comum
+  if (!(window.claude && window.claude.use)){
+    try{
+      const url = URL.createObjectURL(new Blob([txt], { type:'text/markdown;charset=utf-8' }));
+      const a = document.createElement('a'); a.href = url; a.download = fname;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      setStatus('Resumo baixado'); return;
+    }catch(e){}
+  }
+  // alternativa: mostrar o texto para copiar
+  const box = document.createElement('div');
+  box.className = 'box wide'; box.style.gridColumn = '1/-1';
+  box.innerHTML = '<h2>Resumo para copiar</h2><textarea style="min-height:280px" readonly></textarea>';
+  box.querySelector('textarea').value = txt;
+  document.querySelector('.xr').appendChild(box);
+  box.querySelector('textarea').select();
+  setStatus('Download indisponível aqui. O resumo apareceu no fim da página para copiar.');
+}
+
+/* ================= GLOBAL ================= */
+$('#home').onclick = () => renderHome();
+$('#toggleScript').onclick = e => {
+  const app = $('#app'); const hidden = app.classList.toggle('hide-internal');
+  e.currentTarget.setAttribute('aria-pressed', !hidden);
+  e.currentTarget.textContent = hidden ? 'Mostrar roteiro' : 'Ocultar roteiro';
+};
+renderHome();
+initDb();
+</script>
+</body>
+</html>

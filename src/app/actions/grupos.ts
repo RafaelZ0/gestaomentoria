@@ -51,7 +51,8 @@ export async function createGrupo(formData: FormData) {
   }
 
   revalidatePath("/grupos");
-  redirect(`/grupos/${grupo.id}`);
+  // Toda mentoria começa pelo diagnóstico de onboarding.
+  redirect(`/grupos/${grupo.id}/onboarding`);
 }
 
 export async function updateGrupoCampo(

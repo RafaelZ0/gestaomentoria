@@ -11,6 +11,7 @@ import { DataInicioField } from "@/components/DataInicioField";
 import { ObservacoesField } from "@/components/ObservacoesField";
 import { StatusBadge } from "@/components/StatusBadge";
 import { MetaComparacaoCard } from "@/components/MetaComparacaoCard";
+import { RaioXResumoCard } from "@/components/onboarding/RaioXResumoCard";
 import { getGrupo } from "@/lib/data/grupo";
 
 export default async function GrupoOverviewPage({
@@ -30,6 +31,7 @@ export default async function GrupoOverviewPage({
     { data: ultimaReuniao },
     { data: resultados },
     { data: proximaReuniao },
+    { data: onboarding },
   ] = await Promise.all([
     getGrupo(id).then((data) => ({ data })),
     supabase.from("mentorados").select("*").eq("grupo_id", id).order("nome"),
@@ -70,6 +72,13 @@ export default async function GrupoOverviewPage({
       .eq("compareceu", true)
       .gt("data", new Date().toISOString().slice(0, 10))
       .order("data", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("onboardings")
+      .select("*")
+      .eq("grupo_id", id)
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
   ]);
@@ -159,6 +168,8 @@ export default async function GrupoOverviewPage({
 
   return (
     <div className="space-y-6">
+      <RaioXResumoCard grupoId={grupo.id} onboarding={onboarding} />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <ValorMensalCard grupoId={grupo.id} valorMensal={Number(grupo.valor_mensal)} />
         <InfoCard label="Total pago" value={formatBRL(recebidoRegistrado)} />

@@ -192,6 +192,13 @@ export async function removeReuniao(reuniaoId: string) {
     .update({ feito: false, data_feito: null, reuniao_id: null })
     .eq("reuniao_id", reuniaoId);
 
+  // O diagnóstico de onboarding continua existindo, só perde o vínculo com a
+  // reunião (FK sem cascade).
+  await supabase
+    .from("onboardings")
+    .update({ reuniao_id: null })
+    .eq("reuniao_id", reuniaoId);
+
   const { error } = await supabase.from("reunioes").delete().eq("id", reuniaoId);
 
   if (error) {

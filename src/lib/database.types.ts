@@ -148,6 +148,19 @@ export type ResultadoGrupo = {
   created_at: string;
 };
 
+export type StatusOnboarding = "rascunho" | "concluido";
+
+export type Onboarding = {
+  id: string;
+  grupo_id: string;
+  reuniao_id: string | null;
+  respostas: Record<string, unknown>;
+  precisao: Record<string, string>;
+  status: StatusOnboarding;
+  created_at: string;
+  updated_at: string;
+};
+
 type Relationships = never[];
 
 export type Database = {
@@ -247,6 +260,12 @@ export type Database = {
         Row: ResultadoGrupo;
         Insert: Partial<ResultadoGrupo> & Pick<ResultadoGrupo, "grupo_id" | "data">;
         Update: Partial<ResultadoGrupo>;
+        Relationships: Relationships;
+      };
+      onboardings: {
+        Row: Onboarding;
+        Insert: Partial<Onboarding> & Pick<Onboarding, "grupo_id">;
+        Update: Partial<Onboarding>;
         Relationships: Relationships;
       };
     };
