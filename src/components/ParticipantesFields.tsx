@@ -61,25 +61,25 @@ export function ParticipantesFields({
 
   return (
     <div>
-      <p className="mb-2 text-sm text-text-secondary">Quem participou</p>
+      <p className="mb-2 text-sm text-text-2">Quem participou</p>
       <div className="space-y-2">
         {mentoradosDoGrupoVisiveis.map((m) => (
           <label
             key={m.id}
-            className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+            className="flex items-center gap-3 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text"
           >
             <input
               type="checkbox"
               name="participante_id"
               value={m.id}
               defaultChecked={participantesSelecionados.has(m.id)}
-              className="h-4 w-4 accent-[var(--accent)]"
+              className="h-4 w-4"
             />
             {m.nome}
           </label>
         ))}
         {mentoradosDoGrupoVisiveis.length === 0 && (
-          <p className="text-sm text-text-secondary">
+          <p className="text-sm text-text-2">
             {mentoradosDoGrupo.length === 0
               ? "Nenhum mentorado cadastrado neste grupo."
               : "Grupo inativo antes dessa data — nenhum mentorado disponível."}
@@ -93,32 +93,32 @@ export function ParticipantesFields({
             <button
               type="button"
               onClick={() => setMostrarOutrosGrupos(true)}
-              className="text-sm text-accent hover:text-accent-hover"
+              className="text-sm text-gold hover:text-gold-hover"
             >
               + Adicionar pessoa de outro grupo
             </button>
           ) : (
             <div className="space-y-3">
-              <p className="text-xs text-text-secondary">
+              <p className="text-xs text-text-2">
                 A reunião também aparecerá na aba Reuniões do grupo dessa pessoa.
               </p>
               {[...gruposOutros.entries()].map(([grupoNome, mentorados]) => (
                 <div key={grupoNome}>
-                  <p className="mb-1 text-xs font-medium text-text-secondary">
+                  <p className="mb-1 text-xs font-medium text-text-2">
                     {grupoNome}
                   </p>
                   <div className="space-y-2">
                     {mentorados.map((m) => (
                       <label
                         key={m.id}
-                        className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+                        className="flex items-center gap-3 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text"
                       >
                         <input
                           type="checkbox"
                           name="participante_id"
                           value={m.id}
                           defaultChecked={participantesSelecionados.has(m.id)}
-                          className="h-4 w-4 accent-[var(--accent)]"
+                          className="h-4 w-4"
                         />
                         {m.nome}
                       </label>

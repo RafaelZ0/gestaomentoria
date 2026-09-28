@@ -39,25 +39,25 @@ export function MetaComparacaoCard({
       : null;
 
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-5">
+    <div className="rounded-xl border border-line bg-surface p-5">
       <div className="flex items-center gap-2">
-        <p className="text-sm text-text-secondary">{label}</p>
+        <p className="text-sm text-text-2">{label}</p>
         {dentroDaMeta !== null && (
           <span
             className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
               dentroDaMeta
-                ? "bg-status-ok-bg text-status-ok-text"
-                : "bg-status-alert-bg text-status-alert-text"
+                ? "bg-ok/10 text-ok"
+                : "bg-danger/10 text-danger"
             }`}
           >
             {dentroDaMeta ? "dentro da meta" : "fora da meta"}
           </span>
         )}
       </div>
-      <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text-primary">
+      <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text">
         {realizado === null ? "—" : formatarValor(realizado)}
       </p>
-      <div className="mt-3 border-t border-border pt-3">
+      <div className="mt-3 border-t border-line pt-3">
         <ValorEditavel
           label="Meta"
           valor={meta ?? 0}

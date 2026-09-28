@@ -44,7 +44,7 @@ export function NovaReuniaoForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
+        className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
       >
         + Nova reunião
       </button>
@@ -64,23 +64,23 @@ export function NovaReuniaoForm({
           }
         });
       }}
-      className="space-y-4 rounded-xl border border-border bg-bg-surface p-6"
+      className="space-y-4 rounded-xl border border-line bg-surface p-6"
     >
       {error && (
-        <div className="rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">Data</label>
+          <label className="mb-1 block text-sm text-text-2">Data</label>
           <input
             type="date"
             name="data"
             value={data}
             onChange={(e) => setData(e.target.value)}
-            className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
           />
         </div>
 
@@ -90,44 +90,44 @@ export function NovaReuniaoForm({
       {agendada && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">
+            <label className="mb-1 block text-sm text-text-2">
               Horário (opcional)
             </label>
             <input
               type="time"
               name="hora"
-              className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">
+            <label className="mb-1 block text-sm text-text-2">
               Link da reunião (opcional)
             </label>
             <input
               type="url"
               name="link_reuniao"
               placeholder="https://meet.google.com/..."
-              className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
             />
           </div>
         </div>
       )}
 
       {!agendada && (
-        <label className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary">
+        <label className="flex items-center gap-3 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text">
           <input
             type="checkbox"
             name="nao_compareceu"
             checked={naoCompareceu}
             onChange={(e) => setNaoCompareceu(e.target.checked)}
-            className="h-4 w-4 accent-[var(--accent)]"
+            className="h-4 w-4"
           />
           Grupo não compareceu à reunião agendada
         </label>
       )}
 
       <div>
-        <label className="mb-1 block text-sm text-text-secondary">
+        <label className="mb-1 block text-sm text-text-2">
           {agendada
             ? "Pauta / observação (opcional)"
             : naoCompareceu
@@ -138,7 +138,7 @@ export function NovaReuniaoForm({
           name="resumo"
           required={!agendada && !naoCompareceu}
           rows={agendada || naoCompareceu ? 2 : 4}
-          className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+          className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
         />
       </div>
 
@@ -154,7 +154,7 @@ export function NovaReuniaoForm({
 
       {!agendada && !naoCompareceu && entregasPendentes.length > 0 && (
         <div>
-          <p className="mb-2 text-sm text-text-secondary">
+          <p className="mb-2 text-sm text-text-2">
             Alguma entrega foi feita nesta reunião?
           </p>
           <div className="flex gap-2">
@@ -163,8 +163,8 @@ export function NovaReuniaoForm({
               onClick={() => setEntregaFoiFeita("sim")}
               className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
                 entregaFoiFeita === "sim"
-                  ? "border-accent bg-accent text-white"
-                  : "border-border text-text-secondary hover:bg-bg-surface-hover"
+                  ? "border-gold bg-gold text-on-gold"
+                  : "border-line text-text-2 hover:bg-hover"
               }`}
             >
               Sim
@@ -174,8 +174,8 @@ export function NovaReuniaoForm({
               onClick={() => setEntregaFoiFeita("nao")}
               className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
                 entregaFoiFeita === "nao"
-                  ? "border-accent bg-accent text-white"
-                  : "border-border text-text-secondary hover:bg-bg-surface-hover"
+                  ? "border-gold bg-gold text-on-gold"
+                  : "border-line text-text-2 hover:bg-hover"
               }`}
             >
               Não
@@ -187,13 +187,13 @@ export function NovaReuniaoForm({
               {entregasPendentes.map((e) => (
                 <label
                   key={e.id}
-                  className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+                  className="flex items-center gap-3 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text"
                 >
                   <input
                     type="checkbox"
                     name="entrega_feita"
                     value={e.id}
-                    className="h-4 w-4 accent-[var(--accent)]"
+                    className="h-4 w-4"
                   />
                   {e.nome}
                 </label>
@@ -207,7 +207,7 @@ export function NovaReuniaoForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
         >
           {isPending ? "Salvando…" : agendada ? "Agendar reunião" : "Registrar reunião"}
         </button>

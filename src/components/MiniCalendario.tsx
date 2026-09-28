@@ -26,22 +26,22 @@ export function MiniCalendario({
   const proximo = proximoMes(ano, mes);
 
   return (
-    <div className="w-full max-w-[260px] rounded-xl border border-border bg-bg-surface p-4">
+    <div className="w-full max-w-[260px] rounded-xl border border-line bg-surface p-4">
       <div className="flex items-center justify-between">
         <Link
           href={`/agenda?data=${anterior.ano}-${String(anterior.mes).padStart(2, "0")}-01`}
           prefetch={false}
-          className="rounded px-2 py-1 text-xs text-text-secondary hover:bg-bg-surface-hover"
+          className="rounded px-2 py-1 text-xs text-text-2 hover:bg-hover"
         >
           ‹
         </Link>
-        <span className="text-xs font-medium text-text-primary">
+        <span className="text-xs font-medium text-text">
           {formatMesAnoLongo(ano, mes)}
         </span>
         <Link
           href={`/agenda?data=${proximo.ano}-${String(proximo.mes).padStart(2, "0")}-01`}
           prefetch={false}
-          className="rounded px-2 py-1 text-xs text-text-secondary hover:bg-bg-surface-hover"
+          className="rounded px-2 py-1 text-xs text-text-2 hover:bg-hover"
         >
           ›
         </Link>
@@ -49,7 +49,7 @@ export function MiniCalendario({
 
       <div className="mt-3 grid grid-cols-7 gap-y-1 text-center text-[11px]">
         {DIAS.map((d, i) => (
-          <span key={i} className="text-text-secondary">
+          <span key={i} className="text-text-2">
             {d}
           </span>
         ))}
@@ -66,12 +66,12 @@ export function MiniCalendario({
               prefetch={false}
               className={`mx-auto flex h-6 w-6 items-center justify-center rounded-full tabular-nums ${
                 ehSelecionado
-                  ? "bg-accent text-white"
+                  ? "bg-gold text-on-gold"
                   : ehHoje
-                    ? "border border-accent text-accent"
+                    ? "border border-gold text-gold"
                     : foraDoMes
-                      ? "text-text-secondary/40 hover:bg-bg-surface-hover"
-                      : "text-text-primary hover:bg-bg-surface-hover"
+                      ? "text-text-2/40 hover:bg-hover"
+                      : "text-text hover:bg-hover"
               }`}
             >
               {dia}

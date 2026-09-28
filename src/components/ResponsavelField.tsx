@@ -22,17 +22,17 @@ export function ResponsavelField({
 
   return (
     <div>
-      <label className="mb-1 block text-sm text-text-secondary">
+      <label className="mb-1 block text-sm text-text-2">
         {label}
       </label>
-      {error && <p className="mb-1 text-xs text-status-alert-text">{error}</p>}
+      {error && <p className="mb-1 text-xs text-danger">{error}</p>}
       {!novoResponsavel ? (
         <div className="flex gap-2">
           <select
             name="responsavel_id"
             value={responsavelId}
             onChange={(e) => setResponsavelId(e.target.value)}
-            className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
           >
             <option value="">—</option>
             {listaResponsaveis.map((r) => (
@@ -44,7 +44,7 @@ export function ResponsavelField({
           <button
             type="button"
             onClick={() => setNovoResponsavel(true)}
-            className="whitespace-nowrap rounded-lg border border-border px-3 py-2 text-xs text-text-secondary hover:bg-bg-surface-hover"
+            className="whitespace-nowrap rounded-lg border border-line px-3 py-2 text-xs text-text-2 hover:bg-hover"
           >
             + Novo
           </button>
@@ -56,7 +56,7 @@ export function ResponsavelField({
             value={nomeResponsavel}
             onChange={(e) => setNomeResponsavel(e.target.value)}
             placeholder="Nome do responsável"
-            className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
           />
           <button
             type="button"
@@ -74,7 +74,7 @@ export function ResponsavelField({
                 }
               })
             }
-            className="whitespace-nowrap rounded-lg bg-accent px-3 py-2 text-xs font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+            className="whitespace-nowrap rounded-lg bg-gold px-3 py-2 text-xs font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
           >
             Salvar
           </button>

@@ -17,10 +17,10 @@ export default async function ProcessosPage() {
   return (
     <div className="max-w-6xl space-y-10">
       <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
           Processos
         </h1>
-        <p className="mt-1 text-sm text-text-secondary">
+        <p className="mt-1 text-sm text-text-2">
           Ao adicionar um novo processo, ele passa a aparecer no checklist de
           todos os grupos existentes. Desativar não apaga o histórico já
           registrado.
@@ -31,10 +31,10 @@ export default async function ProcessosPage() {
       </div>
 
       <div>
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+        <h2 className="font-display text-lg font-semibold text-text">
           Processos por grupo
         </h2>
-        <p className="mt-1 text-xs text-text-secondary">
+        <p className="mt-1 text-xs text-text-2">
           Veja de uma vez quais processos cada grupo já tem e quais faltam, ou
           filtre por processo (ex: quantos grupos não fizeram Campanha
           Interna) e por status do grupo.

@@ -14,8 +14,8 @@ export function ObservacoesField({
   const [valor, setValor] = useState(observacoes ?? "");
 
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-5">
-      <p className="text-sm text-text-secondary">Observações</p>
+    <div className="rounded-xl border border-line bg-surface p-5">
+      <p className="text-sm text-text-2">Observações</p>
       <textarea
         value={valor}
         disabled={isPending}
@@ -27,7 +27,7 @@ export function ObservacoesField({
             startTransition(() => updateGrupoCampo(grupoId, "observacoes", valor));
           }
         }}
-        className="mt-1 w-full resize-none bg-transparent text-sm text-text-primary outline-none placeholder:text-text-secondary"
+        className="mt-1 w-full resize-none bg-transparent text-sm text-text outline-none placeholder:text-text-2"
       />
     </div>
   );

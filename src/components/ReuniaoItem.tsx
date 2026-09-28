@@ -72,7 +72,7 @@ export function ReuniaoItem({
     const participantesIds = new Set(participantes.map((p) => p.id));
 
     return (
-      <li className="rounded-xl border border-border bg-bg-surface p-5">
+      <li className="rounded-xl border border-line bg-surface p-5">
         <form
           action={(formData) => {
             setError(null);
@@ -88,20 +88,20 @@ export function ReuniaoItem({
           className="space-y-4"
         >
           {error && (
-            <div className="rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+            <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
               {error}
             </div>
           )}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm text-text-secondary">Data</label>
+              <label className="mb-1 block text-sm text-text-2">Data</label>
               <input
                 type="date"
                 name="data"
                 value={data}
                 onChange={(e) => setData(e.target.value)}
-                className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+                className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
               />
             </div>
             <ResponsavelField
@@ -113,18 +113,18 @@ export function ReuniaoItem({
           {agendadaEdicao && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm text-text-secondary">
+                <label className="mb-1 block text-sm text-text-2">
                   Horário (opcional)
                 </label>
                 <input
                   type="time"
                   name="hora"
                   defaultValue={reuniao.hora ? reuniao.hora.slice(0, 5) : ""}
-                  className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+                  className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm text-text-secondary">
+                <label className="mb-1 block text-sm text-text-2">
                   Link da reunião (opcional)
                 </label>
                 <input
@@ -132,27 +132,27 @@ export function ReuniaoItem({
                   name="link_reuniao"
                   defaultValue={reuniao.link_reuniao ?? ""}
                   placeholder="https://meet.google.com/..."
-                  className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+                  className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
                 />
               </div>
             </div>
           )}
 
           {!agendadaEdicao && (
-            <label className="flex items-center gap-3 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary">
+            <label className="flex items-center gap-3 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text">
               <input
                 type="checkbox"
                 name="nao_compareceu"
                 checked={naoCompareceu}
                 onChange={(e) => setNaoCompareceu(e.target.checked)}
-                className="h-4 w-4 accent-[var(--accent)]"
+                className="h-4 w-4"
               />
               Grupo não compareceu à reunião agendada
             </label>
           )}
 
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">
+            <label className="mb-1 block text-sm text-text-2">
               {agendadaEdicao
                 ? "Pauta / observação (opcional)"
                 : naoCompareceu
@@ -164,7 +164,7 @@ export function ReuniaoItem({
               required={!agendadaEdicao && !naoCompareceu}
               rows={agendadaEdicao || naoCompareceu ? 2 : 4}
               defaultValue={reuniao.resumo}
-              className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
             />
           </div>
 
@@ -183,7 +183,7 @@ export function ReuniaoItem({
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+              className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
             >
               {isPending ? "Salvando…" : "Salvar"}
             </button>
@@ -203,33 +203,33 @@ export function ReuniaoItem({
   return (
     <li
       onClick={() => setEditando(true)}
-      className="cursor-pointer rounded-xl border border-border bg-bg-surface p-5 hover:bg-bg-surface-hover"
+      className="cursor-pointer rounded-xl border border-line bg-surface p-5 hover:bg-hover"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-text-primary">
+          <p className="text-sm font-medium text-text">
             {formatDate(reuniao.data)}
             {reuniao.hora && ` às ${reuniao.hora.slice(0, 5)}`}
           </p>
           {onboardingHref && (
-            <span className="rounded-full bg-status-warn-bg px-2 py-0.5 text-xs font-semibold text-status-warn-text">
+            <span className="rounded-full bg-warn/10 px-2 py-0.5 text-xs font-semibold text-warn">
               Onboarding
             </span>
           )}
           {!reuniao.compareceu && (
-            <span className="rounded-full bg-status-alert-bg px-2 py-0.5 text-xs font-medium text-status-alert-text">
+            <span className="rounded-full bg-danger/10 px-2 py-0.5 text-xs font-medium text-danger">
               Não compareceu
             </span>
           )}
           {agendada && (
-            <span className="rounded-full bg-status-accent-bg px-2 py-0.5 text-xs font-medium text-status-accent-text">
+            <span className="rounded-full bg-gold/10 px-2 py-0.5 text-xs font-medium text-gold">
               Agendada
             </span>
           )}
           {grupoOrigemNome && (
             <span
               title="Essa reunião foi agendada por outro grupo; alguém deste grupo participou como convidado."
-              className="rounded-full bg-bg-surface-hover px-2 py-0.5 text-xs text-text-secondary"
+              className="rounded-full bg-hover px-2 py-0.5 text-xs text-text-2"
             >
               Reunião de {grupoOrigemNome}
             </span>
@@ -237,7 +237,7 @@ export function ReuniaoItem({
         </div>
         <div className="flex items-center gap-3">
           {responsavelNome && (
-            <span className="rounded-full bg-bg-surface-hover px-2 py-0.5 text-xs text-text-secondary">
+            <span className="rounded-full bg-hover px-2 py-0.5 text-xs text-text-2">
               Conduzida por {responsavelNome}
             </span>
           )}
@@ -246,7 +246,7 @@ export function ReuniaoItem({
               e.stopPropagation();
               setEditando(true);
             }}
-            className="text-xs text-text-secondary hover:text-text-primary"
+            className="text-xs text-text-2 hover:text-text"
           >
             Editar
           </button>
@@ -265,24 +265,24 @@ export function ReuniaoItem({
                 }
               });
             }}
-            className="text-xs text-text-secondary hover:text-status-alert-text disabled:opacity-60"
+            className="text-xs text-text-2 hover:text-danger disabled:opacity-60"
           >
             Excluir
           </button>
         </div>
       </div>
       {error && (
-        <p className="mt-2 text-xs text-status-alert-text">{error}</p>
+        <p className="mt-2 text-xs text-danger">{error}</p>
       )}
       {reuniao.resumo && (
-        <p className="mt-2 whitespace-pre-wrap text-sm text-text-secondary">{reuniao.resumo}</p>
+        <p className="mt-2 whitespace-pre-wrap text-sm text-text-2">{reuniao.resumo}</p>
       )}
       {onboardingHref && (
         <Link
           href={onboardingHref}
           prefetch={false}
           onClick={(e) => e.stopPropagation()}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-status-warn-text/40 bg-status-warn-bg px-3 py-1.5 text-sm font-medium text-status-warn-text hover:border-status-warn-text"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-warn/40 bg-warn/10 px-3 py-1.5 text-sm font-medium text-warn hover:border-warn"
         >
           Ver raio-X da clínica →
         </Link>
@@ -293,7 +293,7 @@ export function ReuniaoItem({
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="mt-2 inline-block text-sm text-accent hover:text-accent-hover"
+          className="mt-2 inline-block text-sm text-gold hover:text-gold-hover"
         >
           {reuniao.link_reuniao}
         </a>
@@ -307,7 +307,7 @@ export function ReuniaoItem({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="rounded-lg border border-border px-2.5 py-1 text-xs text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
+            className="rounded-lg border border-line px-2.5 py-1 text-xs text-text-2 hover:bg-hover hover:text-text"
           >
             Lembrete de confirmação
           </a>
@@ -318,14 +318,14 @@ export function ReuniaoItem({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="rounded-lg border border-border px-2.5 py-1 text-xs text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
+            className="rounded-lg border border-line px-2.5 py-1 text-xs text-text-2 hover:bg-hover hover:text-text"
           >
             Lembrete com link (10 min antes)
           </a>
         </div>
       )}
       {participantes.length > 0 && (
-        <p className="mt-3 text-xs text-text-secondary">
+        <p className="mt-3 text-xs text-text-2">
           Participantes:{" "}
           {participantes
             .map((p) => p.nome + (p.deOutroGrupo && p.grupoNome ? ` (${p.grupoNome})` : ""))

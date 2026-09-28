@@ -36,32 +36,32 @@ export function CancelarGrupoButton({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg border border-status-alert-text/40 px-4 py-2 text-sm text-status-alert-text hover:bg-status-alert-bg"
+        className="rounded-lg border border-danger/40 px-4 py-2 text-sm text-danger hover:bg-danger/10"
       >
         Cancelar grupo
       </button>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-md rounded-xl border border-border bg-bg-surface p-6">
-            <h2 className="font-display text-lg font-semibold text-text-primary">
+          <div className="w-full max-w-md rounded-xl border border-line bg-surface p-6">
+            <h2 className="font-display text-lg font-semibold text-text">
               Cancelar grupo
             </h2>
-            <p className="mt-2 text-sm text-text-secondary">
+            <p className="mt-2 text-sm text-text-2">
               O contrato será marcado como encerrado. Se houver cláusula de
               cancelamento a cobrar, registre o pagamento manualmente (ou via
               Asaas) na aba Pagamentos do grupo.
             </p>
 
             <div className="mt-4">
-              <label className="mb-1 block text-sm text-text-secondary">
+              <label className="mb-1 block text-sm text-text-2">
                 Data do cancelamento
               </label>
               <input
                 type="date"
                 value={dataCancelamento}
                 onChange={(e) => setDataCancelamento(e.target.value)}
-                className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+                className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text outline-none focus:border-gold"
               />
             </div>
 
@@ -74,7 +74,7 @@ export function CancelarGrupoButton({
                     setOpen(false);
                   })
                 }
-                className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+                className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
               >
                 Confirmar cancelamento
               </button>

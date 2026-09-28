@@ -10,7 +10,7 @@ import { formatBRL, formatDate } from "@/lib/format";
 import type { LancamentoFinanceiro } from "@/lib/database.types";
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent";
+  "w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold";
 
 export function LancamentosList({
   lancamentos,
@@ -24,7 +24,7 @@ export function LancamentosList({
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -34,7 +34,7 @@ export function LancamentosList({
           <LancamentoRow key={l.id} lancamento={l} />
         ))}
         {lancamentos.length === 0 && (
-          <p className="text-sm text-text-secondary">
+          <p className="text-sm text-text-2">
             Nenhum lançamento registrado ainda.
           </p>
         )}
@@ -53,14 +53,14 @@ export function LancamentosList({
               }
             });
           }}
-          className="space-y-4 rounded-xl border border-border bg-bg-surface p-6"
+          className="space-y-4 rounded-xl border border-line bg-surface p-6"
         >
           <LancamentoFields />
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+              className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
             >
               {isPending ? "Salvando…" : "Adicionar"}
             </button>
@@ -76,7 +76,7 @@ export function LancamentosList({
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
+          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
         >
           + Novo lançamento
         </button>
@@ -94,7 +94,7 @@ function LancamentoFields({
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">Tipo</label>
+          <label className="mb-1 block text-sm text-text-2">Tipo</label>
           <select
             name="tipo"
             defaultValue={defaultValues?.tipo ?? "RECEITA"}
@@ -105,7 +105,7 @@ function LancamentoFields({
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">Data</label>
+          <label className="mb-1 block text-sm text-text-2">Data</label>
           <input
             type="date"
             name="data"
@@ -117,7 +117,7 @@ function LancamentoFields({
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-sm text-text-secondary">Descrição</label>
+        <label className="mb-1 block text-sm text-text-2">Descrição</label>
         <input
           name="descricao"
           required
@@ -127,7 +127,7 @@ function LancamentoFields({
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">
+          <label className="mb-1 block text-sm text-text-2">
             Categoria (opcional)
           </label>
           <input
@@ -137,7 +137,7 @@ function LancamentoFields({
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">
+          <label className="mb-1 block text-sm text-text-2">
             Valor (R$)
           </label>
           <input
@@ -163,10 +163,10 @@ function LancamentoRow({ lancamento }: { lancamento: LancamentoFinanceiro }) {
   if (!editing) {
     const isReceita = lancamento.tipo === "RECEITA";
     return (
-      <li className="flex items-center justify-between rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm">
+      <li className="flex items-center justify-between rounded-lg border border-line bg-hover px-4 py-3 text-sm">
         <div>
-          <span className="text-text-primary">{lancamento.descricao}</span>
-          <span className="ml-2 text-text-secondary">
+          <span className="text-text">{lancamento.descricao}</span>
+          <span className="ml-2 text-text-2">
             {formatDate(lancamento.data)}
             {lancamento.categoria && <> · {lancamento.categoria}</>}
           </span>
@@ -174,14 +174,14 @@ function LancamentoRow({ lancamento }: { lancamento: LancamentoFinanceiro }) {
         <div className="flex items-center gap-4">
           <span
             className={`tabular-nums font-medium ${
-              isReceita ? "text-status-ok-text" : "text-status-alert-text"
+              isReceita ? "text-ok" : "text-danger"
             }`}
           >
             {isReceita ? "+" : "−"} {formatBRL(Number(lancamento.valor))}
           </span>
           <button
             onClick={() => setEditing(true)}
-            className="text-text-secondary hover:text-text-primary"
+            className="text-text-2 hover:text-text"
           >
             Editar
           </button>
@@ -190,7 +190,7 @@ function LancamentoRow({ lancamento }: { lancamento: LancamentoFinanceiro }) {
             onClick={() =>
               startTransition(() => removeLancamento(lancamento.id))
             }
-            className="text-text-secondary hover:text-status-alert-text"
+            className="text-text-2 hover:text-danger"
           >
             Remover
           </button>
@@ -200,9 +200,9 @@ function LancamentoRow({ lancamento }: { lancamento: LancamentoFinanceiro }) {
   }
 
   return (
-    <li className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3">
+    <li className="rounded-lg border border-line bg-hover px-4 py-3">
       {error && (
-        <div className="mb-2 rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+        <div className="mb-2 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -225,7 +225,7 @@ function LancamentoRow({ lancamento }: { lancamento: LancamentoFinanceiro }) {
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+            className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
           >
             Salvar
           </button>

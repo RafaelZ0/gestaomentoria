@@ -27,7 +27,7 @@ export function AgendarReuniaoGlobalForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
+        className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
       >
         + Agendar reunião
       </button>
@@ -52,21 +52,21 @@ export function AgendarReuniaoGlobalForm({
           }
         });
       }}
-      className="space-y-4 rounded-xl border border-border bg-bg-surface p-6"
+      className="space-y-4 rounded-xl border border-line bg-surface p-6"
     >
       {error && (
-        <div className="rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}
 
       <div>
-        <label className="mb-1 block text-sm text-text-secondary">Grupo</label>
+        <label className="mb-1 block text-sm text-text-2">Grupo</label>
         <select
           required
           value={grupoId}
           onChange={(e) => setGrupoId(e.target.value)}
-          className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+          className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
         >
           <option value="">Selecione um grupo…</option>
           {grupos.map((g) => (
@@ -79,48 +79,48 @@ export function AgendarReuniaoGlobalForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">Data</label>
+          <label className="mb-1 block text-sm text-text-2">Data</label>
           <input
             type="date"
             name="data"
             defaultValue={amanha()}
             min={amanha()}
-            className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">
+          <label className="mb-1 block text-sm text-text-2">
             Horário (opcional)
           </label>
           <input
             type="time"
             name="hora"
-            className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
           />
         </div>
         <ResponsavelField responsaveis={responsaveis} />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm text-text-secondary">
+        <label className="mb-1 block text-sm text-text-2">
           Link da reunião (opcional)
         </label>
         <input
           type="url"
           name="link_reuniao"
           placeholder="https://meet.google.com/..."
-          className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+          className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm text-text-secondary">
+        <label className="mb-1 block text-sm text-text-2">
           Pauta / observação (opcional)
         </label>
         <textarea
           name="resumo"
           rows={2}
-          className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+          className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
         />
       </div>
 
@@ -128,7 +128,7 @@ export function AgendarReuniaoGlobalForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
         >
           {isPending ? "Salvando…" : "Agendar reunião"}
         </button>

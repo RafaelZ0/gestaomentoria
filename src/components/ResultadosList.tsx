@@ -10,7 +10,7 @@ import { formatBRL, formatDate, formatMesAno } from "@/lib/format";
 import type { ResultadoGrupo } from "@/lib/database.types";
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent";
+  "w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold";
 
 function calcCpl(investimento: number, leads: number): string {
   if (!leads) return "—";
@@ -73,7 +73,7 @@ export function ResultadosList({
   return (
     <div className="space-y-6">
       <div>
-        <p className="mb-2 text-sm text-text-secondary">Total (todos os lançamentos)</p>
+        <p className="mb-2 text-sm text-text-2">Total (todos os lançamentos)</p>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
           <ResumoCard label="Investido" value={formatBRL(totais.investimento)} />
           <ResumoCard label="Leads" value={String(totais.leads)} />
@@ -90,18 +90,18 @@ export function ResultadosList({
       </div>
 
       {error && (
-        <div className="rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}
 
       {meses.length > 0 && (
         <div>
-          <p className="mb-2 text-sm text-text-secondary">Por mês</p>
-          <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
+          <p className="mb-2 text-sm text-text-2">Por mês</p>
+          <div className="overflow-x-auto rounded-xl border border-line bg-surface">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-border text-text-secondary">
+                <tr className="border-b border-line text-text-2">
                   <th className="px-4 py-3 font-medium">Mês</th>
                   <th className="px-4 py-3 font-medium">Investido</th>
                   <th className="px-4 py-3 font-medium">Leads</th>
@@ -122,37 +122,37 @@ export function ResultadosList({
                   return (
                     <Fragment key={chave}>
                       <tr
-                        className="cursor-pointer border-b border-border last:border-0 hover:bg-bg-surface-hover"
+                        className="cursor-pointer border-b border-line last:border-0 hover:bg-hover"
                         onClick={() => setExpandido(aberto ? null : chave)}
                       >
-                        <td className="px-4 py-3 font-medium text-text-primary">
+                        <td className="px-4 py-3 font-medium text-text">
                           {formatMesAno(ano, mes)}
                         </td>
-                        <td className="px-4 py-3 tabular-nums text-text-primary">
+                        <td className="px-4 py-3 tabular-nums text-text">
                           {formatBRL(s.investimento)}
                         </td>
-                        <td className="px-4 py-3 tabular-nums text-text-primary">
+                        <td className="px-4 py-3 tabular-nums text-text">
                           {s.leads}
                         </td>
-                        <td className="px-4 py-3 tabular-nums text-text-primary">
+                        <td className="px-4 py-3 tabular-nums text-text">
                           {calcCpl(s.investimento, s.leads)}
                         </td>
-                        <td className="px-4 py-3 tabular-nums text-text-primary">
+                        <td className="px-4 py-3 tabular-nums text-text">
                           {vendasMes}
                         </td>
-                        <td className="px-4 py-3 tabular-nums text-status-ok-text">
+                        <td className="px-4 py-3 tabular-nums text-ok">
                           {formatBRL(faturamentoMes)}
                         </td>
-                        <td className="px-4 py-3 tabular-nums text-text-primary">
+                        <td className="px-4 py-3 tabular-nums text-text">
                           {calcTicketMedio(faturamentoMes, vendasMes)}
                         </td>
-                        <td className="px-4 py-3 text-right text-text-secondary">
+                        <td className="px-4 py-3 text-right text-text-2">
                           {aberto ? "▲" : "▼"}
                         </td>
                       </tr>
                       {aberto && (
-                        <tr className="border-b border-border last:border-0">
-                          <td colSpan={8} className="bg-bg-surface-hover px-4 py-4">
+                        <tr className="border-b border-line last:border-0">
+                          <td colSpan={8} className="bg-hover px-4 py-4">
                             <ul className="space-y-2">
                               {doMes.map((r) => (
                                 <ResultadoRow key={r.id} grupoId={grupoId} resultado={r} />
@@ -171,7 +171,7 @@ export function ResultadosList({
       )}
 
       {resultados.length === 0 && (
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-text-2">
           Nenhum resultado registrado ainda.
         </p>
       )}
@@ -189,14 +189,14 @@ export function ResultadosList({
               }
             });
           }}
-          className="space-y-4 rounded-xl border border-border bg-bg-surface p-6"
+          className="space-y-4 rounded-xl border border-line bg-surface p-6"
         >
           <ResultadoFields />
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+              className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
             >
               {isPending ? "Salvando…" : "Adicionar"}
             </button>
@@ -212,7 +212,7 @@ export function ResultadosList({
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
+          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
         >
           + Novo resultado
         </button>
@@ -223,9 +223,9 @@ export function ResultadosList({
 
 function ResumoCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-4">
-      <p className="text-xs text-text-secondary">{label}</p>
-      <p className="mt-1 font-display text-lg font-semibold tracking-tight tabular-nums text-text-primary">
+    <div className="rounded-xl border border-line bg-surface p-4">
+      <p className="text-xs text-text-2">{label}</p>
+      <p className="mt-1 font-display text-lg font-semibold tracking-tight tabular-nums text-text">
         {value}
       </p>
     </div>
@@ -237,7 +237,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">Data</label>
+          <label className="mb-1 block text-sm text-text-2">Data</label>
           <input
             type="date"
             name="data"
@@ -246,7 +246,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">
+          <label className="mb-1 block text-sm text-text-2">
             Investimento (R$)
           </label>
           <input
@@ -259,7 +259,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">Leads</label>
+          <label className="mb-1 block text-sm text-text-2">Leads</label>
           <input
             type="number"
             name="leads"
@@ -273,7 +273,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">
+          <label className="mb-1 block text-sm text-text-2">
             Vendas — campanha interna
           </label>
           <input
@@ -286,7 +286,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">
+          <label className="mb-1 block text-sm text-text-2">
             Vendas — tráfego pago
           </label>
           <input
@@ -302,7 +302,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">
+          <label className="mb-1 block text-sm text-text-2">
             Faturamento — campanha interna (R$)
           </label>
           <input
@@ -315,7 +315,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-secondary">
+          <label className="mb-1 block text-sm text-text-2">
             Faturamento — tráfego pago (R$)
           </label>
           <input
@@ -330,7 +330,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
       </div>
 
       <div>
-        <label className="mb-1 block text-sm text-text-secondary">
+        <label className="mb-1 block text-sm text-text-2">
           Observação (opcional)
         </label>
         <input
@@ -363,16 +363,16 @@ function ResultadoRow({
     return (
       <li
         onClick={(e) => e.stopPropagation()}
-        className="rounded-lg border border-border bg-bg-surface px-4 py-3 text-sm"
+        className="rounded-lg border border-line bg-surface px-4 py-3 text-sm"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="font-medium text-text-primary">
+          <span className="font-medium text-text">
             {formatDate(resultado.data)}
           </span>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setEditing(true)}
-              className="text-text-secondary hover:text-text-primary"
+              className="text-text-2 hover:text-text"
             >
               Editar
             </button>
@@ -382,50 +382,50 @@ function ResultadoRow({
                 if (!confirm("Remover este lançamento de resultado?")) return;
                 startTransition(() => removeResultado(resultado.id, grupoId));
               }}
-              className="text-text-secondary hover:text-status-alert-text"
+              className="text-text-2 hover:text-danger"
             >
               Remover
             </button>
           </div>
         </div>
-        <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-text-secondary sm:grid-cols-4">
+        <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-text-2 sm:grid-cols-4">
           <span>
             Investido:{" "}
-            <span className="tabular-nums text-text-primary">
+            <span className="tabular-nums text-text">
               {formatBRL(Number(resultado.investimento))}
             </span>
           </span>
           <span>
             Leads:{" "}
-            <span className="tabular-nums text-text-primary">{resultado.leads}</span>
+            <span className="tabular-nums text-text">{resultado.leads}</span>
           </span>
           <span>
             CPL:{" "}
-            <span className="tabular-nums text-text-primary">
+            <span className="tabular-nums text-text">
               {calcCpl(Number(resultado.investimento), resultado.leads)}
             </span>
           </span>
           <span>
             Vendas:{" "}
-            <span className="tabular-nums text-text-primary">{vendasTotal}</span>{" "}
+            <span className="tabular-nums text-text">{vendasTotal}</span>{" "}
             ({resultado.vendas_campanha_interna} campanha +{" "}
             {resultado.vendas_trafego_pago} tráfego)
           </span>
         </div>
-        <p className="mt-1 text-xs text-text-secondary">
+        <p className="mt-1 text-xs text-text-2">
           Faturamento:{" "}
-          <span className="tabular-nums text-status-ok-text">
+          <span className="tabular-nums text-ok">
             {formatBRL(faturamentoTotal)}
           </span>{" "}
           ({formatBRL(Number(resultado.faturamento_campanha_interna))} campanha
           interna + {formatBRL(Number(resultado.faturamento_trafego_pago))} tráfego
           pago) · Ticket médio:{" "}
-          <span className="tabular-nums text-text-primary">
+          <span className="tabular-nums text-text">
             {calcTicketMedio(faturamentoTotal, vendasTotal)}
           </span>
         </p>
         {resultado.observacao && (
-          <p className="mt-1 text-xs text-text-secondary">{resultado.observacao}</p>
+          <p className="mt-1 text-xs text-text-2">{resultado.observacao}</p>
         )}
       </li>
     );
@@ -434,10 +434,10 @@ function ResultadoRow({
   return (
     <li
       onClick={(e) => e.stopPropagation()}
-      className="rounded-lg border border-border bg-bg-surface px-4 py-3"
+      className="rounded-lg border border-line bg-surface px-4 py-3"
     >
       {error && (
-        <div className="mb-2 rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+        <div className="mb-2 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -460,7 +460,7 @@ function ResultadoRow({
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+            className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
           >
             Salvar
           </button>

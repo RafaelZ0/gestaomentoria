@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from "recharts";
 import { formatBRL } from "@/lib/format";
+import { CORES } from "@/lib/cores";
 
 type PontoMensal = {
   mes: string;
@@ -18,9 +19,9 @@ type PontoMensal = {
   cpl: number | null;
 };
 
-const COR_LINHA = "#6366f1";
-const COR_GRID = "#232838";
-const COR_EIXO = "#a8b0c4";
+const COR_LINHA = CORES.gold;
+const COR_GRID = CORES.line;
+const COR_EIXO = CORES.muted;
 
 const formatCompacto = new Intl.NumberFormat("pt-BR", {
   notation: "compact",
@@ -47,9 +48,9 @@ function TooltipCustom({
 }) {
   if (!active || !payload || payload.length === 0) return null;
   return (
-    <div className="rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-xs shadow-lg">
-      <p className="text-text-secondary">{mesCurto(label ?? "")}</p>
-      <p className="font-medium text-text-primary">
+    <div className="rounded-lg border border-line bg-hover px-3 py-2 text-xs shadow-lg">
+      <p className="text-text-2">{mesCurto(label ?? "")}</p>
+      <p className="font-medium text-text">
         {formatar(payload[0].value)}
       </p>
     </div>
@@ -70,10 +71,10 @@ function GraficoLinha({
   const temDado = dados.some((d) => d[campo] !== null);
 
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-4">
-      <p className="text-sm text-text-secondary">{titulo}</p>
+    <div className="rounded-xl border border-line bg-surface p-4">
+      <p className="text-sm text-text-2">{titulo}</p>
       {!temDado ? (
-        <div className="flex h-[180px] items-center justify-center text-sm text-text-secondary">
+        <div className="flex h-[180px] items-center justify-center text-sm text-text-2">
           Sem dados suficientes
         </div>
       ) : (
@@ -131,7 +132,7 @@ export function EvolucaoResultadosChart({ dados }: { dados: PontoMensal[] }) {
 
   return (
     <div>
-      <h2 className="mb-2 font-display text-lg font-semibold text-text-primary">
+      <h2 className="mb-2 font-display text-lg font-semibold text-text">
         Evolução mensal
       </h2>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

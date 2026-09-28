@@ -104,10 +104,10 @@ export default async function ResultadosPage() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
         Resultados
       </h1>
-      <p className="mt-1 text-sm text-text-secondary">
+      <p className="mt-1 text-sm text-text-2">
         Somente grupos ativos. &quot;Por grupo&quot; ranqueia por ROAS
         (faturamento ÷ investido) — clique em Grupo, ROAS, Faturamento ou
         Vendas pra ordenar por essa coluna, ou na linha pra abrir o

@@ -39,10 +39,10 @@ export default async function CustoHoraPage() {
   return (
     <div className="max-w-4xl space-y-8">
       <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
           Custo por grupo
         </h1>
-        <p className="mt-1 text-sm text-text-secondary">
+        <p className="mt-1 text-sm text-text-2">
           Quanto cada grupo ativo custa em overhead (custos fixos divididos
           pelos grupos ativos), comparado com o valor médio que você cobra.
         </p>
@@ -63,8 +63,8 @@ export default async function CustoHoraPage() {
       <div
         className={`rounded-lg px-3 py-2 text-sm ${
           margemPorGrupo >= 0
-            ? "bg-status-ok-bg text-status-ok-text"
-            : "bg-status-alert-bg text-status-alert-text"
+            ? "bg-ok/10 text-ok"
+            : "bg-danger/10 text-danger"
         }`}
       >
         Margem média por grupo: {formatBRL(margemPorGrupo)}
@@ -74,17 +74,17 @@ export default async function CustoHoraPage() {
       </div>
 
       {gruposAtivos.length === 0 && (
-        <div className="rounded-lg bg-status-warn-bg px-3 py-2 text-sm text-status-warn-text">
+        <div className="rounded-lg bg-warn/10 px-3 py-2 text-sm text-warn">
           Nenhum grupo ativo no momento — não dá para calcular o custo por
           grupo.
         </div>
       )}
 
       <section>
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+        <h2 className="font-display text-lg font-semibold text-text">
           Parâmetros
         </h2>
-        <p className="mt-1 text-xs text-text-secondary">
+        <p className="mt-1 text-xs text-text-2">
           Margem de segurança somada ao custo por grupo, para saber o preço
           mínimo recomendado ao fechar um novo cliente.
         </p>
@@ -96,7 +96,7 @@ export default async function CustoHoraPage() {
       </section>
 
       <section>
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+        <h2 className="font-display text-lg font-semibold text-text">
           Custos fixos
         </h2>
         <div className="mt-3">
@@ -109,9 +109,9 @@ export default async function CustoHoraPage() {
 
 function ResultCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-6">
-      <p className="text-sm text-text-secondary">{label}</p>
-      <p className="mt-2 font-display text-4xl font-bold tracking-tight tabular-nums text-text-primary">
+    <div className="rounded-xl border border-line bg-surface p-6">
+      <p className="text-sm text-text-2">{label}</p>
+      <p className="mt-2 font-display text-4xl font-bold tracking-tight tabular-nums text-text">
         {value}
       </p>
     </div>

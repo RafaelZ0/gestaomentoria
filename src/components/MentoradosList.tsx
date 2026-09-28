@@ -18,7 +18,7 @@ export function MentoradosList({
   return (
     <div className="space-y-3">
       {mentorados.length === 0 && !adding && (
-        <p className="text-sm text-text-secondary">Nenhum mentorado cadastrado.</p>
+        <p className="text-sm text-text-2">Nenhum mentorado cadastrado.</p>
       )}
       <ul className="space-y-2">
         {mentorados.map((m) => (
@@ -37,24 +37,24 @@ export function MentoradosList({
           className="flex items-end gap-3"
         >
           <div className="flex-1">
-            <label className="mb-1 block text-sm text-text-secondary">Nome</label>
+            <label className="mb-1 block text-sm text-text-2">Nome</label>
             <input
               name="nome"
               required
-              className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
             />
           </div>
           <div className="flex-1">
-            <label className="mb-1 block text-sm text-text-secondary">Telefone</label>
+            <label className="mb-1 block text-sm text-text-2">Telefone</label>
             <input
               name="telefone"
-              className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
             />
           </div>
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+            className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
           >
             Adicionar
           </button>
@@ -69,7 +69,7 @@ export function MentoradosList({
       ) : (
         <button
           onClick={() => setAdding(true)}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
+          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
         >
           + Adicionar mentorado
         </button>
@@ -104,14 +104,14 @@ function MentoradoRow({
   }
 
   return (
-    <li className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-surface px-4 py-3 text-sm hover:bg-bg-surface-hover">
+    <li className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3 text-sm hover:bg-hover">
       <div className="flex flex-1 gap-3">
         <input
           value={nome}
           disabled={isPending}
           onChange={(e) => setNome(e.target.value)}
           onBlur={() => salvar(nome, telefone)}
-          className="flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text-primary outline-none hover:border-border focus:border-accent"
+          className="flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text outline-none hover:border-line focus:border-gold"
         />
         <input
           value={editandoTelefone ? telefone : formatTelefone(telefone)}
@@ -123,7 +123,7 @@ function MentoradoRow({
             setEditandoTelefone(false);
             salvar(nome, telefone);
           }}
-          className="w-40 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text-secondary outline-none hover:border-border focus:border-accent"
+          className="w-40 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text-2 outline-none hover:border-line focus:border-gold"
         />
       </div>
       <button
@@ -132,7 +132,7 @@ function MentoradoRow({
           if (!confirm(`Remover ${mentorado.nome} deste grupo?`)) return;
           startTransition(() => removeMentorado(grupoId, mentorado.id));
         }}
-        className="rounded-lg border border-status-alert-text/40 px-3 py-1.5 text-xs text-status-alert-text hover:bg-status-alert-bg disabled:opacity-60"
+        className="rounded-lg border border-danger/40 px-3 py-1.5 text-xs text-danger hover:bg-danger/10 disabled:opacity-60"
       >
         Remover
       </button>

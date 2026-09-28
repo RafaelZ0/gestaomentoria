@@ -5,7 +5,7 @@ import { updateCustoHoraConfig } from "@/app/actions/custoHora";
 import type { CustoHoraConfig } from "@/lib/database.types";
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent tabular-nums";
+  "w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold tabular-nums";
 
 export function CustoHoraConfigForm({ config }: { config: CustoHoraConfig }) {
   const [isPending, startTransition] = useTransition();
@@ -18,7 +18,7 @@ export function CustoHoraConfigForm({ config }: { config: CustoHoraConfig }) {
       className="flex items-end gap-4"
     >
       <div className="max-w-xs flex-1">
-        <label className="mb-1 block text-sm text-text-secondary">
+        <label className="mb-1 block text-sm text-text-2">
           Margem de segurança (%)
         </label>
         <input
@@ -33,7 +33,7 @@ export function CustoHoraConfigForm({ config }: { config: CustoHoraConfig }) {
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+        className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
       >
         {isPending ? "Salvando…" : "Salvar"}
       </button>

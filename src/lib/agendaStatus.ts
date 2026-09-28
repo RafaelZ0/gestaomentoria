@@ -37,6 +37,48 @@ export function calcularGruposPorReuniao(
   return gruposPorReuniao;
 }
 
+export const DIAS_SEM_SINAL_DE_VIDA = 30;
+
+export interface GrupoSemSinal {
+  id: string;
+  nome: string;
+  dias: number | null;
+}
+
+// "Sem sinal de vida": grupos ativos cuja reunião mais recente (qualquer
+// data, própria ou como participante) foi há mais de 30 dias, ou que nunca
+// tiveram reunião. Do maior atraso pro menor (nunca = primeiro). Usado nas
+// métricas de Grupos de gestão e na seção da barra lateral.
+export function calcularSemSinalDeVida(
+  gruposAtivos: { id: string; nome: string }[],
+  reunioes: { id: string; grupo_id: string; data: string }[],
+  gruposPorReuniao: Map<string, Set<string>>,
+  hoje: Date = new Date()
+): GrupoSemSinal[] {
+  const ultimaReuniaoPorGrupo = new Map<string, string>();
+  for (const r of reunioes) {
+    const gruposEnvolvidos = gruposPorReuniao.get(r.id) ?? new Set([r.grupo_id]);
+    for (const gid of gruposEnvolvidos) {
+      const atual = ultimaReuniaoPorGrupo.get(gid);
+      if (!atual || r.data > atual) ultimaReuniaoPorGrupo.set(gid, r.data);
+    }
+  }
+
+  return gruposAtivos
+    .map((g) => {
+      const ultima = ultimaReuniaoPorGrupo.get(g.id);
+      const dias = ultima
+        ? Math.floor(
+            (hoje.getTime() - new Date(ultima + "T00:00:00").getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        : null;
+      return { id: g.id, nome: g.nome, dias };
+    })
+    .filter((g) => g.dias === null || g.dias > DIAS_SEM_SINAL_DE_VIDA)
+    .sort((a, b) => (b.dias ?? Infinity) - (a.dias ?? Infinity));
+}
+
 // Grupos ativos sem nenhuma reunião futura agendada e cuja última reunião
 // (se existir) foi há mais de `diasLimite` dias — mesma regra usada no
 // sino de notificações "hora de agendar a próxima reunião".

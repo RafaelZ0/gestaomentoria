@@ -34,8 +34,8 @@ export function TrafegoCard({
   const valorInvestidoAtual = valorInvestidoDia ?? 0;
 
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-5">
-      <p className="text-sm text-text-secondary">Tráfego pago</p>
+    <div className="rounded-xl border border-line bg-surface p-5">
+      <p className="text-sm text-text-2">Tráfego pago</p>
       <select
         value={trafego}
         disabled={isPending}
@@ -46,7 +46,7 @@ export function TrafegoCard({
             salvar(novoTrafego, desde, String(valorInvestidoAtual))
           );
         }}
-        className="mt-2 w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+        className="mt-2 w-full rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text"
       >
         <option value="">—</option>
         <option value="SIM">SIM</option>
@@ -55,7 +55,7 @@ export function TrafegoCard({
         <option value="EM IMPLEMENTAÇÃO">EM IMPLEMENTAÇÃO</option>
       </select>
 
-      <p className="mt-3 text-sm text-text-secondary">Tráfego pago ativo desde</p>
+      <p className="mt-3 text-sm text-text-2">Tráfego pago ativo desde</p>
       <input
         type="date"
         value={desde}
@@ -66,7 +66,7 @@ export function TrafegoCard({
             salvar(trafego, desde, String(valorInvestidoAtual))
           )
         }
-        className="mt-2 w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+        className="mt-2 w-full rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text"
       />
 
       <div className="mt-3">

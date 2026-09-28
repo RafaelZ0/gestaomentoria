@@ -53,15 +53,15 @@ export default async function PagamentosPage({
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-wrap gap-6">
           <div>
-            <p className="text-sm text-text-secondary">Total recebido</p>
-            <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-status-ok-text">
+            <p className="text-sm text-text-2">Total recebido</p>
+            <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-ok">
               {formatBRL(totalRecebido)}
             </p>
           </div>
           {totalEmAtraso > 0 && (
             <div>
-              <p className="text-sm text-text-secondary">Em atraso</p>
-              <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-status-alert-text">
+              <p className="text-sm text-text-2">Em atraso</p>
+              <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-danger">
                 {formatBRL(totalEmAtraso)}
               </p>
             </div>
@@ -72,7 +72,7 @@ export default async function PagamentosPage({
           <PagamentoParceladoForm grupoId={id} />
         </div>
       </div>
-      <p className="max-w-md text-xs text-text-secondary">
+      <p className="max-w-md text-xs text-text-2">
         Todo pagamento é lançado manualmente aqui, ou entra sozinho via
         integração com o Asaas — boletos ainda não pagos aparecem como
         Pendente/Atrasado e não contam no total recebido.
@@ -83,10 +83,10 @@ export default async function PagamentosPage({
         asaasCustomerId={grupo?.asaas_customer_id ?? null}
       />
 
-      <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
+      <div className="overflow-x-auto rounded-xl border border-line bg-surface">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-border text-text-secondary">
+            <tr className="border-b border-line text-text-2">
               <th className="px-4 py-3 font-medium">Data</th>
               <th className="px-4 py-3 font-medium">Tipo</th>
               <th className="px-4 py-3 font-medium">Status</th>
@@ -96,14 +96,14 @@ export default async function PagamentosPage({
           </thead>
           <tbody>
             {linhas.map((l) => (
-              <tr key={l.id} className="border-b border-border last:border-0">
-                <td className="px-4 py-3 tabular-nums text-text-primary">
+              <tr key={l.id} className="border-b border-line last:border-0">
+                <td className="px-4 py-3 tabular-nums text-text">
                   {formatDate(l.data)}
                 </td>
-                <td className="px-4 py-3 text-text-secondary">
+                <td className="px-4 py-3 text-text-2">
                   {l.tipoLabel}
                   {l.viaAsaas && (
-                    <span className="ml-2 rounded-full bg-status-accent-bg px-2 py-0.5 text-xs font-medium text-status-accent-text">
+                    <span className="ml-2 rounded-full bg-gold/10 px-2 py-0.5 text-xs font-medium text-gold">
                       via Asaas
                     </span>
                   )}
@@ -117,17 +117,17 @@ export default async function PagamentosPage({
                     <StatusBadge label="Pendente" variant="neutral" />
                   )}
                 </td>
-                <td className="px-4 py-3 tabular-nums text-text-primary">
+                <td className="px-4 py-3 tabular-nums text-text">
                   {formatBRL(l.valor)}
                 </td>
-                <td className="px-4 py-3 text-text-secondary">
+                <td className="px-4 py-3 text-text-2">
                   {l.observacao ?? "—"}
                 </td>
               </tr>
             ))}
             {linhas.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-text-secondary">
+                <td colSpan={5} className="px-4 py-8 text-center text-text-2">
                   Nenhum pagamento registrado ainda.
                 </td>
               </tr>

@@ -3,8 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { calcSaudeGrupo, calcTendenciaRoas } from "@/lib/saude";
 import { GruposTable } from "@/components/GruposTable";
 import { GruposResumo } from "@/components/GruposResumo";
-
-const DIAS_SEM_SINAL_DE_VIDA = 30;
+import { calcularSemSinalDeVida } from "@/lib/agendaStatus";
 
 export default async function GruposPage() {
   const supabase = await createClient();
@@ -65,20 +64,12 @@ export default async function GruposPage() {
   }
 
   const hoje = new Date();
-  const semSinalDeVida = (grupos ?? [])
-    .filter((g) => g.status === "Ativo")
-    .map((g) => {
-      const ultima = ultimaReuniaoPorGrupo.get(g.id);
-      const dias = ultima
-        ? Math.floor(
-            (hoje.getTime() - new Date(ultima + "T00:00:00").getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-        : null;
-      return { id: g.id, nome: g.nome, dias };
-    })
-    .filter((g) => g.dias === null || g.dias > DIAS_SEM_SINAL_DE_VIDA)
-    .sort((a, b) => (b.dias ?? Infinity) - (a.dias ?? Infinity));
+  const semSinalDeVida = calcularSemSinalDeVida(
+    (grupos ?? []).filter((g) => g.status === "Ativo"),
+    reunioes ?? [],
+    gruposPorReuniao,
+    hoje
+  );
 
   const ativos = (grupos ?? []).filter((g) => g.status === "Ativo");
 
@@ -151,13 +142,13 @@ export default async function GruposPage() {
   return (
     <div className="max-w-6xl">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
           Grupos de gestão
         </h1>
         <Link
           href="/grupos/novo"
           prefetch={false}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold transition-colors hover:bg-gold-hover"
         >
           + Novo grupo
         </Link>

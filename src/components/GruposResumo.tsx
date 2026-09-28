@@ -25,17 +25,17 @@ export function GruposResumo({
   return (
     <>
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="card-hero rounded-xl border border-border bg-bg-surface p-6 sm:col-span-1">
-          <p className="text-sm text-text-secondary">Total recebido</p>
-          <p className="mt-2 font-display text-4xl font-bold tracking-tight tabular-nums text-text-primary">
+        <div className="card-hero rounded-xl border border-line bg-surface p-6 sm:col-span-1">
+          <p className="text-sm text-text-2">Total recebido</p>
+          <p className="mt-2 font-display text-4xl font-bold tracking-tight tabular-nums text-text">
             {formatBRL(totalPago)}
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-bg-surface p-6">
-          <p className="text-sm text-text-secondary">Grupos ativos</p>
-          <p className="mt-2 font-display text-2xl font-semibold tracking-tight tabular-nums text-text-primary">
+        <div className="rounded-xl border border-line bg-surface p-6">
+          <p className="text-sm text-text-2">Grupos ativos</p>
+          <p className="mt-2 font-display text-2xl font-semibold tracking-tight tabular-nums text-text">
             {ativosCount}{" "}
-            <span className="text-base font-normal text-text-secondary">
+            <span className="text-base font-normal text-text-2">
               / {totalCount}
             </span>
           </p>
@@ -43,20 +43,20 @@ export function GruposResumo({
         <button
           type="button"
           onClick={() => setAberto((a) => !a)}
-          className="rounded-xl border border-border bg-bg-surface p-6 text-left"
+          className="rounded-xl border border-line bg-surface p-6 text-left"
         >
-          <p className="text-sm text-text-secondary">
+          <p className="text-sm text-text-2">
             Sem sinal de vida (+{DIAS_SEM_SINAL_DE_VIDA}d)
           </p>
           <div className="mt-2 flex items-center gap-2">
             <p
               className={`font-display text-2xl font-semibold tracking-tight tabular-nums ${
-                semSinalDeVidaCount > 0 ? "text-status-warn-text" : "text-text-primary"
+                semSinalDeVidaCount > 0 ? "text-warn" : "text-text"
               }`}
             >
               {semSinalDeVidaCount}
             </p>
-            <span className="text-xs text-text-secondary">
+            <span className="text-xs text-text-2">
               {aberto ? "▲ ocultar" : "▼ ver saúde dos clientes"}
             </span>
           </div>
@@ -65,10 +65,10 @@ export function GruposResumo({
 
       {aberto && (
         <div className="mt-8">
-          <h2 className="font-display text-lg font-semibold text-text-primary">
+          <h2 className="font-display text-lg font-semibold text-text">
             Saúde dos clientes
           </h2>
-          <p className="mt-1 text-xs text-text-secondary">
+          <p className="mt-1 text-xs text-text-2">
             Combina sinal de vida (+{DIAS_SEM_SINAL_DE_VIDA}d), tendência de
             ROAS entre os últimos dois meses com lançamento e processos
             ativos pendentes.

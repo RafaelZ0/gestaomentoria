@@ -77,40 +77,40 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
 
   return (
     <div className="mt-8">
-      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-border bg-bg-surface-hover p-3">
+      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-line bg-hover p-3">
         <div>
-          <label className="mb-1 block text-xs text-text-secondary">Buscar</label>
+          <label className="mb-1 block text-xs text-text-2">Buscar</label>
           <input
             type="text"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Nome do grupo"
-            className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-text-secondary">Status</label>
+          <label className="mb-1 block text-xs text-text-2">Status</label>
           <select
             value={filtroStatus}
             onChange={(e) =>
               setFiltroStatus(e.target.value as "todos" | "Ativo" | "Inativo")
             }
-            className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
+            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
           >
             <option value="todos">Todos</option>
             <option value="Ativo">Ativos</option>
             <option value="Inativo">Inativos</option>
           </select>
         </div>
-        <p className="ml-auto text-sm text-text-secondary">
+        <p className="ml-auto text-sm text-text-2">
           {gruposOrdenados.length} grupo{gruposOrdenados.length === 1 ? "" : "s"}
         </p>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-bg-surface">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-line bg-surface">
         <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-border text-text-secondary">
+          <tr className="border-b border-line text-text-2">
             <SortableHeader label="Nome" sortKey="nome" current={sortKey} dir={sortDir} onSort={handleSort} />
             <SortableHeader label="Status" sortKey="status" current={sortKey} dir={sortDir} onSort={handleSort} />
             <SortableHeader
@@ -136,9 +136,9 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
             <tr
               key={g.id}
               onClick={() => router.push(`/grupos/${g.id}`)}
-              className="cursor-pointer border-b border-border last:border-0 hover:bg-bg-surface-hover"
+              className="cursor-pointer border-b border-line last:border-0 hover:bg-hover"
             >
-              <td className="px-4 py-3 font-medium text-text-primary">{g.nome}</td>
+              <td className="px-4 py-3 font-medium text-text">{g.nome}</td>
               <td className="px-4 py-3">
                 <StatusBadge label={g.status} variant={statusGrupoVariant(g.status)} />
               </td>
@@ -149,21 +149,21 @@ export function GruposTable({ grupos }: { grupos: GrupoGestao[] }) {
                     variant={trafegoPagoVariant(g.trafego_pago)}
                   />
                 ) : (
-                  <span className="text-text-secondary">—</span>
+                  <span className="text-text-2">—</span>
                 )}
               </td>
-              <td className="px-4 py-3 tabular-nums text-text-primary">
+              <td className="px-4 py-3 tabular-nums text-text">
                 {formatBRL(Number(g.valor_mensal))}
               </td>
-              <td className="px-4 py-3 tabular-nums text-text-secondary">
+              <td className="px-4 py-3 tabular-nums text-text-2">
                 {formatDate(g.data_inicio)}
               </td>
-              <td className="px-4 py-3 text-right text-text-secondary">→</td>
+              <td className="px-4 py-3 text-right text-text-2">→</td>
             </tr>
           ))}
           {gruposOrdenados.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-4 py-8 text-center text-text-secondary">
+              <td colSpan={6} className="px-4 py-8 text-center text-text-2">
                 {grupos.length === 0
                   ? "Nenhum grupo cadastrado ainda."
                   : "Nenhum grupo encontrado com esse filtro."}
@@ -196,8 +196,8 @@ function SortableHeader({
       <button
         type="button"
         onClick={() => onSort(sortKey)}
-        className={`flex items-center gap-1 hover:text-text-primary ${
-          active ? "text-text-primary" : ""
+        className={`flex items-center gap-1 hover:text-text ${
+          active ? "text-text" : ""
         }`}
       >
         {label}

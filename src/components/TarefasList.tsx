@@ -42,31 +42,31 @@ export function TarefasList({
             await createTarefa(grupoId, formData);
           })
         }
-        className="space-y-3 rounded-xl border border-border bg-bg-surface p-4"
+        className="space-y-3 rounded-xl border border-line bg-surface p-4"
       >
         <input
           name="descricao"
           required
           placeholder="Nova tarefa…"
-          className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+          className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
-            <label className="mb-1 block text-xs text-text-secondary">Prazo</label>
+            <label className="mb-1 block text-xs text-text-2">Prazo</label>
             <input
               type="date"
               name="prazo"
-              className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text outline-none focus:border-gold"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-text-secondary">
+            <label className="mb-1 block text-xs text-text-2">
               Prioridade
             </label>
             <select
               name="prioridade"
               defaultValue="Média"
-              className="w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary"
+              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text"
             >
               <option value="Baixa">Baixa</option>
               <option value="Média">Média</option>
@@ -78,7 +78,7 @@ export function TarefasList({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
         >
           Adicionar
         </button>
@@ -97,13 +97,13 @@ export function TarefasList({
           />
         ))}
         {tarefas.length === 0 && (
-          <p className="text-sm text-text-secondary">Nenhuma tarefa cadastrada.</p>
+          <p className="text-sm text-text-2">Nenhuma tarefa cadastrada.</p>
         )}
       </ul>
 
       {concluidas.length > 0 && (
         <div>
-          <p className="mb-2 text-sm text-text-secondary">Concluídas</p>
+          <p className="mb-2 text-sm text-text-2">Concluídas</p>
           <ul className="space-y-2">
             {concluidas.map((t) => (
               <TarefaItem
@@ -143,9 +143,9 @@ function TarefaItem({
 
   if (editando) {
     return (
-      <li className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3">
+      <li className="rounded-lg border border-line bg-hover px-4 py-3">
         {error && (
-          <p className="mb-2 text-xs text-status-alert-text">{error}</p>
+          <p className="mb-2 text-xs text-danger">{error}</p>
         )}
         <form
           action={(formData) => {
@@ -165,28 +165,28 @@ function TarefaItem({
             name="descricao"
             required
             defaultValue={tarefa.descricao}
-            className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold"
           />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label className="mb-1 block text-xs text-text-secondary">
+              <label className="mb-1 block text-xs text-text-2">
                 Prazo
               </label>
               <input
                 type="date"
                 name="prazo"
                 defaultValue={tarefa.prazo ?? ""}
-                className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+                className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-text-secondary">
+              <label className="mb-1 block text-xs text-text-2">
                 Prioridade
               </label>
               <select
                 name="prioridade"
                 defaultValue={tarefa.prioridade}
-                className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
+                className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
               >
                 <option value="Baixa">Baixa</option>
                 <option value="Média">Média</option>
@@ -203,7 +203,7 @@ function TarefaItem({
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+              className="rounded-lg bg-gold px-3 py-1.5 text-xs font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
             >
               Salvar
             </button>
@@ -221,7 +221,7 @@ function TarefaItem({
   }
 
   return (
-    <li className="flex items-start gap-3 rounded-lg border border-border bg-bg-surface-hover px-4 py-3">
+    <li className="flex items-start gap-3 rounded-lg border border-line bg-hover px-4 py-3">
       <input
         type="checkbox"
         checked={tarefa.concluida}
@@ -231,7 +231,7 @@ function TarefaItem({
             toggleTarefa(grupoId, tarefa.id, e.target.checked)
           )
         }
-        className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
+        className="mt-0.5 h-4 w-4 shrink-0"
       />
       <div
         className="flex-1 cursor-pointer"
@@ -239,7 +239,7 @@ function TarefaItem({
       >
         <span
           className={`text-sm ${
-            tarefa.concluida ? "text-text-secondary line-through" : "text-text-primary"
+            tarefa.concluida ? "text-text-2 line-through" : "text-text"
           }`}
         >
           {tarefa.descricao}
@@ -252,7 +252,7 @@ function TarefaItem({
           {tarefa.prazo && (
             <span
               className={`text-xs tabular-nums ${
-                atrasada ? "text-status-alert-text" : "text-text-secondary"
+                atrasada ? "text-danger" : "text-text-2"
               }`}
             >
               {atrasada ? "Atrasada — " : "Prazo: "}
@@ -260,7 +260,7 @@ function TarefaItem({
             </span>
           )}
           {responsavelNome && (
-            <span className="text-xs text-text-secondary">{responsavelNome}</span>
+            <span className="text-xs text-text-2">{responsavelNome}</span>
           )}
         </div>
       </div>
@@ -272,7 +272,7 @@ function TarefaItem({
           if (!confirm("Remover esta tarefa?")) return;
           startTransition(() => removeTarefa(grupoId, tarefa.id));
         }}
-        className="shrink-0 text-xs text-text-secondary hover:text-status-alert-text disabled:opacity-60"
+        className="shrink-0 text-xs text-text-2 hover:text-danger disabled:opacity-60"
       >
         Remover
       </button>

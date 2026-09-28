@@ -1,9 +1,9 @@
 const VARIANTS = {
-  ok: "bg-status-ok-bg text-status-ok-text",
-  alert: "bg-status-alert-bg text-status-alert-text",
-  warn: "bg-status-warn-bg text-status-warn-text",
-  neutral: "bg-status-neutral-bg text-status-neutral-text",
-  accent: "bg-status-accent-bg text-status-accent-text",
+  ok: "bg-ok/10 text-ok",
+  alert: "bg-danger/10 text-danger",
+  warn: "bg-warn/10 text-warn",
+  neutral: "bg-off/10 text-muted",
+  accent: "bg-gold/10 text-gold",
 } as const;
 
 type Variant = keyof typeof VARIANTS;

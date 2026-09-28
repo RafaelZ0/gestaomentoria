@@ -10,7 +10,7 @@ import { formatBRL } from "@/lib/format";
 import type { CustoFixo } from "@/lib/database.types";
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent";
+  "w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold";
 
 export function CustosFixosList({ custos }: { custos: CustoFixo[] }) {
   const [isPending, startTransition] = useTransition();
@@ -21,7 +21,7 @@ export function CustosFixosList({ custos }: { custos: CustoFixo[] }) {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -31,15 +31,15 @@ export function CustosFixosList({ custos }: { custos: CustoFixo[] }) {
           <CustoFixoRow key={c.id} custo={c} />
         ))}
         {custos.length === 0 && (
-          <p className="text-sm text-text-secondary">
+          <p className="text-sm text-text-2">
             Nenhum custo fixo cadastrado ainda.
           </p>
         )}
       </ul>
 
-      <div className="flex items-center justify-between rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm">
-        <span className="text-text-secondary">Total de custos fixos</span>
-        <span className="tabular-nums font-medium text-text-primary">
+      <div className="flex items-center justify-between rounded-lg border border-line bg-hover px-4 py-3 text-sm">
+        <span className="text-text-2">Total de custos fixos</span>
+        <span className="tabular-nums font-medium text-text">
           {formatBRL(total)}
         </span>
       </div>
@@ -58,7 +58,7 @@ export function CustosFixosList({ custos }: { custos: CustoFixo[] }) {
         className="flex items-end gap-3"
       >
         <div className="flex-1">
-          <label className="mb-1 block text-sm text-text-secondary">Nome</label>
+          <label className="mb-1 block text-sm text-text-2">Nome</label>
           <input
             name="nome"
             required
@@ -67,7 +67,7 @@ export function CustosFixosList({ custos }: { custos: CustoFixo[] }) {
           />
         </div>
         <div className="w-40">
-          <label className="mb-1 block text-sm text-text-secondary">Valor (R$)</label>
+          <label className="mb-1 block text-sm text-text-2">Valor (R$)</label>
           <input
             name="valor"
             type="number"
@@ -80,7 +80,7 @@ export function CustosFixosList({ custos }: { custos: CustoFixo[] }) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
         >
           Adicionar
         </button>
@@ -112,9 +112,9 @@ function CustoFixoRow({ custo }: { custo: CustoFixo }) {
   }
 
   return (
-    <li className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm">
+    <li className="rounded-lg border border-line bg-hover px-4 py-3 text-sm">
       {error && (
-        <div className="mb-2 rounded-lg bg-status-alert-bg px-3 py-2 text-xs text-status-alert-text">
+        <div className="mb-2 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
           {error}
         </div>
       )}
@@ -124,7 +124,7 @@ function CustoFixoRow({ custo }: { custo: CustoFixo }) {
           disabled={isPending}
           onChange={(e) => setNome(e.target.value)}
           onBlur={() => salvar(nome, valor)}
-          className="flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text-primary outline-none hover:border-border focus:border-accent"
+          className="flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1 text-text outline-none hover:border-line focus:border-gold"
         />
         <input
           type="number"
@@ -134,12 +134,12 @@ function CustoFixoRow({ custo }: { custo: CustoFixo }) {
           disabled={isPending}
           onChange={(e) => setValor(e.target.value)}
           onBlur={() => salvar(nome, valor)}
-          className="w-28 rounded-lg border border-transparent bg-transparent px-2 py-1 text-right tabular-nums text-text-primary outline-none hover:border-border focus:border-accent"
+          className="w-28 rounded-lg border border-transparent bg-transparent px-2 py-1 text-right tabular-nums text-text outline-none hover:border-line focus:border-gold"
         />
         <button
           disabled={isPending}
           onClick={() => startTransition(() => removeCustoFixo(custo.id))}
-          className="text-text-secondary hover:text-status-alert-text"
+          className="text-text-2 hover:text-danger"
         >
           Remover
         </button>

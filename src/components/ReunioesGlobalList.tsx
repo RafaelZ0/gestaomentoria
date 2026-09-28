@@ -72,9 +72,9 @@ export function ReunioesGlobalList({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-border bg-bg-surface-hover p-3">
+      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-line bg-hover p-3">
         <div>
-          <label className="mb-1 block text-xs text-text-secondary">
+          <label className="mb-1 block text-xs text-text-2">
             Buscar grupo
           </label>
           <input
@@ -82,11 +82,11 @@ export function ReunioesGlobalList({
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Nome do grupo"
-            className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-text-secondary">
+          <label className="mb-1 block text-xs text-text-2">
             Status do grupo
           </label>
           <select
@@ -94,7 +94,7 @@ export function ReunioesGlobalList({
             onChange={(e) =>
               setFiltroStatus(e.target.value as "Ativo" | "Inativo" | "todos")
             }
-            className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
+            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
           >
             <option value="Ativo">Ativos</option>
             <option value="Inativo">Inativos</option>
@@ -102,13 +102,13 @@ export function ReunioesGlobalList({
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs text-text-secondary">
+          <label className="mb-1 block text-xs text-text-2">
             Responsável
           </label>
           <select
             value={filtroResponsavel}
             onChange={(e) => setFiltroResponsavel(e.target.value)}
-            className="rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
+            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
           >
             <option value="">Todos</option>
             {responsaveis.map((r) => (
@@ -118,7 +118,7 @@ export function ReunioesGlobalList({
             ))}
           </select>
         </div>
-        <p className="ml-auto text-sm text-text-secondary">
+        <p className="ml-auto text-sm text-text-2">
           {filtradas.length} reuni{filtradas.length === 1 ? "ão" : "ões"}
         </p>
       </div>
@@ -129,11 +129,11 @@ export function ReunioesGlobalList({
       )}
 
       <div>
-        <h2 className="mb-3 font-display text-lg font-semibold text-text-primary">
+        <h2 className="mb-3 font-display text-lg font-semibold text-text">
           Histórico
         </h2>
         {historicoPorMes.length === 0 ? (
-          <p className="text-sm text-text-secondary">
+          <p className="text-sm text-text-2">
             Nenhuma reunião no histórico com esse filtro.
           </p>
         ) : (
@@ -143,11 +143,11 @@ export function ReunioesGlobalList({
               return (
                 <div key={mes}>
                   <div className="mb-2 flex items-center gap-3">
-                    <h3 className="whitespace-nowrap font-display text-sm font-semibold text-text-primary">
+                    <h3 className="whitespace-nowrap font-display text-sm font-semibold text-text">
                       {formatMesAno(ano, m)}
                     </h3>
-                    <div className="h-px flex-1 bg-border" />
-                    <span className="whitespace-nowrap text-xs text-text-secondary">
+                    <div className="h-px flex-1 bg-line" />
+                    <span className="whitespace-nowrap text-xs text-text-2">
                       {itens.length} reuni{itens.length === 1 ? "ão" : "ões"}
                     </span>
                   </div>
@@ -169,7 +169,7 @@ export function ReunioesGlobalList({
 function Secao({ titulo, itens }: { titulo: string; itens: LinhaReuniao[] }) {
   return (
     <div>
-      <h2 className="mb-2 font-display text-lg font-semibold text-text-primary">
+      <h2 className="mb-2 font-display text-lg font-semibold text-text">
         {titulo}
       </h2>
       <ul className="space-y-3">
@@ -187,45 +187,45 @@ function ReuniaoGlobalItem({ reuniao: r }: { reuniao: LinhaReuniao }) {
   const hojeFlag = r.data === hoje && r.compareceu;
 
   return (
-    <li className="rounded-xl border border-border bg-bg-surface p-5">
+    <li className="rounded-xl border border-line bg-surface p-5">
       <Link
         href={`/grupos/${r.grupoId}/reunioes`}
         prefetch={false}
         className="flex flex-wrap items-center justify-between gap-2 hover:opacity-80"
       >
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-text-primary">
+          <p className="text-sm font-medium text-text">
             {formatDate(r.data)}
             {r.hora && ` às ${r.hora.slice(0, 5)}`}
           </p>
-          <span className="rounded-full bg-status-accent-bg px-2 py-0.5 text-xs font-medium text-status-accent-text">
+          <span className="rounded-full bg-gold/10 px-2 py-0.5 text-xs font-medium text-gold">
             {r.grupoNome}
           </span>
           {r.grupoStatus === "Inativo" && (
-            <span className="rounded-full bg-status-neutral-bg px-2 py-0.5 text-xs font-medium text-status-neutral-text">
+            <span className="rounded-full bg-off/10 px-2 py-0.5 text-xs font-medium text-muted">
               Grupo inativo
             </span>
           )}
           {!r.compareceu && (
-            <span className="rounded-full bg-status-alert-bg px-2 py-0.5 text-xs font-medium text-status-alert-text">
+            <span className="rounded-full bg-danger/10 px-2 py-0.5 text-xs font-medium text-danger">
               Não compareceu
             </span>
           )}
           {(agendada || hojeFlag) && (
-            <span className="rounded-full bg-status-ok-bg px-2 py-0.5 text-xs font-medium text-status-ok-text">
+            <span className="rounded-full bg-ok/10 px-2 py-0.5 text-xs font-medium text-ok">
               {hojeFlag ? "Hoje" : "Agendada"}
             </span>
           )}
         </div>
         {r.responsavelNome && (
-          <span className="rounded-full bg-bg-surface-hover px-2 py-0.5 text-xs text-text-secondary">
+          <span className="rounded-full bg-hover px-2 py-0.5 text-xs text-text-2">
             Conduzida por {r.responsavelNome}
           </span>
         )}
       </Link>
 
       {r.resumo && (
-        <p className="mt-2 whitespace-pre-wrap text-sm text-text-secondary">
+        <p className="mt-2 whitespace-pre-wrap text-sm text-text-2">
           {r.resumo}
         </p>
       )}
@@ -234,7 +234,7 @@ function ReuniaoGlobalItem({ reuniao: r }: { reuniao: LinhaReuniao }) {
           href={r.linkReuniao}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-block text-sm text-accent hover:text-accent-hover"
+          className="mt-2 inline-block text-sm text-gold hover:text-gold-hover"
         >
           {r.linkReuniao}
         </a>
@@ -247,7 +247,7 @@ function ReuniaoGlobalItem({ reuniao: r }: { reuniao: LinhaReuniao }) {
             )}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg border border-border px-2.5 py-1 text-xs text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
+            className="rounded-lg border border-line px-2.5 py-1 text-xs text-text-2 hover:bg-hover hover:text-text"
           >
             Lembrete de confirmação
           </a>
@@ -257,14 +257,14 @@ function ReuniaoGlobalItem({ reuniao: r }: { reuniao: LinhaReuniao }) {
             )}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg border border-border px-2.5 py-1 text-xs text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
+            className="rounded-lg border border-line px-2.5 py-1 text-xs text-text-2 hover:bg-hover hover:text-text"
           >
             Lembrete com link (10 min antes)
           </a>
         </div>
       )}
       {r.participantes.length > 0 && (
-        <p className="mt-3 text-xs text-text-secondary">
+        <p className="mt-3 text-xs text-text-2">
           Participantes: {r.participantes.join(", ")}
         </p>
       )}

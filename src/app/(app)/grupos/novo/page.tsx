@@ -3,7 +3,7 @@ import { NovoGrupoForm } from "@/components/NovoGrupoForm";
 export default function NovoGrupoPage() {
   return (
     <div className="max-w-3xl">
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
         Novo grupo de gestão
       </h1>
       <div className="mt-6">

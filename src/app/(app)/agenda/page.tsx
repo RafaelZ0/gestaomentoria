@@ -139,10 +139,10 @@ export default async function AgendaPage({
 
   return (
     <div className="max-w-6xl">
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
         Agenda
       </h1>
-      <p className="mt-1 text-sm text-text-secondary">
+      <p className="mt-1 text-sm text-text-2">
         Reuniões do Rafael e do Dr. Pablo e os compromissos da clínica, na
         mesma semana. Clique em qualquer horário pra agendar.
       </p>

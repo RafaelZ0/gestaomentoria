@@ -15,7 +15,7 @@ import { OPCOES_DURACAO } from "@/components/AgendarReuniaoModal";
 import type { ReuniaoDoDia } from "@/components/CalendarioAgenda";
 
 const CAMPO =
-  "w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-accent";
+  "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold";
 
 // Reunião da faixa "Sem horário": mostra os dados e, no modo Editar,
 // deixa definir início e duração (Editar → Salvar / Cancelar).
@@ -101,14 +101,14 @@ export function ReuniaoSemHorarioModal({
         role="dialog"
         aria-label={`Reunião ${reuniao.grupoNome}`}
         onClick={(e) => e.stopPropagation()}
-        className="max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-4 overflow-y-auto rounded-xl border border-border bg-bg-surface-hover p-5 shadow-2xl"
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-4 overflow-y-auto rounded-xl border border-line bg-hover p-5 shadow-2xl"
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="font-display text-lg font-semibold text-text-primary">
+            <h2 className="font-display text-lg font-semibold text-text">
               {reuniao.grupoNome}
             </h2>
-            <p className="text-xs text-text-secondary">
+            <p className="text-xs text-text-2">
               {formatDiaSemanaCurto(data)}, {formatDiaMesCurto(data)} · sem horário definido
             </p>
           </div>
@@ -116,7 +116,7 @@ export function ReuniaoSemHorarioModal({
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded p-1 text-text-secondary hover:bg-bg-surface hover:text-text-primary"
+            className="rounded p-1 text-text-2 hover:bg-surface hover:text-text"
           >
             ✕
           </button>
@@ -124,24 +124,24 @@ export function ReuniaoSemHorarioModal({
 
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between gap-4">
-            <dt className="text-text-secondary">Responsável</dt>
-            <dd className="text-text-primary">{responsavelNome}</dd>
+            <dt className="text-text-2">Responsável</dt>
+            <dd className="text-text">{responsavelNome}</dd>
           </div>
           {reuniao.resumo && (
             <div>
-              <dt className="text-text-secondary">Pauta</dt>
-              <dd className="mt-0.5 whitespace-pre-line text-text-primary">{reuniao.resumo}</dd>
+              <dt className="text-text-2">Pauta</dt>
+              <dd className="mt-0.5 whitespace-pre-line text-text">{reuniao.resumo}</dd>
             </div>
           )}
           {reuniao.linkReuniao && (
             <div className="flex justify-between gap-4">
-              <dt className="text-text-secondary">Link</dt>
+              <dt className="text-text-2">Link</dt>
               <dd className="truncate">
                 <a
                   href={reuniao.linkReuniao}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-accent hover:text-accent-hover"
+                  className="text-gold hover:text-gold-hover"
                 >
                   {reuniao.linkReuniao}
                 </a>
@@ -152,20 +152,20 @@ export function ReuniaoSemHorarioModal({
 
         {editando ? (
           <form
-            className="space-y-3 border-t border-border pt-4"
+            className="space-y-3 border-t border-line pt-4"
             onSubmit={(e) => {
               e.preventDefault();
               salvar();
             }}
           >
             {erro && (
-              <p className="rounded-lg bg-status-alert-bg px-3 py-2 text-xs text-status-alert-text">
+              <p className="rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
                 {erro}
               </p>
             )}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs text-text-secondary">Início</label>
+                <label className="mb-1 block text-xs text-text-2">Início</label>
                 <input
                   type="time"
                   step={300}
@@ -179,7 +179,7 @@ export function ReuniaoSemHorarioModal({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-text-secondary">Duração</label>
+                <label className="mb-1 block text-xs text-text-2">Duração</label>
                 <select
                   value={duracaoMin}
                   onChange={(e) => {
@@ -196,13 +196,13 @@ export function ReuniaoSemHorarioModal({
                 </select>
               </div>
             </div>
-            <p className="text-xs text-text-secondary">
+            <p className="text-xs text-text-2">
               Termina às{" "}
-              <span className="font-medium tabular-nums text-text-primary">{fim ?? "—"}</span>
+              <span className="font-medium tabular-nums text-text">{fim ?? "—"}</span>
             </p>
 
             {horaValida && conflitos.length > 0 && (
-              <div className="rounded-lg border border-status-warn-text/30 bg-status-warn-bg px-3 py-2 text-xs text-status-warn-text">
+              <div className="rounded-lg border border-warn/30 bg-warn/10 px-3 py-2 text-xs text-warn">
                 <p className="font-medium">Conflita com:</p>
                 <ul className="mt-1 space-y-0.5">
                   {conflitos.map((c, i) => (
@@ -214,12 +214,12 @@ export function ReuniaoSemHorarioModal({
               </div>
             )}
 
-            <label className="flex items-center gap-2 text-xs text-text-secondary">
+            <label className="flex items-center gap-2 text-xs text-text-2">
               <input
                 type="checkbox"
                 checked={forcarEncaixe}
                 onChange={(e) => setForcarEncaixe(e.target.checked)}
-                className="accent-accent"
+                className="accent-gold"
               />
               Forçar encaixe (salvar mesmo com conflito)
             </label>
@@ -228,7 +228,7 @@ export function ReuniaoSemHorarioModal({
               <button
                 type="submit"
                 disabled={isPending}
-                className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+                className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
               >
                 {isPending ? "Salvando…" : "Salvar"}
               </button>
@@ -238,25 +238,25 @@ export function ReuniaoSemHorarioModal({
                   setEditando(false);
                   setErro(null);
                 }}
-                className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-bg-surface"
+                className="rounded-lg border border-line px-4 py-2 text-sm text-text-2 hover:bg-surface"
               >
                 Cancelar
               </button>
             </div>
           </form>
         ) : (
-          <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
+          <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
             <Link
               href={`/grupos/${reuniao.grupoId}/reunioes`}
               prefetch={false}
-              className="text-sm text-accent hover:text-accent-hover"
+              className="text-sm text-gold hover:text-gold-hover"
             >
               Abrir no grupo
             </Link>
             <button
               type="button"
               onClick={() => setEditando(true)}
-              className="rounded-lg border border-border px-4 py-2 text-sm text-text-primary hover:bg-bg-surface"
+              className="rounded-lg border border-line px-4 py-2 text-sm text-text hover:bg-surface"
             >
               Editar horário
             </button>

@@ -29,27 +29,27 @@ export function TiposEntregaList({ tipos }: { tipos: TipoEntrega[] }) {
           name="nome"
           required
           placeholder="Nome do novo processo…"
-          className="flex-1 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent"
+          className="flex-1 rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
         >
           Adicionar
         </button>
       </form>
 
       {error && (
-        <div className="rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
+      <div className="overflow-x-auto rounded-xl border border-line bg-surface">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-border text-text-secondary">
+            <tr className="border-b border-line text-text-2">
               <th className="px-4 py-3 font-medium">Nome</th>
               <th className="px-4 py-3 font-medium">Ativo desde</th>
               <th className="px-4 py-3 font-medium">Status</th>
@@ -62,7 +62,7 @@ export function TiposEntregaList({ tipos }: { tipos: TipoEntrega[] }) {
             ))}
             {tipos.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-text-secondary">
+                <td colSpan={4} className="px-4 py-8 text-center text-text-2">
                   Nenhum processo cadastrado ainda.
                 </td>
               </tr>
@@ -89,8 +89,8 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
   }
 
   return (
-    <tr className="border-b border-border last:border-0 hover:bg-bg-surface-hover">
-      <td className="px-4 py-3 text-text-primary">{tipo.nome}</td>
+    <tr className="border-b border-line last:border-0 hover:bg-hover">
+      <td className="px-4 py-3 text-text">{tipo.nome}</td>
       <td className="px-4 py-3">
         {editandoData ? (
           <div className="flex items-center gap-2">
@@ -99,13 +99,13 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
               value={statusDesde}
               disabled={isPending}
               onChange={(e) => setStatusDesde(e.target.value)}
-              className="rounded-lg border border-border bg-bg-surface-hover px-2 py-1 text-xs text-text-primary outline-none focus:border-accent"
+              className="rounded-lg border border-line bg-hover px-2 py-1 text-xs text-text outline-none focus:border-gold"
             />
             <button
               type="button"
               disabled={isPending}
               onClick={salvarData}
-              className="rounded-lg bg-accent px-2.5 py-1 text-xs font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+              className="rounded-lg bg-gold px-2.5 py-1 text-xs font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
             >
               Salvar
             </button>
@@ -123,7 +123,7 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <span className="tabular-nums text-text-secondary">
+            <span className="tabular-nums text-text-2">
               {formatDate(statusDesde)}
             </span>
             <button
@@ -131,7 +131,7 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
               onClick={() => setEditandoData(true)}
               aria-label="Editar data"
               title="Editar data"
-              className="-m-1.5 rounded p-1.5 text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
+              className="-m-1.5 rounded p-1.5 text-text-2 hover:bg-hover hover:text-text"
             >
               ✎
             </button>
@@ -151,7 +151,7 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
           }
           className={
             tipo.ativo
-              ? "rounded-lg border border-status-alert-text/40 px-3 py-1.5 text-xs text-status-alert-text hover:bg-status-alert-bg disabled:opacity-60"
+              ? "rounded-lg border border-danger/40 px-3 py-1.5 text-xs text-danger hover:bg-danger/10 disabled:opacity-60"
               : "btn-secondary px-3 py-1.5 text-xs"
           }
         >

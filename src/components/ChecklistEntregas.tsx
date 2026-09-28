@@ -21,7 +21,7 @@ export function ChecklistEntregas({
 
   if (entregas.length === 0) {
     return (
-      <p className="text-sm text-text-secondary">
+      <p className="text-sm text-text-2">
         Nenhum tipo de entrega cadastrado ainda.
       </p>
     );
@@ -32,9 +32,9 @@ export function ChecklistEntregas({
       {entregas.map((e) => (
         <li
           key={e.id}
-          className="flex items-center justify-between rounded-lg border border-border bg-bg-surface-hover px-4 py-3"
+          className="flex items-center justify-between rounded-lg border border-line bg-hover px-4 py-3"
         >
-          <label className="flex items-center gap-3 text-sm text-text-primary">
+          <label className="flex items-center gap-3 text-sm text-text">
             <input
               type="checkbox"
               checked={e.feito}
@@ -44,7 +44,7 @@ export function ChecklistEntregas({
                   toggleEntrega(grupoId, e.id, ev.target.checked)
                 )
               }
-              className="h-4 w-4 shrink-0 rounded border border-border bg-bg-surface accent-[var(--accent)]"
+              className="h-4 w-4 shrink-0 rounded border border-line bg-surface"
             />
             {e.nome}
           </label>
@@ -59,10 +59,10 @@ export function ChecklistEntregas({
                     updateEntregaData(grupoId, e.id, ev.target.value)
                   )
                 }
-                className="w-full rounded-lg border border-border bg-bg-surface px-2 py-1 text-xs text-text-secondary outline-none focus:border-accent tabular-nums"
+                className="w-full rounded-lg border border-line bg-surface px-2 py-1 text-xs text-text-2 outline-none focus:border-gold tabular-nums"
               />
             ) : (
-              <span className="text-xs text-text-secondary">—</span>
+              <span className="text-xs text-text-2">—</span>
             )}
           </div>
         </li>

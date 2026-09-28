@@ -18,7 +18,7 @@ export function ResultadosTabs({
 
   return (
     <div>
-      <div className="flex gap-2 border-b border-border">
+      <div className="flex gap-2 border-b border-line">
         <TabButton label="Por grupo" ativo={aba === "grupo"} onClick={() => setAba("grupo")} />
         <TabButton label="Por mês" ativo={aba === "mes"} onClick={() => setAba("mes")} />
       </div>
@@ -49,8 +49,8 @@ function TabButton({
       onClick={onClick}
       className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
         ativo
-          ? "border-accent text-text-primary"
-          : "border-transparent text-text-secondary hover:text-text-primary"
+          ? "border-gold text-text"
+          : "border-transparent text-text-2 hover:text-text"
       }`}
     >
       {label}

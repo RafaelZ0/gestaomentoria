@@ -73,26 +73,26 @@ export default async function FinancasPage() {
   return (
     <div className="max-w-5xl space-y-8">
       <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
           Finanças
         </h1>
-        <p className="mt-1 text-sm text-text-secondary">
+        <p className="mt-1 text-sm text-text-2">
           Visão consolidada da consultoria: entrada de caixa real (pagamentos
           registrados) comparada ao faturamento vendido, mais custos e
           despesas, mês a mês.
         </p>
       </div>
 
-      <div className="card-hero rounded-xl border border-border bg-bg-surface p-6">
-        <p className="text-sm text-text-secondary">Lucro acumulado</p>
+      <div className="card-hero rounded-xl border border-line bg-surface p-6">
+        <p className="text-sm text-text-2">Lucro acumulado</p>
         <p
           className={`mt-2 font-display text-4xl font-bold tracking-tight tabular-nums ${
-            lucroAcumulado >= 0 ? "text-text-primary" : "text-status-alert-text"
+            lucroAcumulado >= 0 ? "text-text" : "text-danger"
           }`}
         >
           {formatBRL(lucroAcumulado)}
         </p>
-        <p className="mt-1 text-xs text-text-secondary">
+        <p className="mt-1 text-xs text-text-2">
           Entrada total − gasto total, somando todos os meses
         </p>
       </div>
@@ -125,10 +125,10 @@ export default async function FinancasPage() {
       </div>
 
       <section>
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+        <h2 className="font-display text-lg font-semibold text-text">
           Por mês
         </h2>
-        <p className="mt-1 text-xs text-text-secondary">
+        <p className="mt-1 text-xs text-text-2">
           Entrada = pagamentos de verdade registrados no mês (lançados à mão
           ou vindos do Asaas) + cláusulas recebidas + receitas avulsas.
           Faturamento = valor total vendido (valor mensal × 12) dos grupos
@@ -163,11 +163,11 @@ function InfoCard({
   alert?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-5">
-      <p className="text-sm text-text-secondary">{label}</p>
+    <div className="rounded-xl border border-line bg-surface p-5">
+      <p className="text-sm text-text-2">{label}</p>
       <p
         className={`mt-2 font-display text-xl font-semibold tracking-tight tabular-nums ${
-          alert ? "text-status-alert-text" : "text-text-primary"
+          alert ? "text-danger" : "text-text"
         }`}
       >
         {value}
@@ -177,12 +177,12 @@ function InfoCard({
           <Link
             href={href}
             prefetch={false}
-            className="mt-1 block text-xs text-accent hover:text-accent-hover"
+            className="mt-1 block text-xs text-gold hover:text-gold-hover"
           >
             {hint}
           </Link>
         ) : (
-          <p className="mt-1 text-xs text-text-secondary">{hint}</p>
+          <p className="mt-1 text-xs text-text-2">{hint}</p>
         ))}
     </div>
   );

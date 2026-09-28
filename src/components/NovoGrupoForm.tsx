@@ -25,13 +25,13 @@ export function NovoGrupoForm() {
       className="space-y-6"
     >
       {error && (
-        <div className="rounded-lg bg-status-alert-bg px-3 py-2 text-sm text-status-alert-text">
+        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
           {error}
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-bg-surface p-6 space-y-4">
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+      <div className="rounded-xl border border-line bg-surface p-6 space-y-4">
+        <h2 className="font-display text-lg font-semibold text-text">
           Dados do grupo
         </h2>
 
@@ -89,15 +89,15 @@ export function NovoGrupoForm() {
         </Field>
       </div>
 
-      <div className="rounded-xl border border-border bg-bg-surface p-6 space-y-4">
+      <div className="rounded-xl border border-line bg-surface p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold text-text-primary">
+          <h2 className="font-display text-lg font-semibold text-text">
             Mentorados
           </h2>
           <button
             type="button"
             onClick={() => setMentorados((m) => [...m, m.length])}
-            className="text-sm text-accent hover:text-accent-hover"
+            className="text-sm text-gold hover:text-gold-hover"
           >
             + Adicionar
           </button>
@@ -128,7 +128,7 @@ export function NovoGrupoForm() {
                 onClick={() =>
                   setMentorados((m) => m.filter((_, idx) => idx !== i))
                 }
-                className="mb-1 h-fit rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-bg-surface-hover"
+                className="mb-1 h-fit rounded-lg border border-line px-3 py-2 text-sm text-text-2 hover:bg-hover"
               >
                 Remover
               </button>
@@ -140,7 +140,7 @@ export function NovoGrupoForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
+        className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold transition-colors hover:bg-gold-hover disabled:opacity-60"
       >
         {isPending ? "Salvando…" : "Criar grupo"}
       </button>
@@ -159,7 +159,7 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-1 block text-sm text-text-secondary">
+      <label htmlFor={htmlFor} className="mb-1 block text-sm text-text-2">
         {label}
       </label>
       {children}
@@ -168,4 +168,4 @@ function Field({
 }
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-text-primary outline-none focus:border-accent";
+  "w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold";

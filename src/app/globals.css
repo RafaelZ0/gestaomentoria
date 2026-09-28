@@ -1,71 +1,84 @@
 @import "tailwindcss";
 
+/* Paleta da repaginação (docs/repaginacao/referencia): escura e calma, cinzas
+   quentes com dourado como única cor de destaque. Os valores ficam aqui uma
+   vez só; componentes usam as classes do Tailwind geradas pelo @theme. */
 :root {
-  --bg-base: #0b0e14;
-  --bg-surface: #12161f;
-  --bg-surface-hover: #171c28;
-  --border: #232838;
-  --accent: #6366f1;
-  --accent-hover: #7c7ff2;
-  --text-primary: #f4f5f7;
-  --text-secondary: #a8b0c4;
-  /* tom antigo de --text-secondary, reservado para metadados realmente terciários */
-  --text-tertiary: #8b92a6;
-
-  --status-ok-bg: rgba(34, 197, 94, 0.12);
-  --status-ok-text: #4ade80;
-  --status-alert-bg: rgba(239, 68, 68, 0.12);
-  --status-alert-text: #f87171;
-  --status-warn-bg: rgba(245, 158, 11, 0.12);
-  --status-warn-text: #fbbf24;
-  --status-neutral-bg: rgba(139, 146, 166, 0.12);
-  --status-neutral-text: #8b92a6;
-  --status-accent-bg: rgba(99, 102, 241, 0.12);
-  --status-accent-text: #6366f1;
+  --bg: #1f1e1c;
+  --sidebar: #181715;
+  --surface: #262523;
+  --hover: #2a2926;
+  --raised: #3a3833;
+  --line: #2f2d2a;
+  --line-soft: #262523;
+  --text: #ece9e3;
+  --text-2: #bdb8af;
+  --muted: #9c978e;
+  --subtle: #8a857c;
+  --gold: #c9a45c;
+  --gold-hover: #e0be7a;
+  --on-gold: #1a1812;
+  --ok: #7fb08a;
+  --paused: #d98a5b;
+  --off: #6e6a63;
+  --info: #7ea3c9;
+  --danger: #e08a6e;
+  --warn: #d9a45b;
 }
 
 @theme inline {
-  --color-bg-base: var(--bg-base);
-  --color-bg-surface: var(--bg-surface);
-  --color-bg-surface-hover: var(--bg-surface-hover);
-  --color-border: var(--border);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-tertiary: var(--text-tertiary);
+  /* Zera a paleta padrão do Tailwind: só os tokens abaixo existem. */
+  --color-*: initial;
+  --color-black: #000;
+  --color-white: #fff;
+  --color-transparent: transparent;
+  --color-current: currentColor;
 
-  --color-status-ok-bg: var(--status-ok-bg);
-  --color-status-ok-text: var(--status-ok-text);
-  --color-status-alert-bg: var(--status-alert-bg);
-  --color-status-alert-text: var(--status-alert-text);
-  --color-status-warn-bg: var(--status-warn-bg);
-  --color-status-warn-text: var(--status-warn-text);
-  --color-status-neutral-bg: var(--status-neutral-bg);
-  --color-status-neutral-text: var(--status-neutral-text);
-  --color-status-accent-bg: var(--status-accent-bg);
-  --color-status-accent-text: var(--status-accent-text);
+  --color-bg: var(--bg);
+  --color-sidebar: var(--sidebar);
+  --color-surface: var(--surface);
+  --color-hover: var(--hover);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --color-on-gold: var(--on-gold);
+  --color-ok: var(--ok);
+  --color-paused: var(--paused);
+  --color-off: var(--off);
+  --color-info: var(--info);
+  --color-danger: var(--danger);
+  --color-warn: var(--warn);
 
-  --font-display: var(--font-space-grotesk);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), Georgia, serif;
+  /* Legado: .font-display agora é só a fonte de texto. Títulos de página usam
+     font-serif (via PageHeader). */
+  --font-display: var(--font-dm-sans), system-ui, sans-serif;
 }
 
 body {
-  background: var(--bg-base);
-  color: var(--text-primary);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-}
-
-.font-display {
-  font-family: var(--font-display), var(--font-sans), sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* Anel de foco translúcido, padronizado para inputs, selects e textareas
-   (inclusive o outline nativo do <select>, que antes destoava). */
+/* Foco visível em tudo que é clicável: contorno dourado. */
+:where(a, button, [role="button"], [role="radio"], [role="tab"], summary, input[type="checkbox"], input[type="radio"]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
@@ -78,13 +91,17 @@ input:not([type="checkbox"]):not([type="radio"]):focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 164, 92, 0.22);
 }
 
-/* Remove as setas nativas de incremento/decremento dos inputs numéricos que
-   ainda restam em formulários (o padrão de card-herói editável usa
-   input type="text" com inputMode decimal e não precisa disso). */
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"] {
+  accent-color: var(--gold);
+}
+
+/* Sem setinhas nativas nos campos numéricos. */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -95,56 +112,122 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Sombra sutil para destacar o card-herói (ex: Lucro acumulado) dos demais
-   cards da mesma tela. */
-.card-hero {
-  box-shadow:
-    0 20px 40px -24px rgba(0, 0, 0, 0.55),
-    0 0 0 1px var(--border);
+/* Ícone do seletor nativo de data/hora legível no escuro. */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.75) sepia(0.2);
+  cursor: pointer;
 }
 
-/* Botão secundário (ex: "Cancelar"): a borda em --border sozinha tem baixo
-   contraste sobre bg-surface/bg-surface-hover, então soma um fundo sutil em
-   repouso para dar affordance de botão mesmo sem foco/hover. */
+/* ---- Botões e campos ---------------------------------------------------- */
+
+/* Ação principal da tela (no máximo um por página). */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: var(--gold);
+  color: var(--on-gold);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 150ms;
+}
+
+.btn-primary:hover {
+  background: var(--gold-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Botão secundário: borda `raised`, fundo transparente. */
 .btn-secondary {
-  border-radius: 0.5rem;
-  border: 1px solid var(--border);
-  background-color: var(--bg-surface-hover);
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--raised);
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  white-space: nowrap;
   transition:
-    color 150ms,
-    border-color 150ms,
-    background-color 150ms;
+    background-color 150ms,
+    border-color 150ms;
 }
 
 .btn-secondary:hover {
-  color: var(--text-primary);
-  border-color: var(--text-tertiary);
+  background: var(--hover);
+  border-color: var(--muted);
 }
 
 .btn-secondary:disabled {
   opacity: 0.6;
+  cursor: default;
 }
 
-/* Compromisso da clínica na /agenda: hachurado semitransparente, pra as
-   linhas da grade continuarem visíveis por baixo. */
+/* Campo de formulário padrão. */
+.campo {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+}
+
+textarea.campo {
+  height: auto;
+  padding: 8px 12px;
+  line-height: 1.5;
+}
+
+.campo::placeholder {
+  color: var(--subtle);
+}
+
+.campo:disabled {
+  opacity: 0.6;
+}
+
+/* Rótulo pequeno acima de campo ou métrica. */
+.rotulo {
+  display: block;
+  font-size: 13px;
+  color: var(--subtle);
+}
+
+/* ---- Agenda ------------------------------------------------------------- */
+
+/* Compromisso da clínica: hachura sutil sobre `surface`, deixando as linhas
+   da grade visíveis por baixo. */
 .agenda-compromisso {
+  background-color: rgba(38, 37, 35, 0.55);
   background-image: repeating-linear-gradient(
     135deg,
-    rgba(139, 146, 166, 0.16) 0 6px,
-    rgba(139, 146, 166, 0.07) 6px 12px
+    rgba(189, 184, 175, 0.07) 0 6px,
+    transparent 6px 12px
   );
 }
 
-/* Linhas da grade da /agenda (hora cheia e meia hora), numa camada própria
-   acima dos compromissos. 56px = 2 slots de 28px (ALTURA_LINHA). */
+/* Linhas da grade (hora cheia e meia hora), numa camada própria acima dos
+   compromissos. 56px = 2 slots de 28px (ALTURA_LINHA). */
 .agenda-linhas {
   background-image:
-    linear-gradient(to bottom, var(--border) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(35, 40, 56, 0.55) 1px, transparent 1px);
+    linear-gradient(to bottom, var(--line) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(47, 45, 42, 0.5) 1px, transparent 1px);
   background-size:
     100% 56px,
     100% 28px;

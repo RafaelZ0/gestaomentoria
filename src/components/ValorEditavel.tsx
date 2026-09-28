@@ -63,7 +63,7 @@ export function ValorEditavel({
   if (editando) {
     return (
       <div>
-        <p className="text-sm text-text-secondary">{label}</p>
+        <p className="text-sm text-text-2">{label}</p>
         <div className="mt-2 flex items-center gap-2">
           <input
             type="text"
@@ -76,10 +76,10 @@ export function ValorEditavel({
               if (e.key === "Enter") salvar();
               if (e.key === "Escape") cancelar();
             }}
-            className="w-28 shrink-0 rounded-lg border border-border bg-bg-surface-hover px-2 py-1 font-display text-lg font-semibold tabular-nums text-text-primary outline-none"
+            className="w-28 shrink-0 rounded-lg border border-line bg-hover px-2 py-1 font-display text-lg font-semibold tabular-nums text-text outline-none"
           />
           {sufixo && (
-            <span className="shrink-0 text-xs text-text-secondary">{sufixo}</span>
+            <span className="shrink-0 text-xs text-text-2">{sufixo}</span>
           )}
         </div>
         <div className="mt-2 flex items-center gap-2">
@@ -87,7 +87,7 @@ export function ValorEditavel({
             type="button"
             disabled={isPending}
             onClick={salvar}
-            className="rounded-lg bg-accent px-2.5 py-1 text-xs font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+            className="rounded-lg bg-gold px-2.5 py-1 text-xs font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
           >
             Salvar
           </button>
@@ -106,11 +106,11 @@ export function ValorEditavel({
 
   return (
     <div>
-      <p className="text-sm text-text-secondary">{label}</p>
+      <p className="text-sm text-text-2">{label}</p>
       <div className="mt-2 flex items-center gap-2">
         <p
           className={`font-display text-xl font-semibold tracking-tight tabular-nums transition-colors ${
-            sucesso ? "text-status-ok-text" : "text-text-primary"
+            sucesso ? "text-ok" : "text-text"
           }`}
         >
           {formatarExibicao(valorAtual)}
@@ -123,7 +123,7 @@ export function ValorEditavel({
           }}
           aria-label={`Editar ${label}`}
           title={`Editar ${label}`}
-          className="-m-1.5 rounded p-1.5 text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary"
+          className="-m-1.5 rounded p-1.5 text-text-2 hover:bg-hover hover:text-text"
         >
           ✎
         </button>

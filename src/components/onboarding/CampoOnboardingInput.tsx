@@ -10,7 +10,7 @@ import {
 } from "@/lib/onboarding";
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-bg-base px-4 py-3 text-lg text-text-primary outline-none transition-colors placeholder:text-text-tertiary focus:border-accent disabled:opacity-50";
+  "w-full rounded-lg border border-line bg-bg px-4 py-3 text-lg text-text outline-none transition-colors placeholder:text-muted focus:border-gold disabled:opacity-50";
 
 const PRECISOES: [string, string][] = [
   ["exato", "Exato"],
@@ -72,8 +72,8 @@ export function CampoOnboardingInput({
     );
   } else if (f.t === "number" || f.t === "money") {
     controle = (
-      <div className="flex items-center rounded-lg border border-border bg-bg-base focus-within:border-accent">
-        {f.t === "money" && <span className="pl-4 text-lg text-text-secondary">R$</span>}
+      <div className="flex items-center rounded-lg border border-line bg-bg focus-within:border-gold">
+        {f.t === "money" && <span className="pl-4 text-lg text-text-2">R$</span>}
         <input
           id={id}
           type="number"
@@ -82,9 +82,9 @@ export function CampoOnboardingInput({
           disabled={naoSabe}
           value={texto(v)}
           onChange={(e) => onValor(f.k, e.target.value)}
-          className="w-full bg-transparent px-4 py-3 text-lg tabular-nums text-text-primary outline-none disabled:opacity-50"
+          className="w-full bg-transparent px-4 py-3 text-lg tabular-nums text-text outline-none disabled:opacity-50"
         />
-        {f.suf && <span className="pr-4 text-base text-text-secondary">{f.suf}</span>}
+        {f.suf && <span className="pr-4 text-base text-text-2">{f.suf}</span>}
       </div>
     );
   } else if (f.t === "range") {
@@ -99,9 +99,9 @@ export function CampoOnboardingInput({
           step={5}
           value={n ?? 50}
           onChange={(e) => onValor(f.k, Number(e.target.value))}
-          className="h-2 flex-1 cursor-pointer accent-[var(--accent)]"
+          className="h-2 flex-1 cursor-pointer"
         />
-        <b className="min-w-16 text-right font-display text-2xl tabular-nums text-text-primary">
+        <b className="min-w-16 text-right font-display text-2xl tabular-nums text-text">
           {n != null ? `${n}%` : "—"}
         </b>
       </div>
@@ -129,8 +129,8 @@ export function CampoOnboardingInput({
               }}
               className={`rounded-full border px-4 py-2 text-base transition-colors ${
                 ativo
-                  ? "border-accent bg-accent font-medium text-white"
-                  : "border-border bg-bg-base text-text-secondary hover:border-text-tertiary hover:text-text-primary"
+                  ? "border-gold bg-gold font-medium text-on-gold"
+                  : "border-line bg-bg text-text-2 hover:border-muted hover:text-text"
               }`}
             >
               {opcao}
@@ -147,23 +147,23 @@ export function CampoOnboardingInput({
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {ORIGENS.map((origem) => (
             <label key={origem} className="flex flex-col gap-1">
-              <span className="text-sm text-text-secondary">{origem}</span>
-              <div className="flex items-center rounded-lg border border-border bg-bg-base focus-within:border-accent">
+              <span className="text-sm text-text-2">{origem}</span>
+              <div className="flex items-center rounded-lg border border-line bg-bg focus-within:border-gold">
                 <input
                   type="number"
                   min={0}
                   max={100}
                   value={texto(o[origem])}
                   onChange={(e) => onValor(f.k, { ...o, [origem]: e.target.value })}
-                  className="w-full bg-transparent px-3 py-2.5 text-lg tabular-nums text-text-primary outline-none"
+                  className="w-full bg-transparent px-3 py-2.5 text-lg tabular-nums text-text outline-none"
                 />
-                <span className="pr-3 text-text-secondary">%</span>
+                <span className="pr-3 text-text-2">%</span>
               </div>
             </label>
           ))}
         </div>
         {soma > 0 && (
-          <p className={`mt-2 text-sm ${soma === 100 ? "text-status-ok-text" : "text-status-warn-text"}`}>
+          <p className={`mt-2 text-sm ${soma === 100 ? "text-ok" : "text-warn"}`}>
             Soma: {soma}%{soma !== 100 ? " (o ideal é somar 100%)" : ""}
           </p>
         )}
@@ -174,13 +174,13 @@ export function CampoOnboardingInput({
   return (
     <div className={`flex flex-col gap-2 ${f.wide ? "md:col-span-2" : ""}`}>
       {ehGrupo ? (
-        <span className="text-base font-medium text-text-primary">{f.q}</span>
+        <span className="text-base font-medium text-text">{f.q}</span>
       ) : (
-        <label htmlFor={id} className="text-base font-medium text-text-primary">
+        <label htmlFor={id} className="text-base font-medium text-text">
           {f.q}
         </label>
       )}
-      {f.hint && <span className="-mt-1 text-sm text-text-secondary">{f.hint}</span>}
+      {f.hint && <span className="-mt-1 text-sm text-text-2">{f.hint}</span>}
       {controle}
       {f.prec && (
         <div role="group" aria-label="Precisão" className="flex flex-wrap gap-1.5">
@@ -194,8 +194,8 @@ export function CampoOnboardingInput({
                 onClick={() => onPrecisao(f.k, ativo ? "" : valor)}
                 className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                   ativo
-                    ? "border-solid border-status-warn-text bg-status-warn-bg font-medium text-status-warn-text"
-                    : "border-dashed border-border text-text-tertiary hover:text-text-secondary"
+                    ? "border-solid border-warn bg-warn/10 font-medium text-warn"
+                    : "border-dashed border-line text-muted hover:text-text-2"
                 }`}
               >
                 {rotulo}

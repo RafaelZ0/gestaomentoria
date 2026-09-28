@@ -53,10 +53,10 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
   }, [linhas, sortKey, sortDir]);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
+    <div className="overflow-x-auto rounded-xl border border-line bg-surface">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-border text-text-secondary">
+          <tr className="border-b border-line text-text-2">
             <th className="px-4 py-3 font-medium">#</th>
             <SortableHeader
               label="Grupo"
@@ -101,26 +101,26 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
             <tr
               key={l.id}
               onClick={() => router.push(`/grupos/${l.id}/resultados`)}
-              className="cursor-pointer border-b border-border last:border-0 hover:bg-bg-surface-hover"
+              className="cursor-pointer border-b border-line last:border-0 hover:bg-hover"
             >
-              <td className="px-4 py-3 tabular-nums text-text-secondary">{i + 1}</td>
-              <td className="px-4 py-3 font-medium text-text-primary">{l.nome}</td>
-              <td className="px-4 py-3 tabular-nums text-text-primary">
+              <td className="px-4 py-3 tabular-nums text-text-2">{i + 1}</td>
+              <td className="px-4 py-3 font-medium text-text">{l.nome}</td>
+              <td className="px-4 py-3 tabular-nums text-text">
                 {l.roas === null ? "—" : `${l.roas.toFixed(1)}x`}
               </td>
-              <td className="px-4 py-3 tabular-nums text-status-ok-text">
+              <td className="px-4 py-3 tabular-nums text-ok">
                 {formatBRL(l.faturamento)}
               </td>
-              <td className="px-4 py-3 tabular-nums text-text-primary">{l.vendas}</td>
-              <td className="px-4 py-3 tabular-nums text-text-primary">
+              <td className="px-4 py-3 tabular-nums text-text">{l.vendas}</td>
+              <td className="px-4 py-3 tabular-nums text-text">
                 {l.ticketMedio === null ? "—" : formatBRL(l.ticketMedio)}
               </td>
-              <td className="px-4 py-3 text-right text-text-secondary">→</td>
+              <td className="px-4 py-3 text-right text-text-2">→</td>
             </tr>
           ))}
           {ordenadas.length === 0 && (
             <tr>
-              <td colSpan={7} className="px-4 py-8 text-center text-text-secondary">
+              <td colSpan={7} className="px-4 py-8 text-center text-text-2">
                 Nenhum grupo ativo cadastrado ainda.
               </td>
             </tr>
@@ -153,8 +153,8 @@ function SortableHeader({
           e.stopPropagation();
           onSort(sortKey);
         }}
-        className={`flex items-center gap-1 hover:text-text-primary ${
-          active ? "text-text-primary" : ""
+        className={`flex items-center gap-1 hover:text-text ${
+          active ? "text-text" : ""
         }`}
       >
         {label}

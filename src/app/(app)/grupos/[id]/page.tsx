@@ -208,10 +208,10 @@ export default async function GrupoOverviewPage({
         <Link
           href={`/grupos/${grupo.id}/pagamentos`}
           prefetch={false}
-          className="rounded-xl border border-border bg-bg-surface p-5 hover:bg-bg-surface-hover"
+          className="rounded-xl border border-line bg-surface p-5 hover:bg-hover"
         >
-          <p className="text-sm text-text-secondary">Último pagamento</p>
-          <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text-primary">
+          <p className="text-sm text-text-2">Último pagamento</p>
+          <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text">
             {ultimoPagamento
               ? `${formatBRL(Number(ultimoPagamento.valor))} em ${formatDate(ultimoPagamento.data)}`
               : "Nenhum registrado"}
@@ -220,12 +220,12 @@ export default async function GrupoOverviewPage({
         <Link
           href={`/grupos/${grupo.id}/pagamentos`}
           prefetch={false}
-          className="rounded-xl border border-border bg-bg-surface p-5 hover:bg-bg-surface-hover"
+          className="rounded-xl border border-line bg-surface p-5 hover:bg-hover"
         >
-          <p className="text-sm text-text-secondary">Em atraso</p>
+          <p className="text-sm text-text-2">Em atraso</p>
           <p
             className={`mt-2 font-display text-xl font-semibold tracking-tight tabular-nums ${
-              emAtraso > 0 ? "text-status-alert-text" : "text-text-primary"
+              emAtraso > 0 ? "text-danger" : "text-text"
             }`}
           >
             {formatBRL(emAtraso)}
@@ -233,19 +233,19 @@ export default async function GrupoOverviewPage({
         </Link>
       </div>
 
-      <div className="rounded-xl border border-border bg-bg-surface p-5">
+      <div className="rounded-xl border border-line bg-surface p-5">
         <div className="flex items-center gap-2">
-          <p className="text-sm text-text-secondary">Saúde do cliente</p>
+          <p className="text-sm text-text-2">Saúde do cliente</p>
           <StatusBadge label={saudeLabel} variant={saudeVariant} />
         </div>
-        <p className="mt-1 text-sm text-text-secondary">
+        <p className="mt-1 text-sm text-text-2">
           {saude.flags.length > 0
             ? saude.flags.join(" · ")
             : "Nenhum sinal de alerta no momento."}
         </p>
       </div>
 
-      <div className="text-sm text-text-secondary">
+      <div className="text-sm text-text-2">
         <DataInicioField grupoId={grupo.id} dataInicio={grupo.data_inicio} />
         {grupo.data_termino && <> · Encerrado em {formatDate(grupo.data_termino)}</>}
       </div>
@@ -256,20 +256,20 @@ export default async function GrupoOverviewPage({
         <Link
           href={`/grupos/${grupo.id}/tarefas`}
           prefetch={false}
-          className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm hover:bg-bg-surface"
+          className="rounded-lg border border-line bg-hover px-4 py-3 text-sm hover:bg-surface"
         >
-          <span className="text-text-secondary">Tarefas pendentes</span>{" "}
-          <span className="font-medium text-text-primary">
+          <span className="text-text-2">Tarefas pendentes</span>{" "}
+          <span className="font-medium text-text">
             {(tarefasPendentes ?? []).length}
           </span>
         </Link>
         <Link
           href={`/grupos/${grupo.id}/reunioes`}
           prefetch={false}
-          className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm hover:bg-bg-surface"
+          className="rounded-lg border border-line bg-hover px-4 py-3 text-sm hover:bg-surface"
         >
-          <span className="text-text-secondary">Última reunião</span>{" "}
-          <span className="font-medium text-text-primary">
+          <span className="text-text-2">Última reunião</span>{" "}
+          <span className="font-medium text-text">
             {diasDesdeUltimaReuniao === null
               ? "nunca teve reunião"
               : diasDesdeUltimaReuniao === 0
@@ -280,17 +280,17 @@ export default async function GrupoOverviewPage({
         <Link
           href={`/grupos/${grupo.id}/reunioes`}
           prefetch={false}
-          className="rounded-lg border border-border bg-bg-surface-hover px-4 py-3 text-sm hover:bg-bg-surface"
+          className="rounded-lg border border-line bg-hover px-4 py-3 text-sm hover:bg-surface"
         >
-          <span className="text-text-secondary">Próxima reunião</span>{" "}
-          <span className="font-medium text-text-primary">
+          <span className="text-text-2">Próxima reunião</span>{" "}
+          <span className="font-medium text-text">
             {proximaReuniao ? formatDate(proximaReuniao.data) : "não agendada"}
           </span>
         </Link>
       </div>
 
       <section>
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+        <h2 className="font-display text-lg font-semibold text-text">
           Mentorados
         </h2>
         <div className="mt-3">
@@ -299,7 +299,7 @@ export default async function GrupoOverviewPage({
       </section>
 
       <section>
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+        <h2 className="font-display text-lg font-semibold text-text">
           Checklist de entregas
         </h2>
         <div className="mt-3">
@@ -307,11 +307,11 @@ export default async function GrupoOverviewPage({
         </div>
       </section>
 
-      <section className="mt-10 rounded-xl border border-status-alert-text/20 bg-status-alert-bg/40 p-5">
-        <h2 className="font-display text-sm font-semibold text-status-alert-text">
+      <section className="mt-10 rounded-xl border border-danger/20 bg-danger/15 p-5">
+        <h2 className="font-display text-sm font-semibold text-danger">
           Zona de risco
         </h2>
-        <p className="mt-1 text-xs text-text-secondary">
+        <p className="mt-1 text-xs text-text-2">
           Cancelar o grupo marca o contrato como encerrado. Essa ação pede
           confirmação antes de ser aplicada.
         </p>
@@ -325,9 +325,9 @@ export default async function GrupoOverviewPage({
 
 function InfoCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-5">
-      <p className="text-sm text-text-secondary">{label}</p>
-      <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text-primary">
+    <div className="rounded-xl border border-line bg-surface p-5">
+      <p className="text-sm text-text-2">{label}</p>
+      <p className="mt-2 font-display text-xl font-semibold tracking-tight tabular-nums text-text">
         {value}
       </p>
     </div>

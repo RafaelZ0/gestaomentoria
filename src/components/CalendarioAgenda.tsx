@@ -240,12 +240,12 @@ export function CalendarioAgenda({
 
   function corDaReuniao(r: ReuniaoDoDia): string {
     if (r.responsavelId && r.responsavelId === pabloId) {
-      return "border-accent bg-accent/25 text-text-primary";
+      return "border-gold bg-gold/25 text-text";
     }
     if (r.responsavelId) {
-      return "border-status-ok-text bg-status-ok-text/20 text-text-primary";
+      return "border-ok bg-ok/20 text-text";
     }
-    return "border-text-tertiary bg-status-neutral-bg text-text-primary";
+    return "border-muted bg-off/10 text-text";
   }
 
   // O corpo do evento não captura o mouse (o clique cai no slot de baixo);
@@ -271,15 +271,15 @@ export function CalendarioAgenda({
       return (
         <div
           key={ev.key}
-          className="agenda-compromisso pointer-events-none absolute overflow-hidden rounded border-l-2 border-text-tertiary/60 py-0.5 pl-1.5 pr-5 text-[10px] leading-tight text-text-secondary"
+          className="agenda-compromisso pointer-events-none absolute overflow-hidden rounded border-l-2 border-muted/60 py-0.5 pl-1.5 pr-5 text-[10px] leading-tight text-text-2"
           style={estilo}
         >
           <p className="truncate font-medium">{ev.label}</p>
-          <p className="truncate tabular-nums text-text-tertiary">{horario}</p>
+          <p className="truncate tabular-nums text-muted">{horario}</p>
           <button
             type="button"
             aria-label={`Detalhes: ${ev.label}`}
-            className="pointer-events-auto absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] text-text-tertiary hover:bg-bg-surface-hover hover:text-text-primary"
+            className="pointer-events-auto absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] text-muted hover:bg-hover hover:text-text"
             onMouseEnter={(e) => mostrarTooltip(e, detalhes)}
             onFocus={(e) => mostrarTooltip(e, detalhes)}
             onMouseLeave={() => setTooltip(null)}
@@ -309,14 +309,14 @@ export function CalendarioAgenda({
         style={estilo}
       >
         <p className="truncate font-semibold">{r.grupoNome}</p>
-        <p className="truncate tabular-nums text-text-secondary">
+        <p className="truncate tabular-nums text-text-2">
           {horario} · {responsavel}
         </p>
         <Link
           href={`/grupos/${r.grupoId}/reunioes`}
           prefetch={false}
           aria-label={`Abrir reuniões de ${r.grupoNome}`}
-          className="pointer-events-auto absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] text-text-secondary hover:bg-bg-surface hover:text-text-primary"
+          className="pointer-events-auto absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] text-text-2 hover:bg-surface hover:text-text"
           onMouseEnter={(e) => mostrarTooltip(e, detalhes)}
           onFocus={(e) => mostrarTooltip(e, detalhes)}
           onMouseLeave={() => setTooltip(null)}
@@ -368,7 +368,7 @@ export function CalendarioAgenda({
             >
               ›
             </Link>
-            <span className="ml-1 text-sm text-text-secondary">
+            <span className="ml-1 text-sm text-text-2">
               {formatDiaMesCurto(dias[0])} — {formatDiaMesCurto(dias[6])}
             </span>
           </div>
@@ -376,7 +376,7 @@ export function CalendarioAgenda({
           <div
             role="radiogroup"
             aria-label="Filtrar por responsável"
-            className="flex rounded-lg border border-border bg-bg-surface p-0.5"
+            className="flex rounded-lg border border-line bg-surface p-0.5"
           >
             {opcoesFiltro.map((o) => (
               <button
@@ -387,8 +387,8 @@ export function CalendarioAgenda({
                 onClick={() => setFiltro(o.valor)}
                 className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
                   filtro === o.valor
-                    ? "bg-accent text-white"
-                    : "text-text-secondary hover:text-text-primary"
+                    ? "bg-gold text-on-gold"
+                    : "text-text-2 hover:text-text"
                 }`}
               >
                 {o.label}
@@ -397,45 +397,45 @@ export function CalendarioAgenda({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-2">
           <span className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-sm border-l-2 border-accent bg-accent/25" />
+            <span className="h-3 w-3 rounded-sm border-l-2 border-gold bg-gold/25" />
             Reunião Dr. Pablo
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-sm border-l-2 border-status-ok-text bg-status-ok-text/20" />
+            <span className="h-3 w-3 rounded-sm border-l-2 border-ok bg-ok/20" />
             Reunião Rafael
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="agenda-compromisso h-3 w-3 rounded-sm border-l-2 border-text-tertiary/60" />
+            <span className="agenda-compromisso h-3 w-3 rounded-sm border-l-2 border-muted/60" />
             Compromisso da clínica
           </span>
-          <span className="text-text-tertiary">
+          <span className="text-muted">
             · Clique em qualquer horário pra agendar
           </span>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
+        <div className="overflow-x-auto rounded-xl border border-line bg-surface">
           <div
             className="grid min-w-[880px]"
             style={{ gridTemplateColumns: "56px repeat(7, minmax(0, 1fr))" }}
           >
-            <div className="border-b border-r border-border" />
+            <div className="border-b border-r border-line" />
             {dias.map((d) => {
               const ehHoje = d === hoje;
               return (
                 <div
                   key={d}
-                  className={`border-b border-r border-border px-2 py-2 text-center last:border-r-0 ${
-                    ehHoje ? "bg-bg-surface-hover" : ""
+                  className={`border-b border-r border-line px-2 py-2 text-center last:border-r-0 ${
+                    ehHoje ? "bg-hover" : ""
                   }`}
                 >
-                  <p className="text-xs text-text-secondary">
+                  <p className="text-xs text-text-2">
                     {formatDiaSemanaCurto(d)}
                   </p>
                   <p
                     className={`font-display text-sm font-semibold tabular-nums ${
-                      ehHoje ? "text-accent" : "text-text-primary"
+                      ehHoje ? "text-gold" : "text-text"
                     }`}
                   >
                     {formatDiaMesCurto(d)}
@@ -446,13 +446,13 @@ export function CalendarioAgenda({
 
             {temSemHorario && (
               <>
-                <div className="flex items-start justify-end border-b border-r border-border px-1 pb-3.5 pt-1.5 text-right text-[10px] leading-tight text-text-tertiary">
+                <div className="flex items-start justify-end border-b border-r border-line px-1 pb-3.5 pt-1.5 text-right text-[10px] leading-tight text-muted">
                   Sem horário
                 </div>
                 {dias.map((d) => (
                   <div
                     key={d}
-                    className="flex min-w-0 flex-col gap-1 border-b border-r border-border p-1 last:border-r-0"
+                    className="flex min-w-0 flex-col gap-1 border-b border-r border-line p-1 last:border-r-0"
                   >
                     {semHorarioPorDia[d].map((r) => (
                       <button
@@ -471,13 +471,13 @@ export function CalendarioAgenda({
             )}
 
             <div
-              className="relative border-r border-border"
+              className="relative border-r border-line"
               style={{ height: LINHAS_TOTAIS * ALTURA_LINHA }}
             >
               {HORAS_LABEL.map((h, i) => (
                 <span
                   key={h}
-                  className="absolute right-1 -translate-y-1/2 text-[10px] tabular-nums text-text-secondary"
+                  className="absolute right-1 -translate-y-1/2 text-[10px] tabular-nums text-text-2"
                   style={{ top: i * 2 * ALTURA_LINHA }}
                 >
                   {h}
@@ -493,8 +493,8 @@ export function CalendarioAgenda({
               return (
                 <div
                   key={diaISO}
-                  className={`relative border-r border-border last:border-r-0 ${
-                    passou ? "bg-bg-base/40" : ""
+                  className={`relative border-r border-line last:border-r-0 ${
+                    passou ? "bg-bg/40" : ""
                   }`}
                   style={{ height: LINHAS_TOTAIS * ALTURA_LINHA }}
                   onMouseLeave={() => setSlotHover(null)}
@@ -533,10 +533,10 @@ export function CalendarioAgenda({
                       com o horário que vai abrir no modal. */}
                   {hoverAqui != null && (
                     <div
-                      className="pointer-events-none absolute inset-x-0 z-10 rounded-sm bg-accent/10 ring-1 ring-inset ring-accent/70"
+                      className="pointer-events-none absolute inset-x-0 z-10 rounded-sm bg-gold/10 ring-1 ring-inset ring-gold/70"
                       style={{ top: hoverAqui * ALTURA_LINHA, height: ALTURA_LINHA }}
                     >
-                      <span className="absolute left-1 top-1/2 -translate-y-1/2 rounded bg-accent px-1 text-[10px] font-semibold tabular-nums text-white">
+                      <span className="absolute left-1 top-1/2 -translate-y-1/2 rounded bg-gold px-1 text-[10px] font-semibold tabular-nums text-on-gold">
                         {horaDoSlot(hoverAqui)}
                       </span>
                     </div>
@@ -550,12 +550,12 @@ export function CalendarioAgenda({
         {tooltip && (
           <div
             role="tooltip"
-            className="pointer-events-none fixed z-40 max-w-64 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-xs shadow-xl"
+            className="pointer-events-none fixed z-40 max-w-64 rounded-lg border border-line bg-hover px-3 py-2 text-xs shadow-xl"
             style={{ left: tooltip.x, top: tooltip.y }}
           >
-            <p className="font-medium text-text-primary">{tooltip.titulo}</p>
+            <p className="font-medium text-text">{tooltip.titulo}</p>
             {tooltip.linhas.map((l) => (
-              <p key={l} className="break-words text-text-secondary">
+              <p key={l} className="break-words text-text-2">
                 {l}
               </p>
             ))}

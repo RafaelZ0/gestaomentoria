@@ -54,6 +54,24 @@ export function formatTelefone(telefone: string): string {
   return telefone;
 }
 
+const PARTICULAS = new Set(["e", "de", "da", "do", "das", "dos"]);
+
+// Nome do grupo como aparece na tela: sem o prefixo "GESTÃO " e em title
+// case, mantendo partículas em minúsculas e os acentos
+// ("GESTÃO BRUNO E JESSICA" → "Bruno e Jessica"). O valor no banco não muda.
+export function displayGroupName(nome: string | null | undefined): string {
+  const semPrefixo = (nome ?? "").trim().replace(/^GEST[ÃA]O\s+/i, "");
+  return semPrefixo
+    .toLocaleLowerCase("pt-BR")
+    .split(/(\s+)/)
+    .map((parte, i) => {
+      if (/^\s+$/.test(parte) || parte === "") return parte;
+      if (i > 0 && PARTICULAS.has(parte)) return parte;
+      return parte.charAt(0).toLocaleUpperCase("pt-BR") + parte.slice(1);
+    })
+    .join("");
+}
+
 export function formatDuracao(dias: number): string {
   const meses = Math.floor(dias / 30);
   const diasRestantes = dias % 30;

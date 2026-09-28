@@ -25,8 +25,8 @@ export function AsaasCustomerIdField({
   const [encontrado, setEncontrado] = useState<string | null>(null);
 
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-5">
-      <label className="text-sm text-text-secondary">
+    <div className="rounded-xl border border-line bg-surface p-5">
+      <label className="text-sm text-text-2">
         ID do cliente no Asaas
       </label>
       <input
@@ -42,9 +42,9 @@ export function AsaasCustomerIdField({
             );
           }
         }}
-        className="mt-2 w-full rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+        className="mt-2 w-full rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text outline-none focus:border-gold"
       />
-      <p className="mt-2 text-xs text-text-secondary">
+      <p className="mt-2 text-xs text-text-2">
         Cole aqui o ID do cliente no Asaas (Clientes → esse cliente → ID no
         topo). Com isso preenchido, pagamentos confirmados no Asaas entram
         aqui automaticamente, e boletos pendentes/atrasados aparecem ao
@@ -59,7 +59,7 @@ export function AsaasCustomerIdField({
           disabled={isBuscando}
           placeholder="CPF ou CNPJ do cliente"
           onChange={(e) => setDocumento(e.target.value)}
-          className="w-56 rounded-lg border border-border bg-bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+          className="w-56 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text outline-none focus:border-gold"
         />
         <button
           type="button"
@@ -86,14 +86,14 @@ export function AsaasCustomerIdField({
         </button>
       </div>
       {encontrado && (
-        <p className="mt-2 text-xs text-status-ok-text">{encontrado}</p>
+        <p className="mt-2 text-xs text-ok">{encontrado}</p>
       )}
       {erroBusca && (
-        <p className="mt-2 text-xs text-status-alert-text">{erroBusca}</p>
+        <p className="mt-2 text-xs text-danger">{erroBusca}</p>
       )}
 
       {valor.trim() && (
-        <div className="mt-4 border-t border-border pt-4">
+        <div className="mt-4 border-t border-line pt-4">
           <button
             type="button"
             disabled={isImporting}
@@ -129,10 +129,10 @@ export function AsaasCustomerIdField({
             {isImporting ? "Importando…" : "Importar histórico do Asaas"}
           </button>
           {resultadoImport && (
-            <p className="mt-2 text-xs text-status-ok-text">{resultadoImport}</p>
+            <p className="mt-2 text-xs text-ok">{resultadoImport}</p>
           )}
           {erroImport && (
-            <p className="mt-2 text-xs text-status-alert-text">{erroImport}</p>
+            <p className="mt-2 text-xs text-danger">{erroImport}</p>
           )}
         </div>
       )}

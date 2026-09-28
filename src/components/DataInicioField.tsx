@@ -28,7 +28,7 @@ export function DataInicioField({
             );
           }
         }}
-        className="rounded border border-transparent bg-transparent px-1 text-text-secondary outline-none hover:border-border focus:border-accent"
+        className="rounded border border-transparent bg-transparent px-1 text-text-2 outline-none hover:border-line focus:border-gold"
       />
     </span>
   );

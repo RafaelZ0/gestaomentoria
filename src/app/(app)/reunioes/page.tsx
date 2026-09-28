@@ -68,10 +68,10 @@ export default async function ReunioesGlobaisPage() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
         Reuniões
       </h1>
-      <p className="mt-1 text-sm text-text-secondary">
+      <p className="mt-1 text-sm text-text-2">
         Todas as reuniões de todos os grupos — agendadas e já realizadas — num
         só lugar.
       </p>

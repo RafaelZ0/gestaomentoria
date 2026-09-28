@@ -28,8 +28,8 @@ const CHAVE_BACKUP = (id: string) => `onboarding-backup:${id}`;
 
 function Roteiro({ linhas }: { linhas: string[] }) {
   return (
-    <div className="mb-6 space-y-2 rounded-r-xl border-l-4 border-status-warn-text bg-status-warn-bg px-5 py-4 text-sm text-text-primary">
-      <p className="text-xs font-semibold uppercase tracking-wider text-status-warn-text">
+    <div className="mb-6 space-y-2 rounded-r-xl border-l-4 border-warn bg-warn/10 px-5 py-4 text-sm text-text">
+      <p className="text-xs font-semibold uppercase tracking-wider text-warn">
         Roteiro (só pra você)
       </p>
       {linhas.map((linha, i) => (
@@ -283,12 +283,12 @@ export function OnboardingApp({
 
   const textoSalvamento: Record<EstadoSalvamento, { txt: string; cor: string }> = {
     ocioso: { txt: "", cor: "" },
-    pendente: { txt: "Alterações não salvas…", cor: "text-text-tertiary" },
-    salvando: { txt: "Salvando…", cor: "text-text-secondary" },
-    salvo: { txt: "✓ Salvo", cor: "text-status-ok-text" },
+    pendente: { txt: "Alterações não salvas…", cor: "text-muted" },
+    salvando: { txt: "Salvando…", cor: "text-text-2" },
+    salvo: { txt: "✓ Salvo", cor: "text-ok" },
     erro: {
       txt: "Erro ao salvar — suas respostas continuam aqui, tentando de novo…",
-      cor: "text-status-alert-text",
+      cor: "text-danger",
     },
   };
 
@@ -305,8 +305,8 @@ export function OnboardingApp({
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${
               status === "concluido"
-                ? "bg-status-ok-bg text-status-ok-text"
-                : "bg-status-warn-bg text-status-warn-text"
+                ? "bg-ok/10 text-ok"
+                : "bg-warn/10 text-warn"
             }`}
           >
             {status === "concluido" ? "Onboarding concluído" : "Diagnóstico em andamento"}
@@ -335,9 +335,9 @@ export function OnboardingApp({
       </div>
 
       {aviso && (
-        <div className="flex items-start justify-between gap-3 rounded-lg bg-status-accent-bg px-4 py-3 text-sm text-text-primary">
+        <div className="flex items-start justify-between gap-3 rounded-lg bg-gold/10 px-4 py-3 text-sm text-text">
           <span>{aviso}</span>
-          <button type="button" onClick={() => setAviso(null)} className="text-text-secondary hover:text-text-primary">
+          <button type="button" onClick={() => setAviso(null)} className="text-text-2 hover:text-text">
             ✕
           </button>
         </div>
@@ -357,20 +357,20 @@ export function OnboardingApp({
               aria-current={atual ? "step" : undefined}
               className="flex flex-col gap-2 text-left"
             >
-              <span className="h-2 overflow-hidden rounded-full bg-bg-surface-hover">
+              <span className="h-2 overflow-hidden rounded-full bg-hover">
                 <span
                   className={`block h-full rounded-full transition-[width] duration-500 ${
-                    feito ? "bg-status-ok-text" : "bg-accent"
+                    feito ? "bg-ok" : "bg-gold"
                   }`}
                   style={{ width: `${Math.round(progresso * 100)}%` }}
                 />
               </span>
               <span
                 className={`text-xs leading-tight ${
-                  atual ? "font-semibold text-text-primary" : "text-text-secondary"
+                  atual ? "font-semibold text-text" : "text-text-2"
                 }`}
               >
-                <span className={`mr-1 font-bold ${feito ? "text-status-ok-text" : "text-accent"}`}>
+                <span className={`mr-1 font-bold ${feito ? "text-ok" : "text-gold"}`}>
                   {feito ? "✓" : i + 1}
                 </span>
                 {st.nome}
@@ -392,7 +392,7 @@ export function OnboardingApp({
               <button
                 type="button"
                 onClick={baixarResumo}
-                className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover"
+                className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
               >
                 Baixar resumo
               </button>
@@ -400,23 +400,23 @@ export function OnboardingApp({
           }
         />
       ) : (
-        <section className="rounded-2xl border border-border bg-bg-surface p-6 sm:p-8" aria-labelledby="titulo-etapa">
+        <section className="rounded-2xl border border-line bg-surface p-6 sm:p-8" aria-labelledby="titulo-etapa">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <h1 id="titulo-etapa" className="font-display text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
+            <h1 id="titulo-etapa" className="font-display text-3xl font-bold tracking-tight text-text sm:text-4xl">
               {s.titulo}
             </h1>
-            <span className="whitespace-nowrap text-sm text-text-secondary">
+            <span className="whitespace-nowrap text-sm text-text-2">
               {preenchidos} de {s.fields.length} respondidas
             </span>
           </div>
-          <p className="mb-6 mt-2 max-w-2xl text-lg text-text-secondary">{s.lead}</p>
+          <p className="mb-6 mt-2 max-w-2xl text-lg text-text-2">{s.lead}</p>
 
           {mostrarRoteiro && <Roteiro linhas={s.roteiro} />}
 
           {s.id === "abertura" && reuniaoId && (
-            <div className="mb-6 rounded-xl border border-border bg-bg-base p-5">
-              <p className="text-base font-medium text-text-primary">Mentorados na reunião</p>
-              <p className="mt-0.5 text-sm text-text-secondary">
+            <div className="mb-6 rounded-xl border border-line bg-bg p-5">
+              <p className="text-base font-medium text-text">Mentorados na reunião</p>
+              <p className="mt-0.5 text-sm text-text-2">
                 Fica registrado na reunião de onboarding, na aba Reuniões.
               </p>
               {mentorados.length > 0 ? (
@@ -431,8 +431,8 @@ export function OnboardingApp({
                         onClick={() => alternarParticipante(m.id)}
                         className={`rounded-full border px-4 py-2 text-base transition-colors ${
                           ativo
-                            ? "border-status-ok-text bg-status-ok-bg font-medium text-status-ok-text"
-                            : "border-border bg-bg-surface text-text-secondary hover:text-text-primary"
+                            ? "border-ok bg-ok/10 font-medium text-ok"
+                            : "border-line bg-surface text-text-2 hover:text-text"
                         }`}
                       >
                         {ativo ? "✓ " : ""}
@@ -442,12 +442,12 @@ export function OnboardingApp({
                   })}
                 </div>
               ) : (
-                <p className="mt-3 text-sm text-text-tertiary">
+                <p className="mt-3 text-sm text-muted">
                   Nenhum mentorado cadastrado neste grupo ainda (dá pra cadastrar na Visão geral).
                 </p>
               )}
               {erroParticipantes && (
-                <p className="mt-2 text-sm text-status-alert-text">{erroParticipantes}</p>
+                <p className="mt-2 text-sm text-danger">{erroParticipantes}</p>
               )}
             </div>
           )}
@@ -466,7 +466,7 @@ export function OnboardingApp({
           </div>
 
           {s.id === "numeros" && (
-            <div className="mt-8 border-t border-border pt-7">
+            <div className="mt-8 border-t border-line pt-7">
               <FunilOnboarding funil={funnel(respostas, precisao)} />
             </div>
           )}
@@ -476,8 +476,8 @@ export function OnboardingApp({
               aria-live="polite"
               className={`mt-6 rounded-lg px-4 py-3 text-base ${
                 verba.ok
-                  ? "bg-status-ok-bg text-status-ok-text"
-                  : "bg-status-warn-bg text-status-warn-text"
+                  ? "bg-ok/10 text-ok"
+                  : "bg-warn/10 text-warn"
               }`}
             >
               {verba.txt}
@@ -498,7 +498,7 @@ export function OnboardingApp({
                 type="button"
                 disabled={concluindo}
                 onClick={concluir}
-                className="rounded-lg bg-accent px-6 py-2.5 text-base font-semibold text-white hover:bg-accent-hover disabled:opacity-60"
+                className="rounded-lg bg-gold px-6 py-2.5 text-base font-semibold text-on-gold hover:bg-gold-hover disabled:opacity-60"
               >
                 {concluindo ? "Montando o raio-X…" : "Ver o raio-X da clínica"}
               </button>
@@ -506,7 +506,7 @@ export function OnboardingApp({
               <button
                 type="button"
                 onClick={() => irPara(etapa + 1)}
-                className="rounded-lg bg-accent px-6 py-2.5 text-base font-semibold text-white hover:bg-accent-hover"
+                className="rounded-lg bg-gold px-6 py-2.5 text-base font-semibold text-on-gold hover:bg-gold-hover"
               >
                 Próxima etapa
               </button>

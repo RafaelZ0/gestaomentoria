@@ -22,10 +22,10 @@ export function TabelaMensalFinancas({
   const [expandido, setExpandido] = useState<string | null>(null);
 
   return (
-    <div className="mt-3 overflow-x-auto rounded-xl border border-border bg-bg-surface">
+    <div className="mt-3 overflow-x-auto rounded-xl border border-line bg-surface">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-border text-text-secondary">
+          <tr className="border-b border-line text-text-2">
             <th className="px-4 py-3 font-medium">Mês</th>
             <th className="px-4 py-3 font-medium">Entrada</th>
             <th className="px-4 py-3 font-medium">Faturamento</th>
@@ -46,60 +46,60 @@ export function TabelaMensalFinancas({
             return (
               <Fragment key={key}>
                 <tr
-                  className="border-b border-border last:border-0 cursor-pointer hover:bg-bg-surface-hover"
+                  className="border-b border-line last:border-0 cursor-pointer hover:bg-hover"
                   onClick={() => setExpandido(aberto ? null : key)}
                 >
-                  <td className="px-4 py-3 font-medium text-text-primary">
+                  <td className="px-4 py-3 font-medium text-text">
                     {formatMesAno(m.ano, m.mes)}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-status-ok-text">
+                  <td className="px-4 py-3 tabular-nums text-ok">
                     {formatBRL(m.entrada)}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-text-primary">
+                  <td className="px-4 py-3 tabular-nums text-text">
                     {formatBRL(m.faturamento)}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-status-alert-text">
+                  <td className="px-4 py-3 tabular-nums text-danger">
                     {formatBRL(m.gasto)}
                     {m.custosFixosManual && (
-                      <span className="ml-1 text-xs text-text-secondary">
+                      <span className="ml-1 text-xs text-text-2">
                         (custos lançados à mão)
                       </span>
                     )}
                   </td>
                   <td
                     className={`px-4 py-3 tabular-nums font-medium ${
-                      m.lucro >= 0 ? "text-text-primary" : "text-status-alert-text"
+                      m.lucro >= 0 ? "text-text" : "text-danger"
                     }`}
                   >
                     {formatBRL(m.lucro)}
                   </td>
-                  <td className="px-4 py-3 text-right text-text-secondary">
+                  <td className="px-4 py-3 text-right text-text-2">
                     {aberto ? "▲" : "▼"}
                   </td>
                 </tr>
                 {aberto && (
-                  <tr key={`${key}-detalhe`} className="border-b border-border last:border-0">
-                    <td colSpan={6} className="bg-bg-surface-hover px-4 py-5">
+                  <tr key={`${key}-detalhe`} className="border-b border-line last:border-0">
+                    <td colSpan={6} className="bg-hover px-4 py-5">
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
-                          <h3 className="font-display text-sm font-semibold text-text-primary">
+                          <h3 className="font-display text-sm font-semibold text-text">
                             De onde vem a entrada
                           </h3>
                           <ul className="mt-2 space-y-1 text-sm">
                             {m.mensalidadesDetalhe.map((p, i) => (
                               <li
                                 key={`mensalidade-${i}`}
-                                className="flex items-center justify-between text-text-secondary"
+                                className="flex items-center justify-between text-text-2"
                               >
                                 <span>
                                   {p.grupoNome} ({formatDate(p.data)})
                                   {p.viaAsaas && (
-                                    <span className="ml-2 rounded-full bg-status-accent-bg px-2 py-0.5 text-xs font-medium text-status-accent-text">
+                                    <span className="ml-2 rounded-full bg-gold/10 px-2 py-0.5 text-xs font-medium text-gold">
                                       via Asaas
                                     </span>
                                   )}
                                 </span>
-                                <span className="tabular-nums text-text-primary">
+                                <span className="tabular-nums text-text">
                                   {formatBRL(p.valor)}
                                 </span>
                               </li>
@@ -107,20 +107,20 @@ export function TabelaMensalFinancas({
                             {m.clausulasDetalhe.map((c, i) => (
                               <li
                                 key={`clausula-${i}`}
-                                className="flex items-center justify-between text-text-secondary"
+                                className="flex items-center justify-between text-text-2"
                               >
                                 <span>
                                   Cláusula de cancelamento — {c.grupoNome} (
                                   {formatDate(c.data)})
                                 </span>
-                                <span className="tabular-nums text-status-ok-text">
+                                <span className="tabular-nums text-ok">
                                   {formatBRL(c.valor)}
                                 </span>
                               </li>
                             ))}
                             {m.mensalidadesDetalhe.length === 0 &&
                               m.clausulasDetalhe.length === 0 && (
-                                <li className="text-text-secondary">
+                                <li className="text-text-2">
                                   Nenhum pagamento registrado neste mês.
                                 </li>
                               )}
@@ -135,23 +135,23 @@ export function TabelaMensalFinancas({
                         </div>
 
                         <div>
-                          <h3 className="font-display text-sm font-semibold text-text-primary">
+                          <h3 className="font-display text-sm font-semibold text-text">
                             Faturamento vendido este mês
                           </h3>
                           <ul className="mt-2 space-y-1 text-sm">
                             {m.vendasDetalhe.map((v, i) => (
                               <li
                                 key={`venda-${i}`}
-                                className="flex items-center justify-between text-text-secondary"
+                                className="flex items-center justify-between text-text-2"
                               >
                                 <span>{v.grupoNome} (fechou acompanhamento)</span>
-                                <span className="tabular-nums text-text-primary">
+                                <span className="tabular-nums text-text">
                                   {formatBRL(v.valor)}
                                 </span>
                               </li>
                             ))}
                             {m.vendasDetalhe.length === 0 && (
-                              <li className="text-text-secondary">
+                              <li className="text-text-2">
                                 Nenhum grupo novo fechado neste mês.
                               </li>
                             )}
@@ -160,10 +160,10 @@ export function TabelaMensalFinancas({
                       </div>
 
                       <div className="mt-6">
-                        <h3 className="font-display text-sm font-semibold text-text-primary">
+                        <h3 className="font-display text-sm font-semibold text-text">
                           De onde vem o gasto
                         </h3>
-                        <p className="mt-1 text-xs text-text-secondary">
+                        <p className="mt-1 text-xs text-text-2">
                           Custo fixo de referência (atual): {" "}
                           {formatBRL(custosFixosAtual)}. Enquanto não há itens
                           lançados à mão para este mês, o gasto usa essa
@@ -193,7 +193,7 @@ export function TabelaMensalFinancas({
           })}
           {meses.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-4 py-8 text-center text-text-secondary">
+              <td colSpan={6} className="px-4 py-8 text-center text-text-2">
                 Sem dados suficientes ainda para montar a tabela mensal.
               </td>
             </tr>
@@ -219,7 +219,7 @@ function CustosFixosMensaisEditor({
   return (
     <div className="space-y-3">
       {error && (
-        <div className="rounded-lg bg-status-alert-bg px-3 py-2 text-xs text-status-alert-text">
+        <div className="rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
           {error}
         </div>
       )}
@@ -229,11 +229,11 @@ function CustosFixosMensaisEditor({
           {itens.map((item) => (
             <li
               key={item.id}
-              className="flex items-center justify-between rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm"
+              className="flex items-center justify-between rounded-lg border border-line bg-surface px-3 py-2 text-sm"
             >
-              <span className="text-text-primary">{item.nome}</span>
+              <span className="text-text">{item.nome}</span>
               <div className="flex items-center gap-3">
-                <span className="tabular-nums text-status-alert-text">
+                <span className="tabular-nums text-danger">
                   {formatBRL(item.valor)}
                 </span>
                 <button
@@ -242,7 +242,7 @@ function CustosFixosMensaisEditor({
                   onClick={() =>
                     startTransition(() => removeCustoMensalItem(item.id))
                   }
-                  className="text-xs text-text-secondary hover:text-status-alert-text"
+                  className="text-xs text-text-2 hover:text-danger"
                 >
                   Remover
                 </button>
@@ -274,18 +274,18 @@ function CustosFixosMensaisEditor({
         className="flex items-end gap-2"
       >
         <div className="flex-1">
-          <label className="mb-1 block text-xs text-text-secondary">
+          <label className="mb-1 block text-xs text-text-2">
             Novo custo de {formatMesAno(ano, mes)}
           </label>
           <input
             name="nome"
             placeholder="Ex: Ferramenta X"
             required
-            className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
+            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold"
           />
         </div>
         <div className="w-32">
-          <label className="mb-1 block text-xs text-text-secondary">
+          <label className="mb-1 block text-xs text-text-2">
             Valor (R$)
           </label>
           <input
@@ -294,13 +294,13 @@ function CustosFixosMensaisEditor({
             step="0.01"
             min="0"
             required
-            className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-accent tabular-nums"
+            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold tabular-nums"
           />
         </div>
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+          className="rounded-lg bg-gold px-3 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
         >
           Adicionar
         </button>

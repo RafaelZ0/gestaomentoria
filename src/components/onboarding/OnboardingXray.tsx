@@ -12,11 +12,11 @@ import {
 import { FunilOnboarding } from "@/components/onboarding/FunilOnboarding";
 
 const CORES_ORIGEM: Record<string, string> = {
-  Indicação: "var(--accent)",
-  Convênio: "var(--text-tertiary)",
-  Instagram: "var(--status-warn-text)",
-  Anúncio: "var(--status-ok-text)",
-  Outros: "#475069",
+  Indicação: "var(--gold)",
+  Convênio: "var(--info)",
+  Instagram: "var(--paused)",
+  Anúncio: "var(--ok)",
+  Outros: "var(--off)",
 };
 
 function Caixa({
@@ -30,9 +30,9 @@ function Caixa({
 }) {
   return (
     <section
-      className={`rounded-2xl border border-border bg-bg-surface p-6 ${larga ? "md:col-span-2" : ""}`}
+      className={`rounded-2xl border border-line bg-surface p-6 ${larga ? "md:col-span-2" : ""}`}
     >
-      <h2 className="font-display text-lg font-semibold text-text-primary">{titulo}</h2>
+      <h2 className="font-display text-lg font-semibold text-text">{titulo}</h2>
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -43,8 +43,8 @@ function Lista({ itens }: { itens: [string, React.ReactNode][] }) {
     <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-base">
       {itens.map(([rotulo, valor]) => (
         <div key={rotulo} className="contents">
-          <dt className="text-text-secondary">{rotulo}</dt>
-          <dd className="font-medium text-text-primary">{valor || "—"}</dd>
+          <dt className="text-text-2">{rotulo}</dt>
+          <dd className="font-medium text-text">{valor || "—"}</dd>
         </div>
       ))}
     </dl>
@@ -81,11 +81,11 @@ export function OnboardingXray({
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wider text-accent">Raio-X da clínica</p>
-          <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-text-primary sm:text-5xl">
+          <p className="text-sm font-medium uppercase tracking-wider text-gold">Raio-X da clínica</p>
+          <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-text sm:text-5xl">
             {texto(v.clinica) || texto(v.aluno) || "Clínica"}
           </h1>
-          <p className="mt-2 text-base text-text-secondary">
+          <p className="mt-2 text-base text-text-2">
             {juntar(
               texto(v.aluno),
               /^\d{4}-\d{2}-\d{2}$/.test(dataReuniao) ? `onboarding em ${formatDate(dataReuniao)}` : ""
@@ -96,9 +96,9 @@ export function OnboardingXray({
       </div>
 
       {texto(v.sucesso) && (
-        <section className="card-hero rounded-2xl border-l-4 border-accent bg-bg-surface p-7">
-          <p className="text-sm font-medium text-text-secondary">Daqui a 90 dias, valeu a pena se...</p>
-          <p className="mt-2 font-display text-2xl leading-snug text-text-primary sm:text-3xl">
+        <section className="card-hero rounded-2xl border-l-4 border-gold bg-surface p-7">
+          <p className="text-sm font-medium text-text-2">Daqui a 90 dias, valeu a pena se...</p>
+          <p className="mt-2 font-display text-2xl leading-snug text-text sm:text-3xl">
             “{texto(v.sucesso)}”
           </p>
         </section>
@@ -174,25 +174,25 @@ export function OnboardingXray({
                 detalhe: "exatos · aproximados · não sabe",
               },
             ].map((s) => (
-              <div key={s.rotulo} className="rounded-xl border border-border bg-bg-base p-4">
-                <p className="text-sm text-text-secondary">{s.rotulo}</p>
-                <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-text-primary">
+              <div key={s.rotulo} className="rounded-xl border border-line bg-bg p-4">
+                <p className="text-sm text-text-2">{s.rotulo}</p>
+                <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-text">
                   {s.valor}
                 </p>
-                {s.detalhe && <p className="mt-0.5 text-xs text-text-tertiary">{s.detalhe}</p>}
+                {s.detalhe && <p className="mt-0.5 text-xs text-muted">{s.detalhe}</p>}
               </div>
             ))}
           </div>
         </Caixa>
 
-        <section className="rounded-2xl border border-border bg-bg-surface p-6 md:col-span-2">
+        <section className="rounded-2xl border border-line bg-surface p-6 md:col-span-2">
           <FunilOnboarding funil={F} subtitulo="Com os números informados no diagnóstico." />
         </section>
 
         <Caixa titulo="De onde vêm os pacientes">
           {totalOrigem > 0 ? (
             <>
-              <div className="flex h-8 overflow-hidden rounded-lg border border-border">
+              <div className="flex h-8 overflow-hidden rounded-lg border border-line">
                 {origens.map(([k, x]) => (
                   <i
                     key={k}
@@ -200,17 +200,17 @@ export function OnboardingXray({
                     className="block h-full"
                     style={{
                       width: `${((num(x) ?? 0) / totalOrigem) * 100}%`,
-                      background: CORES_ORIGEM[k] ?? "#475069",
+                      background: CORES_ORIGEM[k] ?? "var(--off)",
                     }}
                   />
                 ))}
               </div>
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-text-primary">
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-text">
                 {origens.map(([k, x]) => (
                   <span key={k} className="flex items-center gap-2">
                     <span
                       className="inline-block h-2.5 w-2.5 rounded-sm"
-                      style={{ background: CORES_ORIGEM[k] ?? "#475069" }}
+                      style={{ background: CORES_ORIGEM[k] ?? "var(--off)" }}
                     />
                     {k} {texto(x)}%
                   </span>
@@ -218,15 +218,15 @@ export function OnboardingXray({
               </div>
             </>
           ) : (
-            <p className="text-sm text-text-secondary">Não informado.</p>
+            <p className="text-sm text-text-2">Não informado.</p>
           )}
-          <div className="mt-5 space-y-1.5 text-sm text-text-secondary">
+          <div className="mt-5 space-y-1.5 text-sm text-text-2">
             <p>
-              Tráfego pago: <span className="text-text-primary">{texto(v.trafego) || "não informado"}</span>
+              Tráfego pago: <span className="text-text">{texto(v.trafego) || "não informado"}</span>
             </p>
             <p>
               Verba para anúncios:{" "}
-              <span className={verba ? (verba.ok ? "text-status-ok-text" : "text-status-warn-text") : ""}>
+              <span className={verba ? (verba.ok ? "text-ok" : "text-warn") : ""}>
                 {verba ? verba.txt : "não informada"}
               </span>
             </p>
@@ -234,32 +234,32 @@ export function OnboardingXray({
         </Caixa>
 
         <Caixa titulo="Foco dos 90 dias">
-          <p className="font-display text-3xl font-semibold text-text-primary">
+          <p className="font-display text-3xl font-semibold text-text">
             {texto(v.indicador) || "A definir"}
           </p>
           {texto(v.riscos) && (
-            <p className="mt-4 text-sm text-text-secondary">
-              O que pode atrapalhar: <span className="text-text-primary">{texto(v.riscos)}</span>
+            <p className="mt-4 text-sm text-text-2">
+              O que pode atrapalhar: <span className="text-text">{texto(v.riscos)}</span>
             </p>
           )}
         </Caixa>
 
         <Caixa titulo="O que apareceu no diagnóstico" larga>
           {pts.length > 0 ? (
-            <ol className="divide-y divide-border">
+            <ol className="divide-y divide-line">
               {pts.map((pt, i) => (
                 <li key={pt} className="flex gap-4 py-3 first:pt-0 last:pb-0">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-status-warn-bg font-display text-sm font-bold text-status-warn-text">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warn/10 font-display text-sm font-bold text-warn">
                     {i + 1}
                   </span>
-                  <span className="pt-1 text-base text-text-primary">{pt}</span>
+                  <span className="pt-1 text-base text-text">{pt}</span>
                 </li>
               ))}
             </ol>
           ) : (
-            <p className="text-sm text-text-secondary">Nada se destacou com as respostas preenchidas.</p>
+            <p className="text-sm text-text-2">Nada se destacou com as respostas preenchidas.</p>
           )}
-          <p className="mt-5 text-sm text-text-secondary">
+          <p className="mt-5 text-sm text-text-2">
             {/^\d{4}-\d{2}-\d{2}$/.test(texto(v.proxima))
               ? `Na próxima reunião, em ${formatDate(texto(v.proxima))}, apresentamos como o acompanhamento segue a partir daqui.`
               : "Próxima reunião: a marcar."}

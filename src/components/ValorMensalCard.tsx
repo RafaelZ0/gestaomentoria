@@ -12,7 +12,7 @@ export function ValorMensalCard({
   valorMensal: number;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-5">
+    <div className="rounded-xl border border-line bg-surface p-5">
       <ValorEditavel
         label="Valor mensal"
         valor={valorMensal}

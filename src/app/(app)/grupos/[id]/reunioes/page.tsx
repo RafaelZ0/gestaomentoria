@@ -220,7 +220,7 @@ export default async function ReunioesPage({
 
       {proximas.length > 0 && (
         <div>
-          <h2 className="mb-2 font-display text-lg font-semibold text-text-primary">
+          <h2 className="mb-2 font-display text-lg font-semibold text-text">
             Próximas reuniões
           </h2>
           <ul className="space-y-3">{proximas.map(renderItem)}</ul>
@@ -229,14 +229,14 @@ export default async function ReunioesPage({
 
       <div>
         {proximas.length > 0 && (
-          <h2 className="mb-2 font-display text-lg font-semibold text-text-primary">
+          <h2 className="mb-2 font-display text-lg font-semibold text-text">
             Histórico
           </h2>
         )}
         <ul className="space-y-3">
           {historico.map(renderItem)}
           {reunioes.length === 0 && (
-            <p className="text-sm text-text-secondary">
+            <p className="text-sm text-text-2">
               Nenhuma reunião registrada ainda.
             </p>
           )}

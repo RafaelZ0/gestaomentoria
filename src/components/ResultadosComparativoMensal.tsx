@@ -41,10 +41,10 @@ export function ResultadosComparativoMensal({
   );
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
+    <div className="overflow-x-auto rounded-xl border border-line bg-surface">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-border text-text-secondary">
+          <tr className="border-b border-line text-text-2">
             <th className="px-4 py-3 font-medium">Mês</th>
             <th className="px-4 py-3 font-medium">Investido</th>
             <th className="px-4 py-3 font-medium">Vendas</th>
@@ -64,31 +64,31 @@ export function ResultadosComparativoMensal({
             return (
               <Fragment key={mes}>
                 <tr
-                  className="cursor-pointer border-b border-border last:border-0 hover:bg-bg-surface-hover"
+                  className="cursor-pointer border-b border-line last:border-0 hover:bg-hover"
                   onClick={() => setExpandido(aberto ? null : mes)}
                 >
-                  <td className="px-4 py-3 font-medium text-text-primary">
+                  <td className="px-4 py-3 font-medium text-text">
                     {formatMesAno(ano, mesNum)}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-text-primary">
+                  <td className="px-4 py-3 tabular-nums text-text">
                     {formatBRL(s.investimento)}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-text-primary">
+                  <td className="px-4 py-3 tabular-nums text-text">
                     {s.vendas}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-status-ok-text">
+                  <td className="px-4 py-3 tabular-nums text-ok">
                     {formatBRL(s.faturamento)}
                   </td>
-                  <td className="px-4 py-3 text-right text-text-secondary">
+                  <td className="px-4 py-3 text-right text-text-2">
                     {aberto ? "▲" : "▼"}
                   </td>
                 </tr>
                 {aberto && (
-                  <tr className="border-b border-border last:border-0">
-                    <td colSpan={5} className="bg-bg-surface-hover p-0">
+                  <tr className="border-b border-line last:border-0">
+                    <td colSpan={5} className="bg-hover p-0">
                       <table className="w-full text-left text-sm">
                         <thead>
-                          <tr className="border-b border-border text-text-secondary">
+                          <tr className="border-b border-line text-text-2">
                             <th className="px-4 py-2 font-medium">Clínica</th>
                             <th className="px-4 py-2 font-medium">Investido</th>
                             <th className="px-4 py-2 font-medium">Leads</th>
@@ -100,26 +100,26 @@ export function ResultadosComparativoMensal({
                         </thead>
                         <tbody>
                           {clinicasOrdenadas.map((c) => (
-                            <tr key={c.id} className="border-b border-border last:border-0">
-                              <td className="px-4 py-2 font-medium text-text-primary">
+                            <tr key={c.id} className="border-b border-line last:border-0">
+                              <td className="px-4 py-2 font-medium text-text">
                                 {c.nome}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-text-primary">
+                              <td className="px-4 py-2 tabular-nums text-text">
                                 {formatBRL(c.investimento)}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-text-primary">
+                              <td className="px-4 py-2 tabular-nums text-text">
                                 {c.leads}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-text-primary">
+                              <td className="px-4 py-2 tabular-nums text-text">
                                 {c.vendas}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-status-ok-text">
+                              <td className="px-4 py-2 tabular-nums text-ok">
                                 {formatBRL(c.faturamento)}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-text-primary">
+                              <td className="px-4 py-2 tabular-nums text-text">
                                 {c.roas === null ? "—" : `${c.roas.toFixed(1)}x`}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-text-primary">
+                              <td className="px-4 py-2 tabular-nums text-text">
                                 {c.ticketMedio === null ? "—" : formatBRL(c.ticketMedio)}
                               </td>
                             </tr>
@@ -128,7 +128,7 @@ export function ResultadosComparativoMensal({
                             <tr>
                               <td
                                 colSpan={7}
-                                className="px-4 py-4 text-center text-text-secondary"
+                                className="px-4 py-4 text-center text-text-2"
                               >
                                 Nenhum lançamento nesse mês.
                               </td>
@@ -144,7 +144,7 @@ export function ResultadosComparativoMensal({
           })}
           {meses.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-4 py-8 text-center text-text-secondary">
+              <td colSpan={5} className="px-4 py-8 text-center text-text-2">
                 Nenhum resultado lançado ainda.
               </td>
             </tr>
