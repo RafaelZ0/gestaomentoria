@@ -402,7 +402,7 @@ export function OnboardingApp({
       ) : (
         <section className="rounded-2xl border border-line bg-surface p-6 sm:p-8" aria-labelledby="titulo-etapa">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <h1 id="titulo-etapa" className="font-display text-3xl font-bold tracking-tight text-text sm:text-4xl">
+            <h1 id="titulo-etapa" className="font-serif text-3xl font-medium tracking-[-0.015em] text-text sm:text-4xl">
               {s.titulo}
             </h1>
             <span className="whitespace-nowrap text-sm text-text-2">
@@ -489,7 +489,7 @@ export function OnboardingApp({
               type="button"
               disabled={etapa === 0}
               onClick={() => irPara(etapa - 1)}
-              className="btn-secondary px-5 py-2.5 text-base disabled:cursor-not-allowed"
+              className="btn-secondary h-11 px-5 text-base disabled:cursor-not-allowed"
             >
               Voltar
             </button>
@@ -498,7 +498,7 @@ export function OnboardingApp({
                 type="button"
                 disabled={concluindo}
                 onClick={concluir}
-                className="btn-secondary"
+                className="btn-primary h-11 px-5 text-base"
               >
                 {concluindo ? "Montando o raio-X…" : "Ver o raio-X da clínica"}
               </button>
@@ -506,7 +506,7 @@ export function OnboardingApp({
               <button
                 type="button"
                 onClick={() => irPara(etapa + 1)}
-                className="btn-secondary"
+                className="btn-primary h-11 px-5 text-base"
               >
                 Próxima etapa
               </button>

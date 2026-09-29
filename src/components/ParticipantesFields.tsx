@@ -62,11 +62,11 @@ export function ParticipantesFields({
   return (
     <div>
       <p className="mb-2 text-sm text-text-2">Quem participou</p>
-      <div className="space-y-2">
+      <div className="flex flex-col">
         {mentoradosDoGrupoVisiveis.map((m) => (
           <label
             key={m.id}
-            className="flex items-center gap-3 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text"
+            className="flex min-h-10 items-center gap-3 border-b border-line-soft text-sm text-text last:border-b-0"
           >
             <input
               type="checkbox"
@@ -107,11 +107,11 @@ export function ParticipantesFields({
                   <p className="mb-1 text-xs font-medium text-text-2">
                     {grupoNome}
                   </p>
-                  <div className="space-y-2">
+                  <div className="flex flex-col">
                     {mentorados.map((m) => (
                       <label
                         key={m.id}
-                        className="flex items-center gap-3 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text"
+                        className="flex min-h-10 items-center gap-3 border-b border-line-soft text-sm text-text last:border-b-0"
                       >
                         <input
                           type="checkbox"

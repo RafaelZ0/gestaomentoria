@@ -86,9 +86,9 @@ export function OnboardingInicio({
 
   return (
     <div className="space-y-6">
-      <div className="card-hero rounded-2xl border border-line bg-surface p-7">
+      <div className="rounded-2xl border border-line bg-surface p-7">
         <p className="text-sm font-medium uppercase tracking-wider text-gold">Primeira reunião</p>
-        <h1 className="mt-1 font-display text-3xl font-bold tracking-tight text-text sm:text-4xl">
+        <h1 className="mt-1 font-serif text-3xl font-medium tracking-[-0.015em] text-text sm:text-4xl">
           Diagnóstico de onboarding
         </h1>
         <p className="mt-2 max-w-2xl text-lg text-text-2">
@@ -173,7 +173,7 @@ export function OnboardingInicio({
               type="button"
               disabled={iniciando || !aluno.trim()}
               onClick={comecar}
-              className="btn-secondary w-full"
+              className="btn-primary h-12 w-full text-base"
             >
               {iniciando ? "Criando…" : "Começar diagnóstico"}
             </button>
@@ -250,7 +250,7 @@ export function OnboardingInicio({
               type="button"
               disabled={importando || !previa || previa.reconhecidos.length === 0}
               onClick={importar}
-              className="btn-secondary w-full"
+              className="btn-primary h-12 w-full text-base"
             >
               {importando ? "Importando…" : "Importar e revisar"}
             </button>

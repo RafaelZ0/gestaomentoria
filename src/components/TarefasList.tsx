@@ -1,21 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import {
-  createTarefa,
-  toggleTarefa,
-  updateTarefa,
-  removeTarefa,
-} from "@/app/actions/tarefas";
+import { createTarefa, toggleTarefa, updateTarefa, removeTarefa } from "@/app/actions/tarefas";
 import { ResponsavelField } from "@/components/ResponsavelField";
-import { StatusBadge } from "@/components/StatusBadge";
+import { StatusDot, type Tom } from "@/components/ui/StatusDot";
+import { RowMenu } from "@/components/ui/RowMenu";
 import { formatDate } from "@/lib/format";
 import type { Tarefa, Responsavel, PrioridadeTarefa } from "@/lib/database.types";
 
-const PRIORIDADE_VARIANT: Record<PrioridadeTarefa, "alert" | "warn" | "neutral"> = {
-  Alta: "alert",
+const PRIORIDADE_TOM: Record<PrioridadeTarefa, Tom> = {
+  Alta: "danger",
   Média: "warn",
-  Baixa: "neutral",
+  Baixa: "off",
 };
 
 export function TarefasList({
@@ -35,39 +31,30 @@ export function TarefasList({
   const responsavelPorId = new Map(responsaveis.map((r) => [r.id, r.nome]));
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-8">
       <form
         action={(formData) =>
           startTransition(async () => {
             await createTarefa(grupoId, formData);
           })
         }
-        className="space-y-3 rounded-xl border border-line bg-surface p-4"
+        className="flex flex-col gap-3 border-b border-line pb-7"
       >
         <input
           name="descricao"
           required
           placeholder="Nova tarefa…"
-          className="campo w-full"
+          aria-label="Nova tarefa"
+          className="campo"
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
             <label className="rotulo mb-1.5">Prazo</label>
-            <input
-              type="date"
-              name="prazo"
-              className="campo w-full"
-            />
+            <input type="date" name="prazo" className="campo" />
           </div>
           <div>
-            <label className="rotulo mb-1.5">
-              Prioridade
-            </label>
-            <select
-              name="prioridade"
-              defaultValue="Média"
-              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text"
-            >
+            <label className="rotulo mb-1.5">Prioridade</label>
+            <select name="prioridade" defaultValue="Média" className="campo">
               <option value="Baixa">Baixa</option>
               <option value="Média">Média</option>
               <option value="Alta">Alta</option>
@@ -75,49 +62,49 @@ export function TarefasList({
           </div>
           <ResponsavelField responsaveis={responsaveis} label="Responsável" />
         </div>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="btn-secondary"
-        >
+        <button type="submit" disabled={isPending} className="btn-secondary w-fit">
           Adicionar
         </button>
       </form>
 
-      <ul className="space-y-2">
-        {pendentes.map((t) => (
-          <TarefaItem
-            key={t.id}
-            grupoId={grupoId}
-            tarefa={t}
-            responsaveis={responsaveis}
-            responsavelNome={
-              t.responsavel_id ? responsavelPorId.get(t.responsavel_id) : undefined
-            }
-          />
-        ))}
-        {tarefas.length === 0 && (
-          <p className="text-sm text-text-2">Nenhuma tarefa cadastrada.</p>
-        )}
-      </ul>
+      <section className="flex flex-col">
+        <h2 className="border-b border-line pb-2 text-[15px] font-semibold text-text">Pendentes</h2>
+        <ul className="flex flex-col">
+          {pendentes.map((t) => (
+            <TarefaItem
+              key={t.id}
+              grupoId={grupoId}
+              tarefa={t}
+              responsaveis={responsaveis}
+              responsavelNome={t.responsavel_id ? responsavelPorId.get(t.responsavel_id) : undefined}
+            />
+          ))}
+          {tarefas.length === 0 && (
+            <p className="py-4 text-sm text-muted">Nenhuma tarefa cadastrada.</p>
+          )}
+          {tarefas.length > 0 && pendentes.length === 0 && (
+            <p className="py-4 text-sm text-muted">Nenhuma tarefa pendente.</p>
+          )}
+        </ul>
+      </section>
 
       {concluidas.length > 0 && (
-        <div>
-          <p className="mb-2 text-sm text-text-2">Concluídas</p>
-          <ul className="space-y-2">
+        <section className="flex flex-col">
+          <h2 className="border-b border-line pb-2 text-[15px] font-semibold text-text">
+            Concluídas
+          </h2>
+          <ul className="flex flex-col">
             {concluidas.map((t) => (
               <TarefaItem
                 key={t.id}
                 grupoId={grupoId}
                 tarefa={t}
                 responsaveis={responsaveis}
-                responsavelNome={
-                  t.responsavel_id ? responsavelPorId.get(t.responsavel_id) : undefined
-                }
+                responsavelNome={t.responsavel_id ? responsavelPorId.get(t.responsavel_id) : undefined}
               />
             ))}
           </ul>
-        </div>
+        </section>
       )}
     </div>
   );
@@ -143,10 +130,8 @@ function TarefaItem({
 
   if (editando) {
     return (
-      <li className="rounded-lg border border-line bg-hover px-4 py-3">
-        {error && (
-          <p className="mb-2 text-xs text-danger">{error}</p>
-        )}
+      <li className="border-b border-line-soft py-4 last:border-b-0">
+        {error && <p className="mb-2 text-xs text-danger">{error}</p>}
         <form
           action={(formData) => {
             setError(null);
@@ -159,35 +144,17 @@ function TarefaItem({
               }
             });
           }}
-          className="space-y-3"
+          className="flex flex-col gap-3"
         >
-          <input
-            name="descricao"
-            required
-            defaultValue={tarefa.descricao}
-            className="campo w-full"
-          />
+          <input name="descricao" required defaultValue={tarefa.descricao} className="campo" />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label className="rotulo mb-1.5">
-                Prazo
-              </label>
-              <input
-                type="date"
-                name="prazo"
-                defaultValue={tarefa.prazo ?? ""}
-                className="campo w-full"
-              />
+              <label className="rotulo mb-1.5">Prazo</label>
+              <input type="date" name="prazo" defaultValue={tarefa.prazo ?? ""} className="campo" />
             </div>
             <div>
-              <label className="rotulo mb-1.5">
-                Prioridade
-              </label>
-              <select
-                name="prioridade"
-                defaultValue={tarefa.prioridade}
-                className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
-              >
+              <label className="rotulo mb-1.5">Prioridade</label>
+              <select name="prioridade" defaultValue={tarefa.prioridade} className="campo">
                 <option value="Baixa">Baixa</option>
                 <option value="Média">Média</option>
                 <option value="Alta">Alta</option>
@@ -200,19 +167,11 @@ function TarefaItem({
             />
           </div>
           <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isPending}
-              className="btn-secondary"
-            >
-              Salvar
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditando(false)}
-              className="btn-secondary px-3 py-1.5 text-xs"
-            >
+            <button type="button" onClick={() => setEditando(false)} className="btn-secondary">
               Cancelar
+            </button>
+            <button type="submit" disabled={isPending} className="btn-secondary">
+              Salvar
             </button>
           </div>
         </form>
@@ -221,61 +180,46 @@ function TarefaItem({
   }
 
   return (
-    <li className="flex items-start gap-3 rounded-lg border border-line bg-hover px-4 py-3">
+    <li className="flex items-start gap-3 border-b border-line-soft py-3.5 last:border-b-0">
       <input
         type="checkbox"
         checked={tarefa.concluida}
         disabled={isPending}
-        onChange={(e) =>
-          startTransition(() =>
-            toggleTarefa(grupoId, tarefa.id, e.target.checked)
-          )
-        }
-        className="mt-0.5 h-4 w-4 shrink-0"
+        aria-label={tarefa.concluida ? "Marcar como pendente" : "Marcar como concluída"}
+        onChange={(e) => startTransition(() => toggleTarefa(grupoId, tarefa.id, e.target.checked))}
+        className="mt-1 h-4 w-4 shrink-0"
       />
-      <div
-        className="flex-1 cursor-pointer"
-        onClick={() => setEditando(true)}
-      >
+      <div className="min-w-0 flex-1 cursor-pointer" onClick={() => setEditando(true)}>
         <span
-          className={`text-sm ${
-            tarefa.concluida ? "text-text-2 line-through" : "text-text"
-          }`}
+          className={`text-[14.5px] ${tarefa.concluida ? "text-muted line-through" : "text-text"}`}
         >
           {tarefa.descricao}
         </span>
-        <div className="mt-1.5 flex flex-wrap items-center gap-2">
-          <StatusBadge
-            label={tarefa.prioridade}
-            variant={PRIORIDADE_VARIANT[tarefa.prioridade]}
-          />
+        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
+          <StatusDot tom={tarefa.concluida ? "off" : PRIORIDADE_TOM[tarefa.prioridade]}>
+            {tarefa.prioridade}
+          </StatusDot>
           {tarefa.prazo && (
-            <span
-              className={`text-xs tabular-nums ${
-                atrasada ? "text-danger" : "text-text-2"
-              }`}
-            >
+            <span className={`tabular-nums ${atrasada ? "text-danger" : "text-muted"}`}>
               {atrasada ? "Atrasada — " : "Prazo: "}
               {formatDate(tarefa.prazo)}
             </span>
           )}
-          {responsavelNome && (
-            <span className="text-xs text-text-2">{responsavelNome}</span>
-          )}
+          {responsavelNome && <span className="text-muted">{responsavelNome}</span>}
         </div>
       </div>
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (!confirm("Remover esta tarefa?")) return;
-          startTransition(() => removeTarefa(grupoId, tarefa.id));
-        }}
-        className="shrink-0 text-xs text-text-2 hover:text-danger disabled:opacity-60"
-      >
-        Remover
-      </button>
+      <RowMenu
+        rotulo={`Mais opções de ${tarefa.descricao}`}
+        acoes={[
+          { label: "Editar", onSelect: () => setEditando(true) },
+          {
+            label: "Remover",
+            destrutiva: true,
+            confirmar: { titulo: "Remover esta tarefa?", texto: tarefa.descricao, botao: "Remover" },
+            onSelect: () => removeTarefa(grupoId, tarefa.id),
+          },
+        ]}
+      />
     </li>
   );
 }

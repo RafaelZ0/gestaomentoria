@@ -40,7 +40,7 @@ export default async function ResultadosPage({
     }));
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <EvolucaoResultadosChart dados={evolucao} />
       <ResultadosList grupoId={id} resultados={resultados ?? []} />
     </div>

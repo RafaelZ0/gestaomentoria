@@ -3,7 +3,9 @@ import { formatBRL, formatDate } from "@/lib/format";
 import { NovoPagamentoForm } from "@/components/NovoPagamentoForm";
 import { PagamentoParceladoForm } from "@/components/PagamentoParceladoForm";
 import { AsaasCustomerIdField } from "@/components/AsaasCustomerIdField";
-import { StatusBadge } from "@/components/StatusBadge";
+import { StatusDot } from "@/components/ui/StatusDot";
+import { Metric } from "@/components/ui/Metric";
+import { AjudaPopover } from "@/components/ui/PageHeader";
 import { getGrupo } from "@/lib/data/grupo";
 
 const TIPO_LABEL: Record<string, string> = {
@@ -49,85 +51,64 @@ export default async function PagamentosPage({
     .reduce((acc, l) => acc + l.valor, 0);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-wrap gap-6">
-          <div>
-            <p className="text-sm text-text-2">Total recebido</p>
-            <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-ok">
-              {formatBRL(totalRecebido)}
-            </p>
-          </div>
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-wrap items-end justify-between gap-6 border-b border-line pb-6">
+        <div className="flex flex-wrap gap-x-12 gap-y-4">
+          <Metric rotulo="Total recebido">{formatBRL(totalRecebido)}</Metric>
           {totalEmAtraso > 0 && (
-            <div>
-              <p className="text-sm text-text-2">Em atraso</p>
-              <p className="font-display text-2xl font-bold tracking-tight tabular-nums text-danger">
-                {formatBRL(totalEmAtraso)}
-              </p>
-            </div>
+            <Metric rotulo="Em atraso" tom="danger">
+              {formatBRL(totalEmAtraso)}
+            </Metric>
           )}
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <NovoPagamentoForm grupoId={id} valorSugerido={Number(grupo?.valor_mensal ?? 0)} />
+        <div className="flex flex-wrap items-center gap-2">
+          <AjudaPopover>
+            <p>
+              Todo pagamento é lançado manualmente aqui, ou entra sozinho via integração com o
+              Asaas — boletos ainda não pagos aparecem como Pendente/Atrasado e não contam no
+              total recebido.
+            </p>
+          </AjudaPopover>
           <PagamentoParceladoForm grupoId={id} />
+          <NovoPagamentoForm grupoId={id} valorSugerido={Number(grupo?.valor_mensal ?? 0)} />
         </div>
       </div>
-      <p className="max-w-md text-xs text-text-2">
-        Todo pagamento é lançado manualmente aqui, ou entra sozinho via
-        integração com o Asaas — boletos ainda não pagos aparecem como
-        Pendente/Atrasado e não contam no total recebido.
-      </p>
 
-      <AsaasCustomerIdField
-        grupoId={id}
-        asaasCustomerId={grupo?.asaas_customer_id ?? null}
-      />
-
-      <div className="overflow-x-auto rounded-xl border border-line bg-surface">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[620px] text-left text-[14.5px]">
           <thead>
-            <tr className="border-b border-line text-text-2">
-              <th className="px-4 py-3 font-medium">Data</th>
-              <th className="px-4 py-3 font-medium">Tipo</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Valor</th>
-              <th className="px-4 py-3 font-medium">Observação</th>
+            <tr className="border-b border-line text-[12.5px] text-subtle">
+              <th className="px-3 pb-2.5 pt-1 font-normal">Data</th>
+              <th className="px-3 pb-2.5 pt-1 font-normal">Tipo</th>
+              <th className="px-3 pb-2.5 pt-1 font-normal">Status</th>
+              <th className="px-3 pb-2.5 pt-1 text-right font-normal">Valor</th>
+              <th className="px-3 pb-2.5 pt-1 font-normal">Observação</th>
             </tr>
           </thead>
           <tbody>
             {linhas.map((l) => (
-              <tr key={l.id} className="border-b border-line last:border-0">
-                <td className="px-4 py-3 tabular-nums text-text">
-                  {formatDate(l.data)}
-                </td>
-                <td className="px-4 py-3 text-text-2">
+              <tr key={l.id} className="border-b border-line-soft last:border-0">
+                <td className="px-3 py-3 tabular-nums text-text">{formatDate(l.data)}</td>
+                <td className="px-3 py-3 text-text-2">
                   {l.tipoLabel}
-                  {l.viaAsaas && (
-                    <span className="ml-2 rounded-full bg-gold/10 px-2 py-0.5 text-xs font-medium text-gold">
-                      via Asaas
-                    </span>
-                  )}
+                  {l.viaAsaas && <span className="ml-2 text-[12px] text-subtle">via Asaas</span>}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-3 py-3 text-[13.5px]">
                   {l.pago ? (
-                    <StatusBadge label="Pago" variant="ok" />
+                    <StatusDot tom="ok">Pago</StatusDot>
                   ) : l.atrasado ? (
-                    <StatusBadge label="Atrasado" variant="alert" />
+                    <StatusDot tom="danger">Atrasado</StatusDot>
                   ) : (
-                    <StatusBadge label="Pendente" variant="neutral" />
+                    <StatusDot tom="off">Pendente</StatusDot>
                   )}
                 </td>
-                <td className="px-4 py-3 tabular-nums text-text">
-                  {formatBRL(l.valor)}
-                </td>
-                <td className="px-4 py-3 text-text-2">
-                  {l.observacao ?? "—"}
-                </td>
+                <td className="px-3 py-3 text-right tabular-nums text-text">{formatBRL(l.valor)}</td>
+                <td className="px-3 py-3 text-[13.5px] text-muted">{l.observacao ?? "—"}</td>
               </tr>
             ))}
             {linhas.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-text-2">
+                <td colSpan={5} className="px-3 py-8 text-center text-muted">
                   Nenhum pagamento registrado ainda.
                 </td>
               </tr>
@@ -135,6 +116,8 @@ export default async function PagamentosPage({
           </tbody>
         </table>
       </div>
+
+      <AsaasCustomerIdField grupoId={id} asaasCustomerId={grupo?.asaas_customer_id ?? null} />
     </div>
   );
 }

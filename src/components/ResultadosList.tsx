@@ -8,6 +8,8 @@ import {
 } from "@/app/actions/resultados";
 import { formatBRL, formatDate, formatMesAno } from "@/lib/format";
 import type { ResultadoGrupo } from "@/lib/database.types";
+import { Metric } from "@/components/ui/Metric";
+import { RowMenu } from "@/components/ui/RowMenu";
 
 const inputClass =
   "campo w-full";
@@ -71,45 +73,35 @@ export function ResultadosList({
   const meses = [...porMes.entries()].sort((a, b) => b[0].localeCompare(a[0]));
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="mb-2 text-sm text-text-2">Total (todos os lançamentos)</p>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-          <ResumoCard label="Investido" value={formatBRL(totais.investimento)} />
-          <ResumoCard label="Leads" value={String(totais.leads)} />
-          <ResumoCard
-            label="CPL médio"
-            value={calcCpl(totais.investimento, totais.leads)}
-          />
-          <ResumoCard label="Vendas" value={String(totalVendas)} />
-          <ResumoCard
-            label="Ticket médio"
-            value={calcTicketMedio(totalFaturamento, totalVendas)}
-          />
+    <div className="flex flex-col gap-8">
+      <section className="flex flex-col gap-4 border-b border-line pb-7">
+        <h2 className="text-[15px] font-semibold text-text">Total (todos os lançamentos)</h2>
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-5">
+          <Metric rotulo="Investido">{formatBRL(totais.investimento)}</Metric>
+          <Metric rotulo="Leads">{totais.leads}</Metric>
+          <Metric rotulo="CPL médio">{calcCpl(totais.investimento, totais.leads)}</Metric>
+          <Metric rotulo="Vendas">{totalVendas}</Metric>
+          <Metric rotulo="Ticket médio">{calcTicketMedio(totalFaturamento, totalVendas)}</Metric>
         </div>
-      </div>
+      </section>
 
-      {error && (
-        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       {meses.length > 0 && (
-        <div>
-          <p className="mb-2 text-sm text-text-2">Por mês</p>
-          <div className="overflow-x-auto rounded-xl border border-line bg-surface">
-            <table className="w-full text-left text-sm">
+        <section className="flex flex-col gap-2">
+          <h2 className="text-[15px] font-semibold text-text">Por mês</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left text-[14.5px]">
               <thead>
-                <tr className="border-b border-line text-text-2">
-                  <th className="px-4 py-3 font-medium">Mês</th>
-                  <th className="px-4 py-3 font-medium">Investido</th>
-                  <th className="px-4 py-3 font-medium">Leads</th>
-                  <th className="px-4 py-3 font-medium">CPL</th>
-                  <th className="px-4 py-3 font-medium">Vendas</th>
-                  <th className="px-4 py-3 font-medium">Faturamento</th>
-                  <th className="px-4 py-3 font-medium">Ticket médio</th>
-                  <th className="px-4 py-3"></th>
+                <tr className="border-b border-line text-[12.5px] text-subtle">
+                  <th className="px-3 pb-2.5 pt-3 font-normal">Mês</th>
+                  <th className="px-3 pb-2.5 pt-3 font-normal">Investido</th>
+                  <th className="px-3 pb-2.5 pt-3 font-normal">Leads</th>
+                  <th className="px-3 pb-2.5 pt-3 font-normal">CPL</th>
+                  <th className="px-3 pb-2.5 pt-3 font-normal">Vendas</th>
+                  <th className="px-3 pb-2.5 pt-3 font-normal">Faturamento</th>
+                  <th className="px-3 pb-2.5 pt-3 font-normal">Ticket médio</th>
+                  <th className="px-3 pb-2.5 pt-3"></th>
                 </tr>
               </thead>
               <tbody>
@@ -122,38 +114,29 @@ export function ResultadosList({
                   return (
                     <Fragment key={chave}>
                       <tr
-                        className="cursor-pointer border-b border-line last:border-0 hover:bg-hover"
+                        className={`cursor-pointer border-b border-line-soft transition-colors last:border-0 hover:bg-hover ${aberto ? "bg-hover" : ""}`}
                         onClick={() => setExpandido(aberto ? null : chave)}
+                        aria-expanded={aberto}
                       >
-                        <td className="px-4 py-3 font-medium text-text">
-                          {formatMesAno(ano, mes)}
-                        </td>
-                        <td className="px-4 py-3 tabular-nums text-text">
-                          {formatBRL(s.investimento)}
-                        </td>
-                        <td className="px-4 py-3 tabular-nums text-text">
-                          {s.leads}
-                        </td>
-                        <td className="px-4 py-3 tabular-nums text-text">
+                        <td className="px-3 py-3 text-text">{formatMesAno(ano, mes)}</td>
+                        <td className="px-3 py-3 tabular-nums text-text">{formatBRL(s.investimento)}</td>
+                        <td className="px-3 py-3 tabular-nums text-text">{s.leads}</td>
+                        <td className="px-3 py-3 tabular-nums text-text">
                           {calcCpl(s.investimento, s.leads)}
                         </td>
-                        <td className="px-4 py-3 tabular-nums text-text">
-                          {vendasMes}
-                        </td>
-                        <td className="px-4 py-3 tabular-nums text-ok">
-                          {formatBRL(faturamentoMes)}
-                        </td>
-                        <td className="px-4 py-3 tabular-nums text-text">
+                        <td className="px-3 py-3 tabular-nums text-text">{vendasMes}</td>
+                        <td className="px-3 py-3 tabular-nums text-text">{formatBRL(faturamentoMes)}</td>
+                        <td className="px-3 py-3 tabular-nums text-text">
                           {calcTicketMedio(faturamentoMes, vendasMes)}
                         </td>
-                        <td className="px-4 py-3 text-right text-text-2">
-                          {aberto ? "▲" : "▼"}
+                        <td className="px-3 py-3 text-right text-subtle">
+                          <span className={`inline-block transition-transform ${aberto ? "rotate-180" : ""}`}>▾</span>
                         </td>
                       </tr>
                       {aberto && (
-                        <tr className="border-b border-line last:border-0">
-                          <td colSpan={8} className="bg-hover px-4 py-4">
-                            <ul className="space-y-2">
+                        <tr className="border-b border-line-soft last:border-0">
+                          <td colSpan={8} className="px-3 pb-4">
+                            <ul className="flex flex-col">
                               {doMes.map((r) => (
                                 <ResultadoRow key={r.id} grupoId={grupoId} resultado={r} />
                               ))}
@@ -167,13 +150,11 @@ export function ResultadosList({
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       )}
 
       {resultados.length === 0 && (
-        <p className="text-sm text-text-2">
-          Nenhum resultado registrado ainda.
-        </p>
+        <p className="text-sm text-muted">Nenhum resultado registrado ainda.</p>
       )}
 
       {open ? (
@@ -189,45 +170,24 @@ export function ResultadosList({
               }
             });
           }}
-          className="space-y-4 rounded-xl border border-line bg-surface p-6"
+          className="flex flex-col gap-4 border-y border-line py-6"
         >
+          <h2 className="text-[15px] font-semibold text-text">Novo resultado</h2>
           <ResultadoFields />
           <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isPending}
-              className="btn-secondary"
-            >
-              {isPending ? "Salvando…" : "Adicionar"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="btn-secondary"
-            >
+            <button type="button" onClick={() => setOpen(false)} className="btn-secondary">
               Cancelar
+            </button>
+            <button type="submit" disabled={isPending} className="btn-secondary">
+              {isPending ? "Salvando…" : "Adicionar"}
             </button>
           </div>
         </form>
       ) : (
-        <button
-          onClick={() => setOpen(true)}
-          className="btn-secondary"
-        >
-          + Novo resultado
+        <button type="button" onClick={() => setOpen(true)} className="btn-secondary w-fit">
+          Novo resultado
         </button>
       )}
-    </div>
-  );
-}
-
-function ResumoCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-line bg-surface p-4">
-      <p className="text-xs text-text-2">{label}</p>
-      <p className="mt-1 font-display text-lg font-semibold tracking-tight tabular-nums text-text">
-        {value}
-      </p>
     </div>
   );
 }
@@ -363,32 +323,33 @@ function ResultadoRow({
     return (
       <li
         onClick={(e) => e.stopPropagation()}
-        className="rounded-lg border border-line bg-surface px-4 py-3 text-sm"
+        className="border-b border-line-soft py-3 text-sm last:border-b-0"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="font-medium text-text">
-            {formatDate(resultado.data)}
-          </span>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setEditing(true)}
-              className="text-text-2 hover:text-text"
-            >
-              Editar
-            </button>
-            <button
-              disabled={isPending}
-              onClick={() => {
-                if (!confirm("Remover este lançamento de resultado?")) return;
-                startTransition(() => removeResultado(resultado.id, grupoId));
-              }}
-              className="text-text-2 hover:text-danger"
-            >
-              Remover
-            </button>
-          </div>
+          <span className="font-medium text-text">{formatDate(resultado.data)}</span>
+          <RowMenu
+            rotulo={`Mais opções do lançamento de ${formatDate(resultado.data)}`}
+            acoes={[
+              { label: "Editar", onSelect: () => setEditing(true) },
+              {
+                label: "Remover",
+                destrutiva: true,
+                confirmar: {
+                  titulo: "Remover este lançamento de resultado?",
+                  botao: "Remover",
+                },
+                onSelect: () =>
+                  new Promise<void>((resolve) =>
+                    startTransition(async () => {
+                      await removeResultado(resultado.id, grupoId);
+                      resolve();
+                    })
+                  ),
+              },
+            ]}
+          />
         </div>
-        <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-text-2 sm:grid-cols-4">
+        <div className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-1 text-[13px] text-muted sm:grid-cols-4">
           <span>
             Investido:{" "}
             <span className="tabular-nums text-text">
@@ -412,9 +373,9 @@ function ResultadoRow({
             {resultado.vendas_trafego_pago} tráfego)
           </span>
         </div>
-        <p className="mt-1 text-xs text-text-2">
+        <p className="mt-1 text-[13px] text-muted">
           Faturamento:{" "}
-          <span className="tabular-nums text-ok">
+          <span className="tabular-nums text-text">
             {formatBRL(faturamentoTotal)}
           </span>{" "}
           ({formatBRL(Number(resultado.faturamento_campanha_interna))} campanha
@@ -432,15 +393,8 @@ function ResultadoRow({
   }
 
   return (
-    <li
-      onClick={(e) => e.stopPropagation()}
-      className="rounded-lg border border-line bg-surface px-4 py-3"
-    >
-      {error && (
-        <div className="mb-2 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error}
-        </div>
-      )}
+    <li onClick={(e) => e.stopPropagation()} className="border-b border-line-soft py-4 last:border-b-0">
+      {error && <p className="mb-2 text-sm text-danger">{error}</p>}
       <form
         action={(formData) => {
           setError(null);
@@ -457,19 +411,11 @@ function ResultadoRow({
       >
         <ResultadoFields defaultValues={resultado} />
         <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={isPending}
-            className="btn-secondary"
-          >
-            Salvar
-          </button>
-          <button
-            type="button"
-            onClick={() => setEditing(false)}
-            className="btn-secondary"
-          >
+          <button type="button" onClick={() => setEditing(false)} className="btn-secondary">
             Cancelar
+          </button>
+          <button type="submit" disabled={isPending} className="btn-secondary">
+            Salvar
           </button>
         </div>
       </form>

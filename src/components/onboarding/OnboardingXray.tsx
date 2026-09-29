@@ -82,7 +82,7 @@ export function OnboardingXray({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-wider text-gold">Raio-X da clínica</p>
-          <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-text sm:text-5xl">
+          <h1 className="mt-1 font-serif text-4xl font-medium tracking-[-0.015em] text-text sm:text-5xl">
             {texto(v.clinica) || texto(v.aluno) || "Clínica"}
           </h1>
           <p className="mt-2 text-base text-text-2">
@@ -96,9 +96,9 @@ export function OnboardingXray({
       </div>
 
       {texto(v.sucesso) && (
-        <section className="card-hero rounded-2xl border-l-4 border-gold bg-surface p-7">
+        <section className="rounded-2xl border-l-4 border-gold bg-surface p-7">
           <p className="text-sm font-medium text-text-2">Daqui a 90 dias, valeu a pena se...</p>
-          <p className="mt-2 font-display text-2xl leading-snug text-text sm:text-3xl">
+          <p className="mt-2 font-serif text-2xl leading-snug text-text sm:text-3xl">
             “{texto(v.sucesso)}”
           </p>
         </section>

@@ -9,36 +9,24 @@ export default async function LoginPage({
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-sm rounded-xl border border-line bg-surface p-8">
-        <h1 className="font-display text-2xl font-semibold text-text">
+      <div className="w-full max-w-sm">
+        <h1 className="font-serif text-[32px] font-medium tracking-[-0.015em] text-text">
           Gestão de Tráfego
         </h1>
-        <p className="mt-1 text-sm text-text-2">
-          Entre com a conta compartilhada da equipe.
-        </p>
+        <p className="mt-1 text-sm text-muted">Entre com a conta compartilhada da equipe.</p>
 
-        {error && (
-          <div className="mt-4 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-            {error}
-          </div>
-        )}
+        {error && <p className="mt-5 text-sm text-danger">{error}</p>}
 
-        <form action={login} className="mt-6 space-y-4">
+        <form action={login} className="mt-8 flex flex-col gap-4">
           <input type="hidden" name="next" value={next ?? "/grupos"} />
           <div>
-            <label className="block text-sm text-text-2 mb-1" htmlFor="email">
+            <label className="rotulo mb-1.5" htmlFor="email">
               E-mail
             </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="campo w-full"
-            />
+            <input id="email" name="email" type="email" required autoComplete="email" className="campo" />
           </div>
           <div>
-            <label className="block text-sm text-text-2 mb-1" htmlFor="password">
+            <label className="rotulo mb-1.5" htmlFor="password">
               Senha
             </label>
             <input
@@ -46,13 +34,11 @@ export default async function LoginPage({
               name="password"
               type="password"
               required
-              className="campo w-full"
+              autoComplete="current-password"
+              className="campo"
             />
           </div>
-          <button
-            type="submit"
-            className="btn-secondary w-full"
-          >
+          <button type="submit" className="btn-primary mt-2 w-full">
             Entrar
           </button>
         </form>

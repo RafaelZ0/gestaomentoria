@@ -22,16 +22,16 @@ export function NovoGrupoForm() {
           }
         });
       }}
-      className="space-y-6"
+      className="flex flex-col gap-10"
     >
       {error && (
-        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
+        <div className="text-sm text-danger">
           {error}
         </div>
       )}
 
-      <div className="rounded-xl border border-line bg-surface p-6 space-y-4">
-        <h2 className="font-display text-lg font-semibold text-text">
+      <section className="flex flex-col gap-4">
+        <h2 className="text-[15px] font-semibold text-text">
           Dados do grupo
         </h2>
 
@@ -72,10 +72,10 @@ export function NovoGrupoForm() {
         <Field label="Tráfego pago" htmlFor="trafego_pago">
           <select id="trafego_pago" name="trafego_pago" className={inputClass} defaultValue="">
             <option value="">—</option>
-            <option value="SIM">SIM</option>
-            <option value="NÃO">NÃO</option>
-            <option value="PARADO">PARADO</option>
-            <option value="EM IMPLEMENTAÇÃO">EM IMPLEMENTAÇÃO</option>
+            <option value="SIM">Sim</option>
+            <option value="NÃO">Não</option>
+            <option value="PARADO">Parado</option>
+            <option value="EM IMPLEMENTAÇÃO">Em implementação</option>
           </select>
         </Field>
 
@@ -87,19 +87,19 @@ export function NovoGrupoForm() {
             className={inputClass}
           />
         </Field>
-      </div>
+      </section>
 
-      <div className="rounded-xl border border-line bg-surface p-6 space-y-4">
+      <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold text-text">
+          <h2 className="text-[15px] font-semibold text-text">
             Mentorados
           </h2>
           <button
             type="button"
             onClick={() => setMentorados((m) => [...m, m.length])}
-            className="text-sm text-gold hover:text-gold-hover"
+            className="link text-[13.5px]"
           >
-            + Adicionar
+            Adicionar
           </button>
         </div>
 
@@ -128,19 +128,19 @@ export function NovoGrupoForm() {
                 onClick={() =>
                   setMentorados((m) => m.filter((_, idx) => idx !== i))
                 }
-                className="mb-1 h-fit rounded-lg border border-line px-3 py-2 text-sm text-text-2 hover:bg-hover"
+                className="btn-secondary"
               >
                 Remover
               </button>
             )}
           </div>
         ))}
-      </div>
+      </section>
 
       <button
         type="submit"
         disabled={isPending}
-        className="btn-secondary"
+        className="btn-primary w-fit"
       >
         {isPending ? "Salvando…" : "Criar grupo"}
       </button>

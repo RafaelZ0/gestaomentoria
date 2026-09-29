@@ -48,7 +48,7 @@ function TooltipCustom({
 }) {
   if (!active || !payload || payload.length === 0) return null;
   return (
-    <div className="rounded-lg border border-line bg-hover px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-lg border border-line bg-surface px-3 py-2 text-xs shadow-lg">
       <p className="text-text-2">{mesCurto(label ?? "")}</p>
       <p className="font-medium text-text">
         {formatar(payload[0].value)}
@@ -71,8 +71,8 @@ function GraficoLinha({
   const temDado = dados.some((d) => d[campo] !== null);
 
   return (
-    <div className="rounded-xl border border-line bg-surface p-4">
-      <p className="text-sm text-text-2">{titulo}</p>
+    <div className="flex flex-col">
+      <p className="text-[13px] text-subtle">{titulo}</p>
       {!temDado ? (
         <div className="flex h-[180px] items-center justify-center text-sm text-text-2">
           Sem dados suficientes
@@ -131,11 +131,9 @@ export function EvolucaoResultadosChart({ dados }: { dados: PontoMensal[] }) {
   if (dados.length < 2) return null;
 
   return (
-    <div>
-      <h2 className="mb-2 font-display text-lg font-semibold text-text">
-        Evolução mensal
-      </h2>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <section className="flex flex-col gap-4 border-b border-line pb-7">
+      <h2 className="text-[15px] font-semibold text-text">Evolução mensal</h2>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <GraficoLinha
           titulo="Faturamento"
           dados={dados}
@@ -155,6 +153,6 @@ export function EvolucaoResultadosChart({ dados }: { dados: PontoMensal[] }) {
           formatar={formatBRL}
         />
       </div>
-    </div>
+    </section>
   );
 }
