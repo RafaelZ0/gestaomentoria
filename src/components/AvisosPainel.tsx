@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { plural } from "@/lib/format";
 
 export type NotificacaoAgendar = {
   id: string;
@@ -67,7 +68,7 @@ export function AvisosPainel({
               <span className="shrink-0 text-[13px] text-muted">
                 {n.diasSemReuniao === null
                   ? "nunca teve reunião"
-                  : `última há ${n.diasSemReuniao} dias`}
+                  : `última há ${plural(n.diasSemReuniao, "dia", "dias")}`}
               </span>
             </Link>
           ))}

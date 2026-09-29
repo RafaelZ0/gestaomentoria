@@ -20,6 +20,8 @@ import {
 import { CampoOnboardingInput } from "@/components/onboarding/CampoOnboardingInput";
 import { FunilOnboarding } from "@/components/onboarding/FunilOnboarding";
 import { OnboardingXray } from "@/components/onboarding/OnboardingXray";
+import { StatusDot } from "@/components/ui/StatusDot";
+import { plural } from "@/lib/format";
 import type { StatusOnboarding } from "@/lib/database.types";
 
 type EstadoSalvamento = "ocioso" | "pendente" | "salvando" | "salvo" | "erro";
@@ -294,6 +296,9 @@ export function OnboardingApp({
 
   const s = STEPS[etapa];
   const ultima = etapa === STEPS.length - 1;
+  const semResposta = STEPS.flatMap((st) => st.fields).filter(
+    (f) => !isFilled(respostas, precisao, f)
+  ).length;
   const preenchidos = s.fields.filter((f) => isFilled(respostas, precisao, f)).length;
   const verba = s.id === "divulgacao" ? verbaStatus(respostas) : null;
 
@@ -302,15 +307,17 @@ export function OnboardingApp({
       {/* Barra de ferramentas */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              status === "concluido"
-                ? "bg-ok/10 text-ok"
-                : "bg-warn/10 text-warn"
-            }`}
-          >
+          {/* "Concluído" = o raio-X foi gerado; pode ter ficado pergunta em
+              branco (o diagnóstico sempre permitiu concluir assim). */}
+          <StatusDot tom={status === "concluido" ? "ok" : "warn"} className="text-sm">
             {status === "concluido" ? "Onboarding concluído" : "Diagnóstico em andamento"}
-          </span>
+            {status === "concluido" && semResposta > 0 && (
+              <span className="text-muted">
+                {" "}
+                · {plural(semResposta, "pergunta sem resposta", "perguntas sem resposta")}
+              </span>
+            )}
+          </StatusDot>
           <span className={`text-sm ${textoSalvamento[salvamento].cor}`} aria-live="polite">
             {textoSalvamento[salvamento].txt}
           </span>
@@ -349,6 +356,10 @@ export function OnboardingApp({
           const progresso = stepProgress(respostas, precisao, st);
           const feito = progresso >= 0.999;
           const atual = modo === "preencher" && i === etapa;
+          // Num diagnóstico já concluído, etapa com pergunta em branco não é
+          // pendência: mostra só quantas foram respondidas, em cor neutra.
+          const neutro = status === "concluido" && !feito;
+          const respondidas = st.fields.filter((f) => isFilled(respostas, precisao, f)).length;
           return (
             <button
               key={st.id}
@@ -360,7 +371,7 @@ export function OnboardingApp({
               <span className="h-2 overflow-hidden rounded-full bg-hover">
                 <span
                   className={`block h-full rounded-full transition-[width] duration-500 ${
-                    feito ? "bg-ok" : "bg-gold"
+                    feito ? "bg-ok" : neutro ? "bg-off" : "bg-gold"
                   }`}
                   style={{ width: `${Math.round(progresso * 100)}%` }}
                 />
@@ -370,10 +381,17 @@ export function OnboardingApp({
                   atual ? "font-semibold text-text" : "text-text-2"
                 }`}
               >
-                <span className={`mr-1 font-bold ${feito ? "text-ok" : "text-gold"}`}>
+                <span
+                  className={`mr-1 font-bold ${feito ? "text-ok" : neutro ? "text-muted" : "text-gold"}`}
+                >
                   {feito ? "✓" : i + 1}
                 </span>
                 {st.nome}
+                {neutro && (
+                  <span className="ml-1 tabular-nums text-muted">
+                    {respondidas}/{st.fields.length}
+                  </span>
+                )}
               </span>
             </button>
           );

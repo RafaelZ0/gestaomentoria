@@ -89,8 +89,12 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
             onChange={(e) => setStatusDesde(e.target.value)}
             className="campo h-8 px-2 text-[13px]"
           />
+        ) : tipo.status_desde ? (
+          formatDate(tipo.status_desde)
         ) : (
-          formatDate(statusDesde)
+          // Sem data gravada: não inventa "hoje" na exibição (o "Editar
+          // data" continua sugerindo hoje, mas só grava se salvar).
+          <span className="text-muted">—</span>
         )}
       </span>
       <span className="text-[13.5px]">

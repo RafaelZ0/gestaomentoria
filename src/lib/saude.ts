@@ -1,3 +1,5 @@
+import { plural } from "@/lib/format";
+
 export type StatusSaude = "ok" | "warn" | "alert";
 export type TendenciaRoas = "subindo" | "caindo" | "estavel" | null;
 
@@ -39,7 +41,7 @@ export function calcSaudeGrupo({
     flags.push(
       diasSemReuniao === null
         ? "Nunca teve reunião"
-        : `Sem reunião há ${diasSemReuniao} dias`
+        : `Sem reunião há ${plural(diasSemReuniao, "dia", "dias")}`
     );
   }
   if (tendenciaRoas === "caindo") flags.push("ROAS em queda");

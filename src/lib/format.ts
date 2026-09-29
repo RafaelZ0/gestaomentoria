@@ -54,6 +54,11 @@ export function formatTelefone(telefone: string): string {
   return telefone;
 }
 
+// "1 dia", "3 dias". Singular só quando n é exatamente 1.
+export function plural(n: number, singular: string, pluralForm: string): string {
+  return `${n} ${n === 1 ? singular : pluralForm}`;
+}
+
 const PARTICULAS = new Set(["e", "de", "da", "do", "das", "dos"]);
 
 // Nome do grupo como aparece na tela: sem o prefixo "GESTÃO " e em title

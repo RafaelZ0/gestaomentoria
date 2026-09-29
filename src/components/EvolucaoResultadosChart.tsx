@@ -80,7 +80,7 @@ function GraficoLinha({
       ) : (
         <div className="mt-2 h-[180px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={dados} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
+            <LineChart data={dados} margin={{ top: 5, right: 8, left: 4, bottom: 0 }}>
               <CartesianGrid
                 stroke={COR_GRID}
                 strokeDasharray="0"
@@ -97,7 +97,9 @@ function GraficoLinha({
                 stroke={COR_GRID}
                 tick={{ fill: COR_EIXO, fontSize: 11 }}
                 tickLine={false}
-                width={campo === "faturamento" ? 36 : 44}
+                // Rótulos compactos ("26 mil", "1,2 mi") precisam de espaço
+                // pra não sair cortados à esquerda.
+                width={campo === "faturamento" ? 58 : 48}
                 tickFormatter={(v) =>
                   campo === "roas"
                     ? `${v}x`

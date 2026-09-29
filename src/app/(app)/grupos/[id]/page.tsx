@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { formatBRL, formatDate, calcDuracaoDias, formatDuracao } from "@/lib/format";
+import { formatBRL, formatDate, calcDuracaoDias, formatDuracao, plural } from "@/lib/format";
 import { ChecklistEntregas } from "@/components/ChecklistEntregas";
 import { MentoradosList } from "@/components/MentoradosList";
 import { EditarGrupoForm } from "@/components/EditarGrupoForm";
@@ -149,7 +149,7 @@ export default async function GrupoOverviewPage({
               ? "Nunca teve reunião"
               : diasDesdeUltimaReuniao === 0
                 ? "Hoje"
-                : `${diasDesdeUltimaReuniao} dias atrás`
+                : `${plural(diasDesdeUltimaReuniao, "dia", "dias")} atrás`
           }
         />
         <ResumoLink
