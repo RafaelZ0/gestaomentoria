@@ -22,8 +22,7 @@ export const OPCOES_DURACAO = [
   { valor: 180, label: "3h" },
 ];
 
-const CAMPO =
-  "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold";
+const CAMPO = "campo";
 
 export function AgendarReuniaoModal({
   dataInicial,
@@ -144,11 +143,11 @@ export function AgendarReuniaoModal({
           e.preventDefault();
           confirmar();
         }}
-        className="max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-3 overflow-y-auto rounded-xl border border-line bg-hover p-5 shadow-2xl"
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-3 overflow-y-auto rounded-xl border border-line bg-surface p-5 shadow-2xl"
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="font-display text-lg font-semibold text-text">
+            <h2 className="text-[17px] font-semibold text-text">
               Agendar reunião
             </h2>
             {data && horaValida && (
@@ -162,7 +161,7 @@ export function AgendarReuniaoModal({
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded p-1 text-text-2 hover:bg-surface hover:text-text"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-hover hover:text-text"
           >
             ✕
           </button>
@@ -178,7 +177,7 @@ export function AgendarReuniaoModal({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="col-span-2">
-            <label className="mb-1 block text-xs text-text-2">Data</label>
+            <label className="rotulo mb-1.5">Data</label>
             <input
               type="date"
               value={data}
@@ -191,7 +190,7 @@ export function AgendarReuniaoModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-text-2">Início</label>
+            <label className="rotulo mb-1.5">Início</label>
             <input
               type="time"
               step={300}
@@ -204,7 +203,7 @@ export function AgendarReuniaoModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-text-2">Duração</label>
+            <label className="rotulo mb-1.5">Duração</label>
             <select
               value={duracaoMin}
               onChange={(e) => {
@@ -226,7 +225,7 @@ export function AgendarReuniaoModal({
           </p>
 
           <div>
-            <label className="mb-1 block text-xs text-text-2">Grupo *</label>
+            <label className="rotulo mb-1.5">Grupo *</label>
             <select
               value={grupoId}
               onChange={(e) => setGrupoId(e.target.value)}
@@ -241,7 +240,7 @@ export function AgendarReuniaoModal({
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs text-text-2">Responsável *</label>
+            <label className="rotulo mb-1.5">Responsável *</label>
             <select
               value={responsavelId}
               onChange={(e) => {
@@ -284,7 +283,7 @@ export function AgendarReuniaoModal({
         )}
 
         <div>
-          <label className="mb-1 block text-xs text-text-2">
+          <label className="rotulo mb-1.5">
             Link da reunião (opcional)
           </label>
           <input
@@ -297,7 +296,7 @@ export function AgendarReuniaoModal({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs text-text-2">
+          <label className="rotulo mb-1.5">
             Pauta / observação (opcional)
           </label>
           <textarea
@@ -313,25 +312,17 @@ export function AgendarReuniaoModal({
             type="checkbox"
             checked={forcarEncaixe}
             onChange={(e) => setForcarEncaixe(e.target.checked)}
-            className="accent-gold"
+            className="h-4 w-4"
           />
           Forçar encaixe (salvar mesmo com conflito)
         </label>
 
-        <div className="flex gap-2 pt-1">
-          <button
-            type="submit"
-            disabled={isPending}
-            className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
-          >
-            {isPending ? "Agendando…" : "Confirmar"}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-line px-4 py-2 text-sm text-text-2 hover:bg-surface"
-          >
+        <div className="flex justify-end gap-2 pt-1">
+          <button type="button" onClick={onClose} className="btn-secondary">
             Cancelar
+          </button>
+          <button type="submit" disabled={isPending} className="btn-primary">
+            {isPending ? "Agendando…" : "Confirmar"}
           </button>
         </div>
       </form>

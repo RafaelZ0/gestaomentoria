@@ -17,19 +17,17 @@ export function ResultadosTabs({
   const [aba, setAba] = useState<"grupo" | "mes">("grupo");
 
   return (
-    <div>
-      <div className="flex gap-2 border-b border-line">
+    <div className="flex flex-col gap-6">
+      <div role="tablist" className="flex gap-7 text-[14.5px] shadow-[inset_0_-1px_0_var(--line)]">
         <TabButton label="Por grupo" ativo={aba === "grupo"} onClick={() => setAba("grupo")} />
         <TabButton label="Por mês" ativo={aba === "mes"} onClick={() => setAba("mes")} />
       </div>
 
-      <div className="mt-6">
-        {aba === "grupo" ? (
-          <ResultadosRankingTable linhas={linhasRanking} />
-        ) : (
-          <ResultadosComparativoMensal meses={meses} />
-        )}
-      </div>
+      {aba === "grupo" ? (
+        <ResultadosRankingTable linhas={linhasRanking} />
+      ) : (
+        <ResultadosComparativoMensal meses={meses} />
+      )}
     </div>
   );
 }
@@ -46,11 +44,11 @@ function TabButton({
   return (
     <button
       type="button"
+      role="tab"
+      aria-selected={ativo}
       onClick={onClick}
-      className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
-        ativo
-          ? "border-gold text-text"
-          : "border-transparent text-text-2 hover:text-text"
+      className={`border-b-2 pb-3 transition-colors ${
+        ativo ? "border-gold text-text" : "border-transparent text-muted hover:text-text"
       }`}
     >
       {label}

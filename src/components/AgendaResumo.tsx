@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { formatDate } from "@/lib/format";
-import type { GrupoParaAgendar } from "@/lib/agendaStatus";
+import { displayGroupName, formatDate } from "@/lib/format";
+import { DIAS_SEM_SINAL_DE_VIDA, type GrupoParaAgendar } from "@/lib/agendaStatus";
 
 export type ProximaReuniao = {
   id: string;
@@ -20,65 +20,52 @@ export function AgendaResumo({
   paraAgendar: GrupoParaAgendar[];
 }) {
   return (
-    <div className="w-full max-w-[260px] space-y-4">
-      <section>
-        <h3 className="px-1 text-xs font-semibold text-text-2">
-          Próximas reuniões
-        </h3>
+    <div className="flex w-full max-w-[240px] flex-col gap-6">
+      <section className="flex flex-col">
+        <h3 className="px-2 pb-1.5 text-xs font-medium text-subtle">Próximas reuniões</h3>
         {proximas.length === 0 ? (
-          <p className="mt-1 px-1 text-xs text-text-2">Nenhuma.</p>
+          <p className="px-2 text-[13px] text-muted">Nenhuma.</p>
         ) : (
-          <ul className="mt-1.5 space-y-1">
-            {proximas.slice(0, 5).map((r) => (
-              <li key={r.id}>
-                <Link
-                  href={`/grupos/${r.grupoId}/reunioes`}
-                  prefetch={false}
-                  className="block rounded-lg border border-line bg-surface px-2 py-1.5 text-xs hover:bg-hover"
-                >
-                  <span className="block truncate font-medium text-text">
-                    {r.grupoNome}
-                  </span>
-                  <span className="text-text-2">
-                    {formatDate(r.data)}
-                    {r.hora ? ` ${r.hora.slice(0, 5)}` : ""}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          proximas.slice(0, 5).map((r) => (
+            <Link
+              key={r.id}
+              href={`/grupos/${r.grupoId}/reunioes`}
+              prefetch={false}
+              className="flex items-baseline justify-between gap-2 rounded-lg px-2 py-1.5 text-[13.5px] hover:bg-hover"
+            >
+              <span className="truncate text-text-2">{displayGroupName(r.grupoNome)}</span>
+              <span className="shrink-0 text-[12.5px] tabular-nums text-subtle">
+                {formatDate(r.data).slice(0, 5)}
+                {r.hora ? ` ${r.hora.slice(0, 5)}` : ""}
+              </span>
+            </Link>
+          ))
         )}
       </section>
 
-      <section>
-        <h3 className="px-1 text-xs font-semibold text-text-2">
-          Quem ainda precisa agendar
-        </h3>
+      <section className="flex flex-col">
+        <h3 className="px-2 pb-1.5 text-xs font-medium text-subtle">Quem ainda precisa agendar</h3>
         {paraAgendar.length === 0 ? (
-          <p className="mt-1 px-1 text-xs text-text-2">
-            Todo mundo em dia.
-          </p>
+          <p className="px-2 text-[13px] text-muted">Todo mundo em dia.</p>
         ) : (
-          <ul className="mt-1.5 space-y-1">
-            {paraAgendar.slice(0, 5).map((g) => (
-              <li key={g.id}>
-                <Link
-                  href={`/grupos/${g.id}/reunioes`}
-                  prefetch={false}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-warn/30 bg-warn/10 px-2 py-1.5 text-xs hover:bg-warn/15"
+          paraAgendar.slice(0, 5).map((g) => {
+            const atrasado = g.diasSemReuniao === null || g.diasSemReuniao > DIAS_SEM_SINAL_DE_VIDA;
+            return (
+              <Link
+                key={g.id}
+                href={`/grupos/${g.id}/reunioes`}
+                prefetch={false}
+                className="flex items-baseline justify-between gap-2 rounded-lg px-2 py-1.5 text-[13.5px] hover:bg-hover"
+              >
+                <span className="truncate text-text-2">{displayGroupName(g.nome)}</span>
+                <span
+                  className={`shrink-0 text-[12.5px] tabular-nums ${atrasado ? "text-warn" : "text-subtle"}`}
                 >
-                  <span className="truncate font-medium text-text">
-                    {g.nome}
-                  </span>
-                  <span className="shrink-0 text-warn">
-                    {g.diasSemReuniao === null
-                      ? "nunca"
-                      : `${g.diasSemReuniao}d`}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                  {g.diasSemReuniao === null ? "nunca" : `${g.diasSemReuniao}d`}
+                </span>
+              </Link>
+            );
+          })
         )}
       </section>
     </div>

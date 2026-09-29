@@ -1,14 +1,15 @@
 "use client";
 
-import { Fragment, useState, useTransition } from "react";
-import { formatBRL, formatMesAno, formatDate } from "@/lib/format";
+import { useState, useTransition } from "react";
+import { displayGroupName, formatBRL, formatMesAno, formatDate } from "@/lib/format";
 import { LancamentosList } from "@/components/LancamentosList";
-import {
-  addCustoMensalItem,
-  removeCustoMensalItem,
-} from "@/app/actions/financas";
+import { RowMenu } from "@/components/ui/RowMenu";
+import { Icon } from "@/components/ui/Icon";
+import { addCustoMensalItem, removeCustoMensalItem } from "@/app/actions/financas";
 import type { MesFinanceiro } from "@/lib/finance";
 import type { LancamentoFinanceiro } from "@/lib/database.types";
+
+const COLUNAS = "grid-cols-[1.3fr_1fr_1fr_1.3fr_1fr_24px]";
 
 export function TabelaMensalFinancas({
   meses,
@@ -22,184 +23,148 @@ export function TabelaMensalFinancas({
   const [expandido, setExpandido] = useState<string | null>(null);
 
   return (
-    <div className="mt-3 overflow-x-auto rounded-xl border border-line bg-surface">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-line text-text-2">
-            <th className="px-4 py-3 font-medium">Mês</th>
-            <th className="px-4 py-3 font-medium">Entrada</th>
-            <th className="px-4 py-3 font-medium">Faturamento</th>
-            <th className="px-4 py-3 font-medium">Gasto</th>
-            <th className="px-4 py-3 font-medium">Lucro</th>
-            <th className="px-4 py-3"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {meses.map((m) => {
-            const key = `${m.ano}-${m.mes}`;
-            const aberto = expandido === key;
-            const lancamentosDoMes = lancamentos.filter((l) => {
-              const [ano, mes] = l.data.split("-").map(Number);
-              return ano === m.ano && mes === m.mes;
-            });
+    <div className="overflow-x-auto">
+      <div className="min-w-[680px]">
+        <div className={`grid ${COLUNAS} gap-3 border-b border-line px-3 pb-2.5 pt-3 text-[12.5px] text-subtle`}>
+          <span>Mês</span>
+          <span className="text-right">Entrada</span>
+          <span className="text-right">Faturamento</span>
+          <span className="text-right">Gasto</span>
+          <span className="text-right">Lucro</span>
+          <span />
+        </div>
 
-            return (
-              <Fragment key={key}>
-                <tr
-                  className="border-b border-line last:border-0 cursor-pointer hover:bg-hover"
-                  onClick={() => setExpandido(aberto ? null : key)}
+        {meses.map((m) => {
+          const key = `${m.ano}-${m.mes}`;
+          const aberto = expandido === key;
+          const lancamentosDoMes = lancamentos.filter((l) => {
+            const [ano, mes] = l.data.split("-").map(Number);
+            return ano === m.ano && mes === m.mes;
+          });
+
+          return (
+            <div key={key} className="border-b border-line-soft last:border-b-0">
+              <button
+                type="button"
+                onClick={() => setExpandido(aberto ? null : key)}
+                aria-expanded={aberto}
+                className={`grid w-full ${COLUNAS} items-center gap-3 px-3 py-3 text-left text-[14.5px] transition-colors hover:bg-hover ${
+                  aberto ? "bg-hover" : ""
+                }`}
+              >
+                <span className="text-text">{formatMesAno(m.ano, m.mes)}</span>
+                <span className="text-right tabular-nums text-text">{formatBRL(m.entrada)}</span>
+                <span className="text-right tabular-nums text-text-2">{formatBRL(m.faturamento)}</span>
+                <span className="text-right tabular-nums text-text-2">
+                  {formatBRL(m.gasto)}
+                  {m.custosFixosManual && (
+                    <span className="block text-[11.5px] text-subtle">custos lançados à mão</span>
+                  )}
+                </span>
+                <span
+                  className={`text-right font-medium tabular-nums ${
+                    m.lucro >= 0 ? "text-text" : "text-danger"
+                  }`}
                 >
-                  <td className="px-4 py-3 font-medium text-text">
-                    {formatMesAno(m.ano, m.mes)}
-                  </td>
-                  <td className="px-4 py-3 tabular-nums text-ok">
-                    {formatBRL(m.entrada)}
-                  </td>
-                  <td className="px-4 py-3 tabular-nums text-text">
-                    {formatBRL(m.faturamento)}
-                  </td>
-                  <td className="px-4 py-3 tabular-nums text-danger">
-                    {formatBRL(m.gasto)}
-                    {m.custosFixosManual && (
-                      <span className="ml-1 text-xs text-text-2">
-                        (custos lançados à mão)
-                      </span>
-                    )}
-                  </td>
-                  <td
-                    className={`px-4 py-3 tabular-nums font-medium ${
-                      m.lucro >= 0 ? "text-text" : "text-danger"
-                    }`}
-                  >
-                    {formatBRL(m.lucro)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-text-2">
-                    {aberto ? "▲" : "▼"}
-                  </td>
-                </tr>
-                {aberto && (
-                  <tr key={`${key}-detalhe`} className="border-b border-line last:border-0">
-                    <td colSpan={6} className="bg-hover px-4 py-5">
-                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div>
-                          <h3 className="font-display text-sm font-semibold text-text">
-                            De onde vem a entrada
-                          </h3>
-                          <ul className="mt-2 space-y-1 text-sm">
-                            {m.mensalidadesDetalhe.map((p, i) => (
-                              <li
-                                key={`mensalidade-${i}`}
-                                className="flex items-center justify-between text-text-2"
-                              >
-                                <span>
-                                  {p.grupoNome} ({formatDate(p.data)})
-                                  {p.viaAsaas && (
-                                    <span className="ml-2 rounded-full bg-gold/10 px-2 py-0.5 text-xs font-medium text-gold">
-                                      via Asaas
-                                    </span>
-                                  )}
-                                </span>
-                                <span className="tabular-nums text-text">
-                                  {formatBRL(p.valor)}
-                                </span>
-                              </li>
-                            ))}
-                            {m.clausulasDetalhe.map((c, i) => (
-                              <li
-                                key={`clausula-${i}`}
-                                className="flex items-center justify-between text-text-2"
-                              >
-                                <span>
-                                  Cláusula de cancelamento — {c.grupoNome} (
-                                  {formatDate(c.data)})
-                                </span>
-                                <span className="tabular-nums text-ok">
-                                  {formatBRL(c.valor)}
-                                </span>
-                              </li>
-                            ))}
-                            {m.mensalidadesDetalhe.length === 0 &&
-                              m.clausulasDetalhe.length === 0 && (
-                                <li className="text-text-2">
-                                  Nenhum pagamento registrado neste mês.
-                                </li>
-                              )}
-                          </ul>
-                          <div className="mt-3">
-                            <LancamentosList
-                              lancamentos={lancamentosDoMes.filter(
-                                (l) => l.tipo === "RECEITA"
-                              )}
-                            />
-                          </div>
-                        </div>
+                  {formatBRL(m.lucro)}
+                </span>
+                <span className={`text-subtle transition-transform ${aberto ? "rotate-180" : ""}`}>
+                  <Icon nome="chevronBaixo" tamanho={16} />
+                </span>
+              </button>
 
-                        <div>
-                          <h3 className="font-display text-sm font-semibold text-text">
-                            Faturamento vendido este mês
-                          </h3>
-                          <ul className="mt-2 space-y-1 text-sm">
-                            {m.vendasDetalhe.map((v, i) => (
-                              <li
-                                key={`venda-${i}`}
-                                className="flex items-center justify-between text-text-2"
-                              >
-                                <span>{v.grupoNome} (fechou acompanhamento)</span>
-                                <span className="tabular-nums text-text">
-                                  {formatBRL(v.valor)}
-                                </span>
-                              </li>
-                            ))}
-                            {m.vendasDetalhe.length === 0 && (
-                              <li className="text-text-2">
-                                Nenhum grupo novo fechado neste mês.
-                              </li>
-                            )}
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div className="mt-6">
-                        <h3 className="font-display text-sm font-semibold text-text">
-                          De onde vem o gasto
-                        </h3>
-                        <p className="mt-1 text-xs text-text-2">
-                          Custo fixo de referência (atual): {" "}
-                          {formatBRL(custosFixosAtual)}. Enquanto não há itens
-                          lançados à mão para este mês, o gasto usa essa
-                          referência. Assim que você lançar ao menos um item,
-                          o gasto passa a ser a soma dos itens abaixo.
+              {aberto && (
+                <div className="flex flex-col gap-8 px-3 pb-8 pt-5">
+                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                    <div className="flex flex-col">
+                      <h3 className="mb-1 text-[13.5px] font-semibold text-text">
+                        De onde vem a entrada
+                      </h3>
+                      {m.mensalidadesDetalhe.map((p, i) => (
+                        <LinhaValor
+                          key={`mensalidade-${i}`}
+                          rotulo={
+                            <>
+                              {displayGroupName(p.grupoNome)} ({formatDate(p.data)})
+                              {p.viaAsaas && <span className="ml-2 text-[12px] text-subtle">via Asaas</span>}
+                            </>
+                          }
+                          valor={formatBRL(p.valor)}
+                        />
+                      ))}
+                      {m.clausulasDetalhe.map((c, i) => (
+                        <LinhaValor
+                          key={`clausula-${i}`}
+                          rotulo={`Cláusula de cancelamento — ${displayGroupName(c.grupoNome)} (${formatDate(c.data)})`}
+                          valor={formatBRL(c.valor)}
+                        />
+                      ))}
+                      {m.mensalidadesDetalhe.length === 0 && m.clausulasDetalhe.length === 0 && (
+                        <p className="py-2 text-[13.5px] text-muted">
+                          Nenhum pagamento registrado neste mês.
                         </p>
-                        <div className="mt-2">
-                          <CustosFixosMensaisEditor
-                            ano={m.ano}
-                            mes={m.mes}
-                            itens={m.custosFixosItens}
-                          />
-                        </div>
-                        <div className="mt-3">
-                          <LancamentosList
-                            lancamentos={lancamentosDoMes.filter(
-                              (l) => l.tipo === "DESPESA"
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </Fragment>
-            );
-          })}
-          {meses.length === 0 && (
-            <tr>
-              <td colSpan={6} className="px-4 py-8 text-center text-text-2">
-                Sem dados suficientes ainda para montar a tabela mensal.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                      )}
+                      <h4 className="mb-1 mt-5 text-[13px] text-subtle">Receitas avulsas</h4>
+                      <LancamentosList
+                        lancamentos={lancamentosDoMes.filter((l) => l.tipo === "RECEITA")}
+                      />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <h3 className="mb-1 text-[13.5px] font-semibold text-text">
+                        Faturamento vendido este mês
+                      </h3>
+                      {m.vendasDetalhe.map((v, i) => (
+                        <LinhaValor
+                          key={`venda-${i}`}
+                          rotulo={`${displayGroupName(v.grupoNome)} (fechou acompanhamento)`}
+                          valor={formatBRL(v.valor)}
+                        />
+                      ))}
+                      {m.vendasDetalhe.length === 0 && (
+                        <p className="py-2 text-[13.5px] text-muted">
+                          Nenhum grupo novo fechado neste mês.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <h3 className="text-[13.5px] font-semibold text-text">De onde vem o gasto</h3>
+                    <p className="mt-1 text-[13px] text-muted">
+                      Custo fixo de referência (atual): {formatBRL(custosFixosAtual)}. Enquanto não
+                      há itens lançados à mão para este mês, o gasto usa essa referência. Assim que
+                      você lançar ao menos um item, o gasto passa a ser a soma dos itens abaixo.
+                    </p>
+                    <div className="mt-2">
+                      <CustosFixosMensaisEditor ano={m.ano} mes={m.mes} itens={m.custosFixosItens} />
+                    </div>
+                    <h4 className="mb-1 mt-5 text-[13px] text-subtle">Despesas avulsas</h4>
+                    <LancamentosList
+                      lancamentos={lancamentosDoMes.filter((l) => l.tipo === "DESPESA")}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {meses.length === 0 && (
+          <p className="px-3 py-8 text-center text-sm text-muted">
+            Sem dados suficientes ainda para montar a tabela mensal.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LinhaValor({ rotulo, valor }: { rotulo: React.ReactNode; valor: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 border-b border-line-soft py-2 text-[14px] last:border-b-0">
+      <span className="text-text-2">{rotulo}</span>
+      <span className="shrink-0 tabular-nums text-text">{valor}</span>
     </div>
   );
 }
@@ -217,39 +182,38 @@ function CustosFixosMensaisEditor({
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <div className="space-y-3">
-      {error && (
-        <div className="rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
-          {error}
-        </div>
-      )}
+    <div className="flex flex-col gap-3">
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       {itens.length > 0 && (
-        <ul className="space-y-1">
+        <div className="flex flex-col">
           {itens.map((item) => (
-            <li
+            <div
               key={item.id}
-              className="flex items-center justify-between rounded-lg border border-line bg-surface px-3 py-2 text-sm"
+              className="flex min-h-11 items-center justify-between gap-4 border-b border-line-soft py-1.5 text-[14px]"
             >
               <span className="text-text">{item.nome}</span>
               <div className="flex items-center gap-3">
-                <span className="tabular-nums text-danger">
-                  {formatBRL(item.valor)}
-                </span>
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() =>
-                    startTransition(() => removeCustoMensalItem(item.id))
-                  }
-                  className="text-xs text-text-2 hover:text-danger"
-                >
-                  Remover
-                </button>
+                <span className="tabular-nums text-text-2">{formatBRL(item.valor)}</span>
+                <RowMenu
+                  rotulo={`Mais opções de ${item.nome}`}
+                  acoes={[
+                    {
+                      label: "Remover",
+                      destrutiva: true,
+                      confirmar: {
+                        titulo: `Remover ${item.nome}?`,
+                        texto: `Custo de ${formatMesAno(ano, mes)} · ${formatBRL(item.valor)}`,
+                        botao: "Remover",
+                      },
+                      onSelect: () => removeCustoMensalItem(item.id),
+                    },
+                  ]}
+                />
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       <form
@@ -261,9 +225,7 @@ function CustosFixosMensaisEditor({
             try {
               await addCustoMensalItem(ano, mes, nome, valor);
               (
-                document.getElementById(
-                  `custo-item-form-${ano}-${mes}`
-                ) as HTMLFormElement | null
+                document.getElementById(`custo-item-form-${ano}-${mes}`) as HTMLFormElement | null
               )?.reset();
             } catch (e) {
               if (e instanceof Error) setError(e.message);
@@ -271,37 +233,17 @@ function CustosFixosMensaisEditor({
           });
         }}
         id={`custo-item-form-${ano}-${mes}`}
-        className="flex items-end gap-2"
+        className="flex flex-wrap items-end gap-2"
       >
-        <div className="flex-1">
-          <label className="mb-1 block text-xs text-text-2">
-            Novo custo de {formatMesAno(ano, mes)}
-          </label>
-          <input
-            name="nome"
-            placeholder="Ex: Ferramenta X"
-            required
-            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold"
-          />
+        <div className="min-w-48 flex-1">
+          <label className="rotulo mb-1.5">Novo custo de {formatMesAno(ano, mes)}</label>
+          <input name="nome" placeholder="Ex: Ferramenta X" required className="campo" />
         </div>
         <div className="w-32">
-          <label className="mb-1 block text-xs text-text-2">
-            Valor (R$)
-          </label>
-          <input
-            name="valor"
-            type="number"
-            step="0.01"
-            min="0"
-            required
-            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold tabular-nums"
-          />
+          <label className="rotulo mb-1.5">Valor (R$)</label>
+          <input name="valor" type="number" step="0.01" min="0" required className="campo tabular-nums" />
         </div>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-gold px-3 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
-        >
+        <button type="submit" disabled={isPending} className="btn-secondary">
           Adicionar
         </button>
       </form>

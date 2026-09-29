@@ -48,19 +48,19 @@ export function TarefasList({
           name="descricao"
           required
           placeholder="Nova tarefa…"
-          className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+          className="campo w-full"
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
-            <label className="mb-1 block text-xs text-text-2">Prazo</label>
+            <label className="rotulo mb-1.5">Prazo</label>
             <input
               type="date"
               name="prazo"
-              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text outline-none focus:border-gold"
+              className="campo w-full"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-text-2">
+            <label className="rotulo mb-1.5">
               Prioridade
             </label>
             <select
@@ -78,7 +78,7 @@ export function TarefasList({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
+          className="btn-secondary"
         >
           Adicionar
         </button>
@@ -165,22 +165,22 @@ function TarefaItem({
             name="descricao"
             required
             defaultValue={tarefa.descricao}
-            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold"
+            className="campo w-full"
           />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label className="mb-1 block text-xs text-text-2">
+              <label className="rotulo mb-1.5">
                 Prazo
               </label>
               <input
                 type="date"
                 name="prazo"
                 defaultValue={tarefa.prazo ?? ""}
-                className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold"
+                className="campo w-full"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-text-2">
+              <label className="rotulo mb-1.5">
                 Prioridade
               </label>
               <select
@@ -203,7 +203,7 @@ function TarefaItem({
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-gold px-3 py-1.5 text-xs font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
+              className="btn-secondary"
             >
               Salvar
             </button>

@@ -7,7 +7,7 @@ import { parseMarkdownDiagnostico, type ResultadoImportacao } from "@/lib/onboar
 import { iniciarOnboarding, importarOnboarding } from "@/app/actions/onboarding";
 
 const inputClass =
-  "w-full rounded-lg border border-line bg-bg px-4 py-3 text-lg text-text outline-none focus:border-gold";
+  "campo w-full text-lg";
 
 export function OnboardingInicio({
   grupoId,
@@ -173,7 +173,7 @@ export function OnboardingInicio({
               type="button"
               disabled={iniciando || !aluno.trim()}
               onClick={comecar}
-              className="w-full rounded-lg bg-gold px-5 py-3 text-base font-semibold text-on-gold hover:bg-gold-hover disabled:opacity-60"
+              className="btn-secondary w-full"
             >
               {iniciando ? "Criando…" : "Começar diagnóstico"}
             </button>
@@ -206,7 +206,7 @@ export function OnboardingInicio({
             }}
             rows={6}
             placeholder={"# Diagnóstico · Clínica (Dentista)\n\n## Vamos começar pelo básico\n- Nome do dentista: ...\n- Nome da clínica: ..."}
-            className="mt-3 w-full rounded-lg border border-line bg-bg px-4 py-3 font-mono text-xs text-text outline-none placeholder:text-muted focus:border-gold"
+            className="campo mt-3 w-full font-mono text-xs placeholder:text-muted"
           />
 
           {previa && previa.reconhecidos.length > 0 && (
@@ -250,7 +250,7 @@ export function OnboardingInicio({
               type="button"
               disabled={importando || !previa || previa.reconhecidos.length === 0}
               onClick={importar}
-              className="w-full rounded-lg bg-gold px-5 py-3 text-base font-semibold text-on-gold hover:bg-gold-hover disabled:opacity-60"
+              className="btn-secondary w-full"
             >
               {importando ? "Importando…" : "Importar e revisar"}
             </button>

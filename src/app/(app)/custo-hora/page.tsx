@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { formatBRL } from "@/lib/format";
 import { CustosFixosList } from "@/components/CustosFixosList";
 import { CustoHoraConfigForm } from "@/components/CustoHoraConfigForm";
+import { AjudaPopover, PageHeader } from "@/components/ui/PageHeader";
+import { Metric } from "@/components/ui/Metric";
 
 export default async function CustoHoraPage() {
   const supabase = await createClient();
@@ -37,83 +39,65 @@ export default async function CustoHoraPage() {
   const margemPorGrupo = valorMedioCobrado - custoPorGrupo;
 
   return (
-    <div className="max-w-4xl space-y-8">
-      <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
-          Custo por grupo
-        </h1>
-        <p className="mt-1 text-sm text-text-2">
-          Quanto cada grupo ativo custa em overhead (custos fixos divididos
-          pelos grupos ativos), comparado com o valor médio que você cobra.
+    <div className="mx-auto flex max-w-[960px] flex-col gap-9">
+      <PageHeader
+        titulo="Custo por grupo"
+        ajuda={
+          <p>
+            Quanto cada grupo ativo custa em overhead (custos fixos divididos pelos grupos
+            ativos), comparado com o valor médio que você cobra.
+          </p>
+        }
+      />
+
+      <div className="flex flex-col gap-4 border-b border-line pb-7">
+        <div className="grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-3">
+          <Metric rotulo="Custo por grupo" tamanho="lg">
+            {formatBRL(custoPorGrupo)}
+          </Metric>
+          <Metric rotulo="Custo por grupo + margem" tamanho="lg">
+            {formatBRL(custoPorGrupoComMargem)}
+          </Metric>
+          <Metric rotulo="Valor médio cobrado" tamanho="lg">
+            {formatBRL(valorMedioCobrado)}
+          </Metric>
+        </div>
+
+        <p className={`text-[14px] ${margemPorGrupo >= 0 ? "text-text-2" : "text-danger"}`}>
+          Margem média por grupo: {formatBRL(margemPorGrupo)}
+          {gruposAtivos.length > 0 && (
+            <span className={margemPorGrupo >= 0 ? "text-muted" : ""}>
+              {" "}
+              · {gruposAtivos.length} grupo{gruposAtivos.length === 1 ? "" : "s"} ativo
+              {gruposAtivos.length === 1 ? "" : "s"}
+            </span>
+          )}
         </p>
-      </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <ResultCard label="Custo por grupo" value={formatBRL(custoPorGrupo)} />
-        <ResultCard
-          label="Custo por grupo + margem"
-          value={formatBRL(custoPorGrupoComMargem)}
-        />
-        <ResultCard
-          label="Valor médio cobrado"
-          value={formatBRL(valorMedioCobrado)}
-        />
-      </div>
-
-      <div
-        className={`rounded-lg px-3 py-2 text-sm ${
-          margemPorGrupo >= 0
-            ? "bg-ok/10 text-ok"
-            : "bg-danger/10 text-danger"
-        }`}
-      >
-        Margem média por grupo: {formatBRL(margemPorGrupo)}
-        {gruposAtivos.length > 0 && (
-          <> · {gruposAtivos.length} grupo{gruposAtivos.length === 1 ? "" : "s"} ativo{gruposAtivos.length === 1 ? "" : "s"}</>
+        {gruposAtivos.length === 0 && (
+          <p className="text-[14px] text-warn">
+            Nenhum grupo ativo no momento — não dá para calcular o custo por grupo.
+          </p>
         )}
       </div>
 
-      {gruposAtivos.length === 0 && (
-        <div className="rounded-lg bg-warn/10 px-3 py-2 text-sm text-warn">
-          Nenhum grupo ativo no momento — não dá para calcular o custo por
-          grupo.
+      <section className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <h2 className="text-[15px] font-semibold text-text">Parâmetros</h2>
+          <AjudaPopover>
+            <p>
+              Margem de segurança somada ao custo por grupo, para saber o preço mínimo
+              recomendado ao fechar um novo cliente.
+            </p>
+          </AjudaPopover>
         </div>
-      )}
-
-      <section>
-        <h2 className="font-display text-lg font-semibold text-text">
-          Parâmetros
-        </h2>
-        <p className="mt-1 text-xs text-text-2">
-          Margem de segurança somada ao custo por grupo, para saber o preço
-          mínimo recomendado ao fechar um novo cliente.
-        </p>
-        <div className="mt-3">
-          <CustoHoraConfigForm
-            config={config ?? { id: 1, percentual_fator_avaliacao: 15 }}
-          />
-        </div>
+        <CustoHoraConfigForm config={config ?? { id: 1, percentual_fator_avaliacao: 15 }} />
       </section>
 
-      <section>
-        <h2 className="font-display text-lg font-semibold text-text">
-          Custos fixos
-        </h2>
-        <div className="mt-3">
-          <CustosFixosList custos={custos ?? []} />
-        </div>
+      <section className="flex flex-col gap-1">
+        <h2 className="text-[15px] font-semibold text-text">Custos fixos</h2>
+        <CustosFixosList custos={custos ?? []} />
       </section>
-    </div>
-  );
-}
-
-function ResultCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-line bg-surface p-6">
-      <p className="text-sm text-text-2">{label}</p>
-      <p className="mt-2 font-display text-4xl font-bold tracking-tight tabular-nums text-text">
-        {value}
-      </p>
     </div>
   );
 }

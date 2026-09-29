@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { formatBRL, formatMesAno } from "@/lib/format";
+import { displayGroupName, formatBRL, formatMesAno } from "@/lib/format";
 
 export type LinhaClinicaMes = {
   id: string;
@@ -41,15 +41,15 @@ export function ResultadosComparativoMensal({
   );
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-line bg-surface">
-      <table className="w-full text-left text-sm">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[640px] text-left text-[14.5px]">
         <thead>
-          <tr className="border-b border-line text-text-2">
-            <th className="px-4 py-3 font-medium">Mês</th>
-            <th className="px-4 py-3 font-medium">Investido</th>
-            <th className="px-4 py-3 font-medium">Vendas</th>
-            <th className="px-4 py-3 font-medium">Faturamento</th>
-            <th className="px-4 py-3"></th>
+          <tr className="border-b border-line text-[12.5px] text-subtle">
+            <th className="px-3 pb-2.5 pt-3 font-normal">Mês</th>
+            <th className="px-3 pb-2.5 pt-3 font-normal">Investido</th>
+            <th className="px-3 pb-2.5 pt-3 font-normal">Vendas</th>
+            <th className="px-3 pb-2.5 pt-3 font-normal">Faturamento</th>
+            <th className="px-3 py-3"></th>
           </tr>
         </thead>
         <tbody>
@@ -64,62 +64,62 @@ export function ResultadosComparativoMensal({
             return (
               <Fragment key={mes}>
                 <tr
-                  className="cursor-pointer border-b border-line last:border-0 hover:bg-hover"
+                  className="cursor-pointer border-b border-line-soft transition-colors last:border-0 hover:bg-hover"
                   onClick={() => setExpandido(aberto ? null : mes)}
                 >
-                  <td className="px-4 py-3 font-medium text-text">
+                  <td className="px-3 py-3 text-text">
                     {formatMesAno(ano, mesNum)}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-text">
+                  <td className="px-3 py-3 tabular-nums text-text">
                     {formatBRL(s.investimento)}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-text">
+                  <td className="px-3 py-3 tabular-nums text-text">
                     {s.vendas}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-ok">
+                  <td className="px-3 py-3 tabular-nums text-text">
                     {formatBRL(s.faturamento)}
                   </td>
-                  <td className="px-4 py-3 text-right text-text-2">
-                    {aberto ? "▲" : "▼"}
+                  <td className="px-3 py-3 text-right text-text-2">
+                    <span className={`inline-block text-subtle transition-transform ${aberto ? "rotate-180" : ""}`}>▾</span>
                   </td>
                 </tr>
                 {aberto && (
-                  <tr className="border-b border-line last:border-0">
-                    <td colSpan={5} className="bg-hover p-0">
-                      <table className="w-full text-left text-sm">
+                  <tr className="border-b border-line-soft last:border-0">
+                    <td colSpan={5} className="p-0 pb-4 pl-4">
+                      <table className="w-full min-w-[640px] text-left text-[14.5px]">
                         <thead>
-                          <tr className="border-b border-line text-text-2">
-                            <th className="px-4 py-2 font-medium">Clínica</th>
-                            <th className="px-4 py-2 font-medium">Investido</th>
-                            <th className="px-4 py-2 font-medium">Leads</th>
-                            <th className="px-4 py-2 font-medium">Vendas</th>
-                            <th className="px-4 py-2 font-medium">Faturamento</th>
-                            <th className="px-4 py-2 font-medium">ROAS</th>
-                            <th className="px-4 py-2 font-medium">Ticket médio</th>
+                          <tr className="border-b border-line text-[12.5px] text-subtle">
+                            <th className="px-3 py-2 font-normal">Clínica</th>
+                            <th className="px-3 py-2 font-normal">Investido</th>
+                            <th className="px-3 py-2 font-normal">Leads</th>
+                            <th className="px-3 py-2 font-normal">Vendas</th>
+                            <th className="px-3 py-2 font-normal">Faturamento</th>
+                            <th className="px-3 py-2 font-normal">ROAS</th>
+                            <th className="px-3 py-2 font-normal">Ticket médio</th>
                           </tr>
                         </thead>
                         <tbody>
                           {clinicasOrdenadas.map((c) => (
                             <tr key={c.id} className="border-b border-line last:border-0">
-                              <td className="px-4 py-2 font-medium text-text">
-                                {c.nome}
+                              <td className="px-3 py-2.5 text-text">
+                                {displayGroupName(c.nome)}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-text">
+                              <td className="px-3 py-2.5 tabular-nums text-text">
                                 {formatBRL(c.investimento)}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-text">
+                              <td className="px-3 py-2.5 tabular-nums text-text">
                                 {c.leads}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-text">
+                              <td className="px-3 py-2.5 tabular-nums text-text">
                                 {c.vendas}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-ok">
+                              <td className="px-3 py-2.5 tabular-nums text-text">
                                 {formatBRL(c.faturamento)}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-text">
+                              <td className="px-3 py-2.5 tabular-nums text-text">
                                 {c.roas === null ? "—" : `${c.roas.toFixed(1)}x`}
                               </td>
-                              <td className="px-4 py-2 tabular-nums text-text">
+                              <td className="px-3 py-2.5 tabular-nums text-text">
                                 {c.ticketMedio === null ? "—" : formatBRL(c.ticketMedio)}
                               </td>
                             </tr>
@@ -128,7 +128,7 @@ export function ResultadosComparativoMensal({
                             <tr>
                               <td
                                 colSpan={7}
-                                className="px-4 py-4 text-center text-text-2"
+                                className="px-4 py-4 text-center text-muted"
                               >
                                 Nenhum lançamento nesse mês.
                               </td>
@@ -144,7 +144,7 @@ export function ResultadosComparativoMensal({
           })}
           {meses.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-4 py-8 text-center text-text-2">
+              <td colSpan={5} className="px-4 py-8 text-center text-muted">
                 Nenhum resultado lançado ainda.
               </td>
             </tr>

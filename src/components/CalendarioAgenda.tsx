@@ -11,6 +11,8 @@ import {
 } from "@/lib/agendaConflitos";
 import { AgendarReuniaoModal } from "@/components/AgendarReuniaoModal";
 import { ReuniaoSemHorarioModal } from "@/components/ReuniaoSemHorarioModal";
+import { Icon } from "@/components/ui/Icon";
+import { Segmented } from "@/components/ui/Segmented";
 import { MiniCalendario } from "@/components/MiniCalendario";
 import { AgendaResumo, type ProximaReuniao } from "@/components/AgendaResumo";
 import type { GrupoParaAgendar } from "@/lib/agendaStatus";
@@ -240,12 +242,12 @@ export function CalendarioAgenda({
 
   function corDaReuniao(r: ReuniaoDoDia): string {
     if (r.responsavelId && r.responsavelId === pabloId) {
-      return "border-gold bg-gold/25 text-text";
+      return "border-gold bg-gold/20 text-text";
     }
     if (r.responsavelId) {
-      return "border-ok bg-ok/20 text-text";
+      return "border-info bg-info/[0.16] text-text";
     }
-    return "border-muted bg-off/10 text-text";
+    return "border-muted bg-off/15 text-text";
   }
 
   // O corpo do evento não captura o mouse (o clique cai no slot de baixo);
@@ -337,8 +339,8 @@ export function CalendarioAgenda({
   ];
 
   return (
-    <div className="flex flex-col gap-4 lg:flex-row">
-      <div className="shrink-0 space-y-4 lg:sticky lg:top-4 lg:self-start">
+    <div className="flex flex-col gap-6 min-[1400px]:flex-row">
+      <div className="flex shrink-0 flex-wrap gap-x-10 gap-y-6 min-[1400px]:sticky min-[1400px]:top-4 min-[1400px]:flex-col min-[1400px]:self-start">
         <MiniCalendario
           ano={miniAno}
           mes={miniMes}
@@ -354,70 +356,54 @@ export function CalendarioAgenda({
             <Link
               href={`/agenda?data=${somarDias(dias[0], -7)}`}
               prefetch={false}
-              className="btn-secondary text-sm"
+              aria-label="Semana anterior"
+              className="btn-secondary h-9 w-9 px-0"
             >
-              ‹
+              <Icon nome="chevronEsquerda" tamanho={16} />
             </Link>
-            <Link href="/agenda" prefetch={false} className="btn-secondary text-sm">
+            <Link href="/agenda" prefetch={false} className="btn-secondary h-9 px-3.5">
               Hoje
             </Link>
             <Link
               href={`/agenda?data=${somarDias(dias[0], 7)}`}
               prefetch={false}
-              className="btn-secondary text-sm"
+              aria-label="Próxima semana"
+              className="btn-secondary h-9 w-9 px-0"
             >
-              ›
+              <Icon nome="chevronDireita" tamanho={16} />
             </Link>
-            <span className="ml-1 text-sm text-text-2">
+            <span className="ml-1.5 text-sm tabular-nums text-text-2">
               {formatDiaMesCurto(dias[0])} — {formatDiaMesCurto(dias[6])}
             </span>
           </div>
 
-          <div
-            role="radiogroup"
-            aria-label="Filtrar por responsável"
-            className="flex rounded-lg border border-line bg-surface p-0.5"
-          >
-            {opcoesFiltro.map((o) => (
-              <button
-                key={o.valor}
-                type="button"
-                role="radio"
-                aria-checked={filtro === o.valor}
-                onClick={() => setFiltro(o.valor)}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                  filtro === o.valor
-                    ? "bg-gold text-on-gold"
-                    : "text-text-2 hover:text-text"
-                }`}
-              >
-                {o.label}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            rotulo="Filtrar por responsável"
+            valor={filtro}
+            onChange={setFiltro}
+            opcoes={opcoesFiltro}
+          />
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-2">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[13px] text-subtle">
           <span className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-sm border-l-2 border-gold bg-gold/25" />
+            <span className="h-[7px] w-[7px] rounded-full bg-gold" />
             Reunião Dr. Pablo
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-sm border-l-2 border-ok bg-ok/20" />
+            <span className="h-[7px] w-[7px] rounded-full bg-info" />
             Reunião Rafael
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="agenda-compromisso h-3 w-3 rounded-sm border-l-2 border-muted/60" />
+            <span className="h-[7px] w-[7px] rounded-full bg-off" />
             Compromisso da clínica
           </span>
-          <span className="text-muted">
-            · Clique em qualquer horário pra agendar
-          </span>
+          <span>· Clique em qualquer horário pra agendar</span>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+        <div className="overflow-x-auto rounded-xl border border-line">
           <div
-            className="grid min-w-[880px]"
+            className="grid min-w-[760px]"
             style={{ gridTemplateColumns: "56px repeat(7, minmax(0, 1fr))" }}
           >
             <div className="border-b border-r border-line" />
@@ -426,15 +412,13 @@ export function CalendarioAgenda({
               return (
                 <div
                   key={d}
-                  className={`border-b border-r border-line px-2 py-2 text-center last:border-r-0 ${
-                    ehHoje ? "bg-hover" : ""
-                  }`}
+                  className="border-b border-r border-line px-2 py-2.5 text-center last:border-r-0"
                 >
-                  <p className="text-xs text-text-2">
+                  <p className="text-xs text-subtle">
                     {formatDiaSemanaCurto(d)}
                   </p>
                   <p
-                    className={`font-display text-sm font-semibold tabular-nums ${
+                    className={`text-sm font-semibold tabular-nums ${
                       ehHoje ? "text-gold" : "text-text"
                     }`}
                   >
@@ -533,10 +517,10 @@ export function CalendarioAgenda({
                       com o horário que vai abrir no modal. */}
                   {hoverAqui != null && (
                     <div
-                      className="pointer-events-none absolute inset-x-0 z-10 rounded-sm bg-gold/10 ring-1 ring-inset ring-gold/70"
+                      className="pointer-events-none absolute inset-x-0 z-10 rounded-sm bg-gold/[0.06] ring-1 ring-inset ring-gold"
                       style={{ top: hoverAqui * ALTURA_LINHA, height: ALTURA_LINHA }}
                     >
-                      <span className="absolute left-1 top-1/2 -translate-y-1/2 rounded bg-gold px-1 text-[10px] font-semibold tabular-nums text-on-gold">
+                      <span className="absolute left-1 top-1/2 -translate-y-1/2 rounded bg-bg/85 px-1 text-[10.5px] font-semibold tabular-nums text-gold">
                         {horaDoSlot(hoverAqui)}
                       </span>
                     </div>
@@ -550,7 +534,7 @@ export function CalendarioAgenda({
         {tooltip && (
           <div
             role="tooltip"
-            className="pointer-events-none fixed z-40 max-w-64 rounded-lg border border-line bg-hover px-3 py-2 text-xs shadow-xl"
+            className="pointer-events-none fixed z-40 max-w-64 rounded-lg border border-line bg-surface px-3 py-2 text-xs shadow-xl"
             style={{ left: tooltip.x, top: tooltip.y }}
           >
             <p className="font-medium text-text">{tooltip.titulo}</p>

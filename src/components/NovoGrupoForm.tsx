@@ -140,7 +140,7 @@ export function NovoGrupoForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold transition-colors hover:bg-gold-hover disabled:opacity-60"
+        className="btn-secondary"
       >
         {isPending ? "Salvando…" : "Criar grupo"}
       </button>
@@ -159,7 +159,7 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-1 block text-sm text-text-2">
+      <label htmlFor={htmlFor} className="rotulo mb-1.5">
         {label}
       </label>
       {children}
@@ -168,4 +168,4 @@ function Field({
 }
 
 const inputClass =
-  "w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold";
+  "campo w-full";

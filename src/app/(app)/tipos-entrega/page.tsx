@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { TiposEntregaList } from "@/components/TiposEntregaList";
 import { ProcessosMatrix } from "@/components/ProcessosMatrix";
+import { AjudaPopover, PageHeader } from "@/components/ui/PageHeader";
 
 export default async function ProcessosPage() {
   const supabase = await createClient();
@@ -15,47 +16,45 @@ export default async function ProcessosPage() {
   ]);
 
   return (
-    <div className="max-w-6xl space-y-10">
-      <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
-          Processos
-        </h1>
-        <p className="mt-1 text-sm text-text-2">
-          Ao adicionar um novo processo, ele passa a aparecer no checklist de
-          todos os grupos existentes. Desativar não apaga o histórico já
-          registrado.
-        </p>
-        <div className="mt-6 max-w-3xl">
-          <TiposEntregaList tipos={tipos ?? []} />
-        </div>
+    <div className="mx-auto flex max-w-[960px] flex-col gap-12">
+      <div className="flex flex-col gap-7">
+        <PageHeader
+          titulo="Processos"
+          ajuda={
+            <p>
+              Ao adicionar um novo processo, ele passa a aparecer no checklist de todos os
+              grupos existentes. Desativar não apaga o histórico já registrado.
+            </p>
+          }
+        />
+        <TiposEntregaList tipos={tipos ?? []} />
       </div>
 
-      <div>
-        <h2 className="font-display text-lg font-semibold text-text">
-          Processos por grupo
-        </h2>
-        <p className="mt-1 text-xs text-text-2">
-          Veja de uma vez quais processos cada grupo já tem e quais faltam, ou
-          filtre por processo (ex: quantos grupos não fizeram Campanha
-          Interna) e por status do grupo.
-        </p>
-        <div className="mt-3">
-          <ProcessosMatrix
-            grupos={(grupos ?? []).map((g) => ({
-              id: g.id,
-              nome: g.nome,
-              status: g.status,
-              trafego_pago: g.trafego_pago,
-            }))}
-            processos={tipos ?? []}
-            entregas={(entregas ?? []).map((e) => ({
-              grupo_id: e.grupo_id,
-              tipo_entrega_id: e.tipo_entrega_id,
-              feito: e.feito,
-            }))}
-          />
+      <section className="flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-[15px] font-semibold text-text">Processos por grupo</h2>
+          <AjudaPopover>
+            <p>
+              Veja de uma vez quais processos cada grupo já tem e quais faltam, ou filtre por
+              processo (ex: quantos grupos não fizeram Campanha Interna) e por status do grupo.
+            </p>
+          </AjudaPopover>
         </div>
-      </div>
+        <ProcessosMatrix
+          grupos={(grupos ?? []).map((g) => ({
+            id: g.id,
+            nome: g.nome,
+            status: g.status,
+            trafego_pago: g.trafego_pago,
+          }))}
+          processos={tipos ?? []}
+          entregas={(entregas ?? []).map((e) => ({
+            grupo_id: e.grupo_id,
+            tipo_entrega_id: e.tipo_entrega_id,
+            feito: e.feito,
+          }))}
+        />
+      </section>
     </div>
   );
 }

@@ -42,7 +42,7 @@ export function AsaasCustomerIdField({
             );
           }
         }}
-        className="mt-2 w-full rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text outline-none focus:border-gold"
+        className="campo mt-2 w-full"
       />
       <p className="mt-2 text-xs text-text-2">
         Cole aqui o ID do cliente no Asaas (Clientes → esse cliente → ID no
@@ -59,7 +59,7 @@ export function AsaasCustomerIdField({
           disabled={isBuscando}
           placeholder="CPF ou CNPJ do cliente"
           onChange={(e) => setDocumento(e.target.value)}
-          className="w-56 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text outline-none focus:border-gold"
+          className="campo w-56"
         />
         <button
           type="button"

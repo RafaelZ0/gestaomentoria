@@ -3,15 +3,18 @@
 import { useState, useTransition } from "react";
 import { createTipoEntrega, toggleTipoEntregaAtivo } from "@/app/actions/tiposEntrega";
 import { formatDate } from "@/lib/format";
-import { StatusBadge } from "@/components/StatusBadge";
+import { StatusDot } from "@/components/ui/StatusDot";
+import { RowMenu } from "@/components/ui/RowMenu";
 import type { TipoEntrega } from "@/lib/database.types";
+
+const COLUNAS = "grid-cols-[1fr_150px_110px_36px]";
 
 export function TiposEntregaList({ tipos }: { tipos: TipoEntrega[] }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-5">
       <form
         action={(formData) => {
           setError(null);
@@ -23,52 +26,35 @@ export function TiposEntregaList({ tipos }: { tipos: TipoEntrega[] }) {
             }
           });
         }}
-        className="flex gap-3"
+        className="flex gap-2"
       >
         <input
           name="nome"
           required
           placeholder="Nome do novo processo…"
-          className="flex-1 rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+          aria-label="Nome do novo processo"
+          className="campo flex-1"
         />
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
-        >
+        <button type="submit" disabled={isPending} className="btn-secondary">
           Adicionar
         </button>
       </form>
 
-      {error && (
-        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
-      <div className="overflow-x-auto rounded-xl border border-line bg-surface">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-line text-text-2">
-              <th className="px-4 py-3 font-medium">Nome</th>
-              <th className="px-4 py-3 font-medium">Ativo desde</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {tipos.map((t) => (
-              <TipoRow key={t.id} tipo={t} />
-            ))}
-            {tipos.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-text-2">
-                  Nenhum processo cadastrado ainda.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="flex flex-col">
+        <div className={`grid ${COLUNAS} gap-3 border-b border-line px-3 pb-2.5 pt-1 text-[12.5px] text-subtle`}>
+          <span>Nome</span>
+          <span>Ativo desde</span>
+          <span>Status</span>
+          <span />
+        </div>
+        {tipos.map((t) => (
+          <TipoRow key={t.id} tipo={t} />
+        ))}
+        {tipos.length === 0 && (
+          <p className="px-3 py-8 text-center text-sm text-muted">Nenhum processo cadastrado ainda.</p>
+        )}
       </div>
     </div>
   );
@@ -89,75 +75,72 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
   }
 
   return (
-    <tr className="border-b border-line last:border-0 hover:bg-hover">
-      <td className="px-4 py-3 text-text">{tipo.nome}</td>
-      <td className="px-4 py-3">
+    <div
+      className={`grid ${COLUNAS} min-h-12 items-center gap-3 border-b border-line-soft px-3 py-1.5 text-[14.5px] last:border-b-0`}
+    >
+      <span className={tipo.ativo ? "text-text" : "text-muted"}>{tipo.nome}</span>
+      <span className="text-[13.5px] tabular-nums text-text-2">
         {editandoData ? (
-          <div className="flex items-center gap-2">
-            <input
-              type="date"
-              value={statusDesde}
-              disabled={isPending}
-              onChange={(e) => setStatusDesde(e.target.value)}
-              className="rounded-lg border border-line bg-hover px-2 py-1 text-xs text-text outline-none focus:border-gold"
-            />
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={salvarData}
-              className="rounded-lg bg-gold px-2.5 py-1 text-xs font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
-            >
-              Salvar
-            </button>
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={() => {
-                setStatusDesde(tipo.status_desde ?? new Date().toISOString().slice(0, 10));
-                setEditandoData(false);
-              }}
-              className="btn-secondary px-2.5 py-1 text-xs"
-            >
-              Cancelar
-            </button>
-          </div>
+          <input
+            type="date"
+            value={statusDesde}
+            disabled={isPending}
+            autoFocus
+            onChange={(e) => setStatusDesde(e.target.value)}
+            className="campo h-8 px-2 text-[13px]"
+          />
         ) : (
-          <div className="flex items-center gap-2">
-            <span className="tabular-nums text-text-2">
-              {formatDate(statusDesde)}
-            </span>
-            <button
-              type="button"
-              onClick={() => setEditandoData(true)}
-              aria-label="Editar data"
-              title="Editar data"
-              className="-m-1.5 rounded p-1.5 text-text-2 hover:bg-hover hover:text-text"
-            >
-              ✎
-            </button>
-          </div>
+          formatDate(statusDesde)
         )}
-      </td>
-      <td className="px-4 py-3">
-        <StatusBadge label={tipo.ativo ? "Ativo" : "Inativo"} variant={tipo.ativo ? "ok" : "alert"} />
-      </td>
-      <td className="px-4 py-3 text-right">
-        <button
-          disabled={isPending}
-          onClick={() =>
-            startTransition(() =>
-              toggleTipoEntregaAtivo(tipo.id, !tipo.ativo, statusDesde)
-            )
-          }
-          className={
+      </span>
+      <span className="text-[13.5px]">
+        <StatusDot tom={tipo.ativo ? "ok" : "off"}>{tipo.ativo ? "Ativo" : "Inativo"}</StatusDot>
+      </span>
+      {editandoData ? (
+        <span className="col-span-4 flex justify-end gap-2 pb-2">
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => {
+              setStatusDesde(tipo.status_desde ?? new Date().toISOString().slice(0, 10));
+              setEditandoData(false);
+            }}
+            className="btn-secondary h-8 px-3 text-[13px]"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={salvarData}
+            className="btn-secondary h-8 px-3 text-[13px]"
+          >
+            Salvar
+          </button>
+        </span>
+      ) : (
+        <RowMenu
+          rotulo={`Mais opções de ${tipo.nome}`}
+          acoes={[
+            { label: "Editar data", onSelect: () => setEditandoData(true) },
             tipo.ativo
-              ? "rounded-lg border border-danger/40 px-3 py-1.5 text-xs text-danger hover:bg-danger/10 disabled:opacity-60"
-              : "btn-secondary px-3 py-1.5 text-xs"
-          }
-        >
-          {tipo.ativo ? "Desativar" : "Reativar"}
-        </button>
-      </td>
-    </tr>
+              ? {
+                  label: "Desativar",
+                  destrutiva: true,
+                  confirmar: {
+                    titulo: `Desativar “${tipo.nome}”?`,
+                    texto: "O processo sai do checklist dos grupos. O histórico já registrado não é apagado.",
+                    botao: "Desativar",
+                  },
+                  onSelect: () => toggleTipoEntregaAtivo(tipo.id, false, statusDesde),
+                }
+              : {
+                  label: "Reativar",
+                  onSelect: () => toggleTipoEntregaAtivo(tipo.id, true, statusDesde),
+                },
+          ]}
+        />
+      )}
+    </div>
   );
 }

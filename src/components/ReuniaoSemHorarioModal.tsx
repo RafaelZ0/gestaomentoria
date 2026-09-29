@@ -14,8 +14,7 @@ import { formatDiaSemanaCurto, formatDiaMesCurto } from "@/lib/calendario";
 import { OPCOES_DURACAO } from "@/components/AgendarReuniaoModal";
 import type { ReuniaoDoDia } from "@/components/CalendarioAgenda";
 
-const CAMPO =
-  "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold";
+const CAMPO = "campo";
 
 // Reunião da faixa "Sem horário": mostra os dados e, no modo Editar,
 // deixa definir início e duração (Editar → Salvar / Cancelar).
@@ -101,11 +100,11 @@ export function ReuniaoSemHorarioModal({
         role="dialog"
         aria-label={`Reunião ${reuniao.grupoNome}`}
         onClick={(e) => e.stopPropagation()}
-        className="max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-4 overflow-y-auto rounded-xl border border-line bg-hover p-5 shadow-2xl"
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-md space-y-4 overflow-y-auto rounded-xl border border-line bg-surface p-5 shadow-2xl"
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="font-display text-lg font-semibold text-text">
+            <h2 className="text-[17px] font-semibold text-text">
               {reuniao.grupoNome}
             </h2>
             <p className="text-xs text-text-2">
@@ -116,7 +115,7 @@ export function ReuniaoSemHorarioModal({
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded p-1 text-text-2 hover:bg-surface hover:text-text"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-hover hover:text-text"
           >
             ✕
           </button>
@@ -141,7 +140,7 @@ export function ReuniaoSemHorarioModal({
                   href={reuniao.linkReuniao}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-gold hover:text-gold-hover"
+                  className="link"
                 >
                   {reuniao.linkReuniao}
                 </a>
@@ -165,7 +164,7 @@ export function ReuniaoSemHorarioModal({
             )}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs text-text-2">Início</label>
+                <label className="rotulo mb-1.5">Início</label>
                 <input
                   type="time"
                   step={300}
@@ -179,7 +178,7 @@ export function ReuniaoSemHorarioModal({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-text-2">Duração</label>
+                <label className="rotulo mb-1.5">Duração</label>
                 <select
                   value={duracaoMin}
                   onChange={(e) => {
@@ -219,7 +218,7 @@ export function ReuniaoSemHorarioModal({
                 type="checkbox"
                 checked={forcarEncaixe}
                 onChange={(e) => setForcarEncaixe(e.target.checked)}
-                className="accent-gold"
+                className="h-4 w-4"
               />
               Forçar encaixe (salvar mesmo com conflito)
             </label>
@@ -228,7 +227,7 @@ export function ReuniaoSemHorarioModal({
               <button
                 type="submit"
                 disabled={isPending}
-                className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
+                className="btn-primary"
               >
                 {isPending ? "Salvando…" : "Salvar"}
               </button>
@@ -238,7 +237,7 @@ export function ReuniaoSemHorarioModal({
                   setEditando(false);
                   setErro(null);
                 }}
-                className="rounded-lg border border-line px-4 py-2 text-sm text-text-2 hover:bg-surface"
+                className="btn-secondary"
               >
                 Cancelar
               </button>
@@ -249,14 +248,14 @@ export function ReuniaoSemHorarioModal({
             <Link
               href={`/grupos/${reuniao.grupoId}/reunioes`}
               prefetch={false}
-              className="text-sm text-gold hover:text-gold-hover"
+              className="link text-sm"
             >
               Abrir no grupo
             </Link>
             <button
               type="button"
               onClick={() => setEditando(true)}
-              className="rounded-lg border border-line px-4 py-2 text-sm text-text hover:bg-surface"
+              className="btn-secondary"
             >
               Editar horário
             </button>

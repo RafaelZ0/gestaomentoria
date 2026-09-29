@@ -22,9 +22,7 @@ export function ResponsavelField({
 
   return (
     <div>
-      <label className="mb-1 block text-sm text-text-2">
-        {label}
-      </label>
+      <label className="rotulo mb-1.5">{label}</label>
       {error && <p className="mb-1 text-xs text-danger">{error}</p>}
       {!novoResponsavel ? (
         <div className="flex gap-2">
@@ -32,7 +30,7 @@ export function ResponsavelField({
             name="responsavel_id"
             value={responsavelId}
             onChange={(e) => setResponsavelId(e.target.value)}
-            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+            className="campo"
           >
             <option value="">—</option>
             {listaResponsaveis.map((r) => (
@@ -44,9 +42,9 @@ export function ResponsavelField({
           <button
             type="button"
             onClick={() => setNovoResponsavel(true)}
-            className="whitespace-nowrap rounded-lg border border-line px-3 py-2 text-xs text-text-2 hover:bg-hover"
+            className="btn-secondary px-3 text-[13px]"
           >
-            + Novo
+            Novo
           </button>
         </div>
       ) : (
@@ -56,7 +54,7 @@ export function ResponsavelField({
             value={nomeResponsavel}
             onChange={(e) => setNomeResponsavel(e.target.value)}
             placeholder="Nome do responsável"
-            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+            className="campo"
           />
           <button
             type="button"
@@ -74,7 +72,7 @@ export function ResponsavelField({
                 }
               })
             }
-            className="whitespace-nowrap rounded-lg bg-gold px-3 py-2 text-xs font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
+            className="btn-secondary px-3 text-[13px]"
           >
             Salvar
           </button>

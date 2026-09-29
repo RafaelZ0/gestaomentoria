@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { formatDate } from "@/lib/format";
+import { displayGroupName, formatDate } from "@/lib/format";
+import { RowMenu } from "@/components/ui/RowMenu";
 import { updateReuniao, removeReuniao } from "@/app/actions/reunioes";
 import { ResponsavelField } from "@/components/ResponsavelField";
 import { ParticipantesFields } from "@/components/ParticipantesFields";
@@ -72,7 +73,7 @@ export function ReuniaoItem({
     const participantesIds = new Set(participantes.map((p) => p.id));
 
     return (
-      <li className="rounded-xl border border-line bg-surface p-5">
+      <li className="border-b border-line-soft py-5 last:border-b-0">
         <form
           action={(formData) => {
             setError(null);
@@ -87,21 +88,17 @@ export function ReuniaoItem({
           }}
           className="space-y-4"
         >
-          {error && (
-            <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-              {error}
-            </div>
-          )}
+          {error && <p className="text-sm text-danger">{error}</p>}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm text-text-2">Data</label>
+              <label className="rotulo mb-1.5">Data</label>
               <input
                 type="date"
                 name="data"
                 value={data}
                 onChange={(e) => setData(e.target.value)}
-                className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+                className="campo w-full"
               />
             </div>
             <ResponsavelField
@@ -113,18 +110,18 @@ export function ReuniaoItem({
           {agendadaEdicao && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm text-text-2">
+                <label className="rotulo mb-1.5">
                   Horário (opcional)
                 </label>
                 <input
                   type="time"
                   name="hora"
                   defaultValue={reuniao.hora ? reuniao.hora.slice(0, 5) : ""}
-                  className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+                  className="campo w-full"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm text-text-2">
+                <label className="rotulo mb-1.5">
                   Link da reunião (opcional)
                 </label>
                 <input
@@ -132,14 +129,14 @@ export function ReuniaoItem({
                   name="link_reuniao"
                   defaultValue={reuniao.link_reuniao ?? ""}
                   placeholder="https://meet.google.com/..."
-                  className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+                  className="campo w-full"
                 />
               </div>
             </div>
           )}
 
           {!agendadaEdicao && (
-            <label className="flex items-center gap-3 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text">
+            <label className="flex items-center gap-3 text-sm text-text">
               <input
                 type="checkbox"
                 name="nao_compareceu"
@@ -152,7 +149,7 @@ export function ReuniaoItem({
           )}
 
           <div>
-            <label className="mb-1 block text-sm text-text-2">
+            <label className="rotulo mb-1.5">
               {agendadaEdicao
                 ? "Pauta / observação (opcional)"
                 : naoCompareceu
@@ -164,7 +161,7 @@ export function ReuniaoItem({
               required={!agendadaEdicao && !naoCompareceu}
               rows={agendadaEdicao || naoCompareceu ? 2 : 4}
               defaultValue={reuniao.resumo}
-              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+              className="campo w-full"
             />
           </div>
 
@@ -180,19 +177,11 @@ export function ReuniaoItem({
           )}
 
           <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isPending}
-              className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
-            >
-              {isPending ? "Salvando…" : "Salvar"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditando(false)}
-              className="btn-secondary"
-            >
+            <button type="button" onClick={() => setEditando(false)} className="btn-secondary">
               Cancelar
+            </button>
+            <button type="submit" disabled={isPending} className="btn-secondary">
+              {isPending ? "Salvando…" : "Salvar"}
             </button>
           </div>
         </form>
@@ -203,86 +192,66 @@ export function ReuniaoItem({
   return (
     <li
       onClick={() => setEditando(true)}
-      className="cursor-pointer rounded-xl border border-line bg-surface p-5 hover:bg-hover"
+      className="-mx-3 cursor-pointer rounded-lg border-b border-line-soft px-3 py-4 transition-colors last:border-b-0 hover:bg-hover"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-text">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+          <span className="text-[14.5px] font-medium tabular-nums text-text">
             {formatDate(reuniao.data)}
             {reuniao.hora && ` às ${reuniao.hora.slice(0, 5)}`}
-          </p>
-          {onboardingHref && (
-            <span className="rounded-full bg-warn/10 px-2 py-0.5 text-xs font-semibold text-warn">
-              Onboarding
-            </span>
-          )}
-          {!reuniao.compareceu && (
-            <span className="rounded-full bg-danger/10 px-2 py-0.5 text-xs font-medium text-danger">
-              Não compareceu
-            </span>
-          )}
-          {agendada && (
-            <span className="rounded-full bg-gold/10 px-2 py-0.5 text-xs font-medium text-gold">
-              Agendada
-            </span>
-          )}
+          </span>
+          {onboardingHref && <span className="text-[13px] text-gold">Onboarding</span>}
+          {!reuniao.compareceu && <span className="text-[13px] text-danger">Não compareceu</span>}
+          {agendada && <span className="text-[13px] text-muted">Agendada</span>}
           {grupoOrigemNome && (
             <span
               title="Essa reunião foi agendada por outro grupo; alguém deste grupo participou como convidado."
-              className="rounded-full bg-hover px-2 py-0.5 text-xs text-text-2"
+              className="text-[13px] text-muted"
             >
-              Reunião de {grupoOrigemNome}
+              Reunião de {displayGroupName(grupoOrigemNome)}
             </span>
           )}
         </div>
         <div className="flex items-center gap-3">
           {responsavelNome && (
-            <span className="rounded-full bg-hover px-2 py-0.5 text-xs text-text-2">
-              Conduzida por {responsavelNome}
-            </span>
+            <span className="text-[13px] text-muted">Conduzida por {responsavelNome}</span>
           )}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setEditando(true);
-            }}
-            className="text-xs text-text-2 hover:text-text"
-          >
-            Editar
-          </button>
-          <button
-            disabled={isPending}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!confirm("Excluir esta reunião? Essa ação não pode ser desfeita.")) {
-                return;
-              }
-              startTransition(async () => {
-                try {
-                  await removeReuniao(reuniao.id);
-                } catch (err) {
-                  if (err instanceof Error) setError(err.message);
-                }
-              });
-            }}
-            className="text-xs text-text-2 hover:text-danger disabled:opacity-60"
-          >
-            Excluir
-          </button>
+          <RowMenu
+            rotulo="Mais opções da reunião"
+            acoes={[
+              { label: "Editar", onSelect: () => setEditando(true) },
+              {
+                label: "Excluir",
+                destrutiva: true,
+                confirmar: {
+                  titulo: "Excluir esta reunião?",
+                  texto: "Essa ação não pode ser desfeita.",
+                  botao: "Excluir",
+                },
+                onSelect: async () => {
+                  try {
+                    await removeReuniao(reuniao.id);
+                  } catch (err) {
+                    if (err instanceof Error) setError(err.message);
+                  }
+                },
+              },
+            ]}
+          />
         </div>
       </div>
       {error && (
         <p className="mt-2 text-xs text-danger">{error}</p>
       )}
       {reuniao.resumo && (
-        <p className="mt-2 whitespace-pre-wrap text-sm text-text-2">{reuniao.resumo}</p>
+        <p className="mt-1.5 whitespace-pre-wrap text-[14px] leading-relaxed text-text-2">{reuniao.resumo}</p>
       )}
       {onboardingHref && (
         <Link
           href={onboardingHref}
           prefetch={false}
           onClick={(e) => e.stopPropagation()}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-warn/40 bg-warn/10 px-3 py-1.5 text-sm font-medium text-warn hover:border-warn"
+          className="link mt-2 inline-block text-[13.5px]"
         >
           Ver raio-X da clínica →
         </Link>
@@ -293,13 +262,13 @@ export function ReuniaoItem({
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="mt-2 inline-block text-sm text-gold hover:text-gold-hover"
+          className="link mt-1.5 block w-fit truncate text-[13.5px]"
         >
           {reuniao.link_reuniao}
         </a>
       )}
       {agendada && (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
           <a
             href={linkWhatsapp(
               mensagemConfirmacaoReuniao(grupoNome, reuniao.data, reuniao.hora)
@@ -307,9 +276,9 @@ export function ReuniaoItem({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="rounded-lg border border-line px-2.5 py-1 text-xs text-text-2 hover:bg-hover hover:text-text"
+            className="text-muted hover:text-text"
           >
-            Lembrete de confirmação
+            Lembrete de confirmação ↗
           </a>
           <a
             href={linkWhatsapp(
@@ -318,17 +287,17 @@ export function ReuniaoItem({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="rounded-lg border border-line px-2.5 py-1 text-xs text-text-2 hover:bg-hover hover:text-text"
+            className="text-muted hover:text-text"
           >
-            Lembrete com link (10 min antes)
+            Lembrete com link (10 min antes) ↗
           </a>
         </div>
       )}
       {participantes.length > 0 && (
-        <p className="mt-3 text-xs text-text-2">
+        <p className="mt-2 text-[13px] text-subtle">
           Participantes:{" "}
           {participantes
-            .map((p) => p.nome + (p.deOutroGrupo && p.grupoNome ? ` (${p.grupoNome})` : ""))
+            .map((p) => p.nome + (p.deOutroGrupo && p.grupoNome ? ` (${displayGroupName(p.grupoNome)})` : ""))
             .join(", ")}
         </p>
       )}

@@ -7,6 +7,8 @@ import {
 import { DIAS_PARA_AGENDAR } from "@/app/(app)/layout";
 import { CalendarioAgenda, type ReuniaoDoDia } from "@/components/CalendarioAgenda";
 import type { ProximaReuniao } from "@/components/AgendaResumo";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { displayGroupName } from "@/lib/format";
 
 export default async function AgendaPage({
   searchParams,
@@ -95,7 +97,7 @@ export default async function AgendaPage({
       grupoId: r.grupo_id,
       hora: r.hora,
       duracaoMin: r.duracao_min,
-      grupoNome: r.grupos_gestao?.nome ?? "—",
+      grupoNome: displayGroupName(r.grupos_gestao?.nome) || "—",
       responsavelId: r.responsavel_id,
       responsavelNome: r.responsavel_id
         ? (responsavelPorId.get(r.responsavel_id) ?? null)
@@ -138,29 +140,29 @@ export default async function AgendaPage({
   const [anoRef, mesRef] = dataRef.split("-").map(Number);
 
   return (
-    <div className="max-w-6xl">
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
-        Agenda
-      </h1>
-      <p className="mt-1 text-sm text-text-2">
-        Reuniões do Rafael e do Dr. Pablo e os compromissos da clínica, na
-        mesma semana. Clique em qualquer horário pra agendar.
-      </p>
+    <div className="mx-auto flex max-w-[1240px] flex-col gap-7">
+      <PageHeader
+        titulo="Agenda"
+        ajuda={
+          <p>
+            Reuniões do Rafael e do Dr. Pablo e os compromissos da clínica, na mesma semana.
+            Clique em qualquer horário pra agendar.
+          </p>
+        }
+      />
 
-      <div className="mt-4">
-        <CalendarioAgenda
-          dias={dias}
-          reunioesPorDia={reunioesPorDia}
-          pabloId={pablo?.id ?? null}
-          responsaveis={(responsaveis ?? []).map((r) => ({ id: r.id, nome: r.nome }))}
-          grupos={grupos ?? []}
-          hoje={hoje}
-          miniAno={anoRef}
-          miniMes={mesRef}
-          proximas={proximas}
-          paraAgendar={paraAgendar}
-        />
-      </div>
+      <CalendarioAgenda
+        dias={dias}
+        reunioesPorDia={reunioesPorDia}
+        pabloId={pablo?.id ?? null}
+        responsaveis={(responsaveis ?? []).map((r) => ({ id: r.id, nome: r.nome }))}
+        grupos={(grupos ?? []).map((g) => ({ id: g.id, nome: displayGroupName(g.nome) }))}
+        hoje={hoje}
+        miniAno={anoRef}
+        miniMes={mesRef}
+        proximas={proximas}
+        paraAgendar={paraAgendar}
+      />
     </div>
   );
 }

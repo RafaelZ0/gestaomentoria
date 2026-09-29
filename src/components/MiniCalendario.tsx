@@ -7,6 +7,7 @@ import {
   proximoMes,
   formatMesAnoLongo,
 } from "@/lib/calendario";
+import { Icon } from "@/components/ui/Icon";
 
 const DIAS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
@@ -26,30 +27,34 @@ export function MiniCalendario({
   const proximo = proximoMes(ano, mes);
 
   return (
-    <div className="w-full max-w-[260px] rounded-xl border border-line bg-surface p-4">
+    <div className="w-full max-w-[240px] px-1">
       <div className="flex items-center justify-between">
-        <Link
-          href={`/agenda?data=${anterior.ano}-${String(anterior.mes).padStart(2, "0")}-01`}
-          prefetch={false}
-          className="rounded px-2 py-1 text-xs text-text-2 hover:bg-hover"
-        >
-          ‹
-        </Link>
-        <span className="text-xs font-medium text-text">
+        <span className="pl-1 text-[13.5px] font-medium text-text">
           {formatMesAnoLongo(ano, mes)}
         </span>
-        <Link
-          href={`/agenda?data=${proximo.ano}-${String(proximo.mes).padStart(2, "0")}-01`}
-          prefetch={false}
-          className="rounded px-2 py-1 text-xs text-text-2 hover:bg-hover"
-        >
-          ›
-        </Link>
+        <div className="flex">
+          <Link
+            href={`/agenda?data=${anterior.ano}-${String(anterior.mes).padStart(2, "0")}-01`}
+            prefetch={false}
+            aria-label="Mês anterior"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-hover hover:text-text"
+          >
+            <Icon nome="chevronEsquerda" tamanho={15} />
+          </Link>
+          <Link
+            href={`/agenda?data=${proximo.ano}-${String(proximo.mes).padStart(2, "0")}-01`}
+            prefetch={false}
+            aria-label="Próximo mês"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-hover hover:text-text"
+          >
+            <Icon nome="chevronDireita" tamanho={15} />
+          </Link>
+        </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-7 gap-y-1 text-center text-[11px]">
+      <div className="mt-3 grid grid-cols-7 gap-y-1 text-center text-[11.5px]">
         {DIAS.map((d, i) => (
-          <span key={i} className="text-text-2">
+          <span key={i} className="pb-1 text-subtle">
             {d}
           </span>
         ))}
@@ -64,14 +69,14 @@ export function MiniCalendario({
               key={diaISO}
               href={`/agenda?data=${diaISO}`}
               prefetch={false}
-              className={`mx-auto flex h-6 w-6 items-center justify-center rounded-full tabular-nums ${
+              className={`mx-auto flex h-7 w-7 items-center justify-center rounded-full tabular-nums transition-colors ${
                 ehSelecionado
-                  ? "bg-gold text-on-gold"
+                  ? `bg-raised font-medium ${ehHoje ? "text-gold" : "text-text"}`
                   : ehHoje
-                    ? "border border-gold text-gold"
+                    ? "font-medium text-gold hover:bg-hover"
                     : foraDoMes
-                      ? "text-text-2/40 hover:bg-hover"
-                      : "text-text hover:bg-hover"
+                      ? "text-off hover:bg-hover"
+                      : "text-text-2 hover:bg-hover hover:text-text"
               }`}
             >
               {dia}

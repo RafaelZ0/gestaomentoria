@@ -42,7 +42,7 @@ export function PagamentoParceladoForm({ grupoId }: { grupoId: string }) {
       </p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-2">
+          <label className="rotulo mb-1.5">
             Valor total (R$)
           </label>
           <input
@@ -51,11 +51,11 @@ export function PagamentoParceladoForm({ grupoId }: { grupoId: string }) {
             step="0.01"
             min="0"
             required
-            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold tabular-nums"
+            className="campo w-full tabular-nums"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-2">
+          <label className="rotulo mb-1.5">
             Data do pagamento
           </label>
           <input
@@ -63,7 +63,7 @@ export function PagamentoParceladoForm({ grupoId }: { grupoId: string }) {
             name="data"
             defaultValue={new Date().toISOString().slice(0, 10)}
             required
-            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+            className="campo w-full"
           />
         </div>
       </div>
@@ -71,7 +71,7 @@ export function PagamentoParceladoForm({ grupoId }: { grupoId: string }) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
+          className="btn-secondary"
         >
           {isPending ? "Registrando…" : "Registrar pagamento"}
         </button>

@@ -10,7 +10,7 @@ import { formatBRL, formatDate, formatMesAno } from "@/lib/format";
 import type { ResultadoGrupo } from "@/lib/database.types";
 
 const inputClass =
-  "w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold";
+  "campo w-full";
 
 function calcCpl(investimento: number, leads: number): string {
   if (!leads) return "—";
@@ -196,7 +196,7 @@ export function ResultadosList({
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
+              className="btn-secondary"
             >
               {isPending ? "Salvando…" : "Adicionar"}
             </button>
@@ -212,7 +212,7 @@ export function ResultadosList({
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
+          className="btn-secondary"
         >
           + Novo resultado
         </button>
@@ -237,7 +237,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-1 block text-sm text-text-2">Data</label>
+          <label className="rotulo mb-1.5">Data</label>
           <input
             type="date"
             name="data"
@@ -246,7 +246,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-2">
+          <label className="rotulo mb-1.5">
             Investimento (R$)
           </label>
           <input
@@ -259,7 +259,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-2">Leads</label>
+          <label className="rotulo mb-1.5">Leads</label>
           <input
             type="number"
             name="leads"
@@ -273,7 +273,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-2">
+          <label className="rotulo mb-1.5">
             Vendas — campanha interna
           </label>
           <input
@@ -286,7 +286,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-2">
+          <label className="rotulo mb-1.5">
             Vendas — tráfego pago
           </label>
           <input
@@ -302,7 +302,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-2">
+          <label className="rotulo mb-1.5">
             Faturamento — campanha interna (R$)
           </label>
           <input
@@ -315,7 +315,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-2">
+          <label className="rotulo mb-1.5">
             Faturamento — tráfego pago (R$)
           </label>
           <input
@@ -330,7 +330,7 @@ function ResultadoFields({ defaultValues }: { defaultValues?: ResultadoGrupo }) 
       </div>
 
       <div>
-        <label className="mb-1 block text-sm text-text-2">
+        <label className="rotulo mb-1.5">
           Observação (opcional)
         </label>
         <input
@@ -460,7 +460,7 @@ function ResultadoRow({
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
+            className="btn-secondary"
           >
             Salvar
           </button>

@@ -2,12 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { formatDate, formatMesAno } from "@/lib/format";
+import { displayGroupName, formatDate, formatMesAno } from "@/lib/format";
 import {
   linkWhatsapp,
   mensagemConfirmacaoReuniao,
   mensagemLinkReuniao,
 } from "@/lib/whatsapp";
+import { Icon } from "@/components/ui/Icon";
+import { Segmented } from "@/components/ui/Segmented";
 import type { Responsavel } from "@/lib/database.types";
 
 type LinhaReuniao = {
@@ -24,6 +26,8 @@ type LinhaReuniao = {
   participantes: string[];
 };
 
+type FiltroStatus = "Ativo" | "Inativo" | "todos";
+
 export function ReunioesGlobalList({
   reunioes,
   responsaveis,
@@ -32,9 +36,7 @@ export function ReunioesGlobalList({
   responsaveis: Responsavel[];
 }) {
   const [busca, setBusca] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState<"Ativo" | "Inativo" | "todos">(
-    "Ativo"
-  );
+  const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("Ativo");
   const [filtroResponsavel, setFiltroResponsavel] = useState("");
 
   const hoje = new Date().toISOString().slice(0, 10);
@@ -44,7 +46,11 @@ export function ReunioesGlobalList({
     return reunioes.filter((r) => {
       if (filtroStatus !== "todos" && r.grupoStatus !== filtroStatus) return false;
       if (filtroResponsavel && r.responsavelNome !== filtroResponsavel) return false;
-      if (buscaNormalizada && !r.grupoNome.toLowerCase().includes(buscaNormalizada)) {
+      if (
+        buscaNormalizada &&
+        !r.grupoNome.toLowerCase().includes(buscaNormalizada) &&
+        !displayGroupName(r.grupoNome).toLowerCase().includes(buscaNormalizada)
+      ) {
         return false;
       }
       return true;
@@ -71,113 +77,87 @@ export function ReunioesGlobalList({
   }, [historico]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-line bg-hover p-3">
-        <div>
-          <label className="mb-1 block text-xs text-text-2">
-            Buscar grupo
-          </label>
-          <input
-            type="text"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Nome do grupo"
-            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text outline-none focus:border-gold"
+    <div className="flex flex-col gap-9">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <Segmented
+            rotulo="Status do grupo"
+            valor={filtroStatus}
+            onChange={setFiltroStatus}
+            opcoes={[
+              { valor: "Ativo", label: "Ativos" },
+              { valor: "Inativo", label: "Inativos" },
+              { valor: "todos", label: "Todos" },
+            ]}
           />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs text-text-2">
-            Status do grupo
-          </label>
-          <select
-            value={filtroStatus}
-            onChange={(e) =>
-              setFiltroStatus(e.target.value as "Ativo" | "Inativo" | "todos")
-            }
-            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
-          >
-            <option value="Ativo">Ativos</option>
-            <option value="Inativo">Inativos</option>
-            <option value="todos">Todos</option>
-          </select>
-        </div>
-        <div>
-          <label className="mb-1 block text-xs text-text-2">
-            Responsável
-          </label>
           <select
             value={filtroResponsavel}
             onChange={(e) => setFiltroResponsavel(e.target.value)}
-            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
+            aria-label="Responsável"
+            className="h-9 rounded-[10px] border-0 bg-surface px-3 text-[13.5px] text-text-2"
           >
-            <option value="">Todos</option>
+            <option value="">Todos os responsáveis</option>
             {responsaveis.map((r) => (
               <option key={r.id} value={r.nome}>
                 {r.nome}
               </option>
             ))}
           </select>
+          <span className="text-[13px] text-subtle">
+            {filtradas.length} reuni{filtradas.length === 1 ? "ão" : "ões"}
+          </span>
         </div>
-        <p className="ml-auto text-sm text-text-2">
-          {filtradas.length} reuni{filtradas.length === 1 ? "ão" : "ões"}
-        </p>
+        <label className="flex h-9 w-full items-center gap-2 rounded-[10px] bg-surface px-3 text-subtle focus-within:ring-2 focus-within:ring-gold/40 sm:w-[260px]">
+          <Icon nome="busca" tamanho={16} traco={1.8} />
+          <input
+            type="text"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar grupo"
+            aria-label="Buscar grupo"
+            className="w-full border-0 bg-transparent text-sm text-text shadow-none outline-none placeholder:text-subtle focus:shadow-none"
+          />
+        </label>
       </div>
 
       {hojeList.length > 0 && <Secao titulo="Hoje" itens={hojeList} />}
-      {proximas.length > 0 && (
-        <Secao titulo="Próximas reuniões" itens={proximas} />
-      )}
+      {proximas.length > 0 && <Secao titulo="Próximas reuniões" itens={proximas} />}
 
-      <div>
-        <h2 className="mb-3 font-display text-lg font-semibold text-text">
-          Histórico
-        </h2>
+      <section className="flex flex-col gap-5">
+        <h2 className="text-[15px] font-semibold text-text">Histórico</h2>
         {historicoPorMes.length === 0 ? (
-          <p className="text-sm text-text-2">
-            Nenhuma reunião no histórico com esse filtro.
-          </p>
+          <p className="text-sm text-muted">Nenhuma reunião no histórico com esse filtro.</p>
         ) : (
-          <div className="space-y-6">
-            {historicoPorMes.map(([mes, itens]) => {
-              const [ano, m] = mes.split("-").map(Number);
-              return (
-                <div key={mes}>
-                  <div className="mb-2 flex items-center gap-3">
-                    <h3 className="whitespace-nowrap font-display text-sm font-semibold text-text">
-                      {formatMesAno(ano, m)}
-                    </h3>
-                    <div className="h-px flex-1 bg-line" />
-                    <span className="whitespace-nowrap text-xs text-text-2">
-                      {itens.length} reuni{itens.length === 1 ? "ão" : "ões"}
-                    </span>
-                  </div>
-                  <ul className="space-y-3">
-                    {itens.map((r) => (
-                      <ReuniaoGlobalItem key={r.id} reuniao={r} />
-                    ))}
-                  </ul>
+          historicoPorMes.map(([mes, itens]) => {
+            const [ano, m] = mes.split("-").map(Number);
+            return (
+              <div key={mes} className="flex flex-col">
+                <div className="flex items-baseline justify-between border-b border-line pb-2">
+                  <h3 className="text-[13.5px] font-medium text-text-2">{formatMesAno(ano, m)}</h3>
+                  <span className="text-[12.5px] text-subtle">
+                    {itens.length} reuni{itens.length === 1 ? "ão" : "ões"}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
+                {itens.map((r) => (
+                  <ReuniaoGlobalItem key={r.id} reuniao={r} />
+                ))}
+              </div>
+            );
+          })
         )}
-      </div>
+      </section>
     </div>
   );
 }
 
 function Secao({ titulo, itens }: { titulo: string; itens: LinhaReuniao[] }) {
   return (
-    <div>
-      <h2 className="mb-2 font-display text-lg font-semibold text-text">
-        {titulo}
-      </h2>
-      <ul className="space-y-3">
-        {itens.map((r) => (
-          <ReuniaoGlobalItem key={r.id} reuniao={r} />
-        ))}
-      </ul>
-    </div>
+    <section className="flex flex-col">
+      <h2 className="border-b border-line pb-2 text-[15px] font-semibold text-text">{titulo}</h2>
+      {itens.map((r) => (
+        <ReuniaoGlobalItem key={r.id} reuniao={r} />
+      ))}
+    </section>
   );
 }
 
@@ -185,89 +165,70 @@ function ReuniaoGlobalItem({ reuniao: r }: { reuniao: LinhaReuniao }) {
   const hoje = new Date().toISOString().slice(0, 10);
   const agendada = r.data > hoje && r.compareceu;
   const hojeFlag = r.data === hoje && r.compareceu;
+  const nome = displayGroupName(r.grupoNome);
 
   return (
-    <li className="rounded-xl border border-line bg-surface p-5">
-      <Link
-        href={`/grupos/${r.grupoId}/reunioes`}
-        prefetch={false}
-        className="flex flex-wrap items-center justify-between gap-2 hover:opacity-80"
-      >
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-text">
-            {formatDate(r.data)}
-            {r.hora && ` às ${r.hora.slice(0, 5)}`}
-          </p>
-          <span className="rounded-full bg-gold/10 px-2 py-0.5 text-xs font-medium text-gold">
-            {r.grupoNome}
-          </span>
-          {r.grupoStatus === "Inativo" && (
-            <span className="rounded-full bg-off/10 px-2 py-0.5 text-xs font-medium text-muted">
-              Grupo inativo
-            </span>
-          )}
-          {!r.compareceu && (
-            <span className="rounded-full bg-danger/10 px-2 py-0.5 text-xs font-medium text-danger">
-              Não compareceu
-            </span>
-          )}
-          {(agendada || hojeFlag) && (
-            <span className="rounded-full bg-ok/10 px-2 py-0.5 text-xs font-medium text-ok">
-              {hojeFlag ? "Hoje" : "Agendada"}
-            </span>
-          )}
-        </div>
-        {r.responsavelNome && (
-          <span className="rounded-full bg-hover px-2 py-0.5 text-xs text-text-2">
-            Conduzida por {r.responsavelNome}
-          </span>
-        )}
-      </Link>
-
-      {r.resumo && (
-        <p className="mt-2 whitespace-pre-wrap text-sm text-text-2">
-          {r.resumo}
-        </p>
-      )}
-      {r.linkReuniao && (
-        <a
-          href={r.linkReuniao}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 inline-block text-sm text-gold hover:text-gold-hover"
+    <article className="flex flex-col gap-1.5 border-b border-line-soft py-4 last:border-b-0">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <Link
+          href={`/grupos/${r.grupoId}/reunioes`}
+          prefetch={false}
+          className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 hover:opacity-80"
         >
-          {r.linkReuniao}
-        </a>
-      )}
-      {(agendada || hojeFlag) && (
-        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="w-[140px] shrink-0 text-[14px] tabular-nums text-text-2">
+            {hojeFlag ? <span className="text-gold">Hoje</span> : formatDate(r.data)}
+            {r.hora && ` às ${r.hora.slice(0, 5)}`}
+          </span>
+          <span className="text-[14.5px] font-medium text-text">{nome}</span>
+          {agendada && <span className="text-[13px] text-muted">Agendada</span>}
+          {r.grupoStatus === "Inativo" && (
+            <span className="text-[13px] text-muted">Grupo inativo</span>
+          )}
+          {!r.compareceu && <span className="text-[13px] text-danger">Não compareceu</span>}
+        </Link>
+        {r.responsavelNome && (
+          <span className="text-[13px] text-muted">Conduzida por {r.responsavelNome}</span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1.5 min-[640px]:pl-[152px]">
+        {r.resumo && (
+          <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-text-2">{r.resumo}</p>
+        )}
+        {r.linkReuniao && (
           <a
-            href={linkWhatsapp(
-              mensagemConfirmacaoReuniao(r.grupoNome, r.data, r.hora)
-            )}
+            href={r.linkReuniao}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg border border-line px-2.5 py-1 text-xs text-text-2 hover:bg-hover hover:text-text"
+            className="link w-fit truncate text-[13.5px]"
           >
-            Lembrete de confirmação
+            {r.linkReuniao}
           </a>
-          <a
-            href={linkWhatsapp(
-              mensagemLinkReuniao(r.grupoNome, r.hora, r.linkReuniao)
-            )}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg border border-line px-2.5 py-1 text-xs text-text-2 hover:bg-hover hover:text-text"
-          >
-            Lembrete com link (10 min antes)
-          </a>
-        </div>
-      )}
-      {r.participantes.length > 0 && (
-        <p className="mt-3 text-xs text-text-2">
-          Participantes: {r.participantes.join(", ")}
-        </p>
-      )}
-    </li>
+        )}
+        {(agendada || hojeFlag) && (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
+            <a
+              href={linkWhatsapp(mensagemConfirmacaoReuniao(r.grupoNome, r.data, r.hora))}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted hover:text-text"
+            >
+              Lembrete de confirmação ↗
+            </a>
+            <a
+              href={linkWhatsapp(mensagemLinkReuniao(r.grupoNome, r.hora, r.linkReuniao))}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted hover:text-text"
+            >
+              Lembrete com link (10 min antes) ↗
+            </a>
+          </div>
+        )}
+        {r.participantes.length > 0 && (
+          <p className="text-[13px] text-subtle">Participantes: {r.participantes.join(", ")}</p>
+        )}
+      </div>
+    </article>
   );
 }

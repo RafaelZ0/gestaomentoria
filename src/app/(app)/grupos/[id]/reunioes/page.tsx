@@ -205,7 +205,7 @@ export default async function ReunioesPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-8">
       <ComparecimentoResumo totalAgendadas={totalAgendadas} faltas={faltas} />
 
       <NovaReuniaoForm
@@ -219,29 +219,25 @@ export default async function ReunioesPage({
       />
 
       {proximas.length > 0 && (
-        <div>
-          <h2 className="mb-2 font-display text-lg font-semibold text-text">
+        <section className="flex flex-col">
+          <h2 className="border-b border-line pb-2 text-[15px] font-semibold text-text">
             Próximas reuniões
           </h2>
-          <ul className="space-y-3">{proximas.map(renderItem)}</ul>
-        </div>
+          <ul className="flex flex-col">{proximas.map(renderItem)}</ul>
+        </section>
       )}
 
-      <div>
-        {proximas.length > 0 && (
-          <h2 className="mb-2 font-display text-lg font-semibold text-text">
-            Histórico
-          </h2>
-        )}
-        <ul className="space-y-3">
+      <section className="flex flex-col">
+        <h2 className="border-b border-line pb-2 text-[15px] font-semibold text-text">
+          Histórico
+        </h2>
+        <ul className="flex flex-col">
           {historico.map(renderItem)}
           {reunioes.length === 0 && (
-            <p className="text-sm text-text-2">
-              Nenhuma reunião registrada ainda.
-            </p>
+            <p className="py-4 text-sm text-muted">Nenhuma reunião registrada ainda.</p>
           )}
         </ul>
-      </div>
+      </section>
     </div>
   );
 }

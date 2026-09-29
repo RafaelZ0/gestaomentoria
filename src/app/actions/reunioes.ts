@@ -7,6 +7,7 @@ import {
   minutosDoHorario,
   type Conflito,
 } from "@/lib/agendaConflitos";
+import { displayGroupName } from "@/lib/format";
 
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -172,7 +173,7 @@ export async function agendarReuniao(input: {
         hora: r.hora.slice(0, 5),
         duracaoMin: r.duracao_min,
         responsavelId: r.responsavel_id,
-        grupoNome: r.grupos_gestao?.nome ?? "—",
+        grupoNome: displayGroupName(r.grupos_gestao?.nome) || "—",
       })),
     });
     if (conflitos.length > 0) {
@@ -261,7 +262,7 @@ export async function definirHorarioReuniao(input: {
         hora: r.hora.slice(0, 5),
         duracaoMin: r.duracao_min,
         responsavelId: r.responsavel_id,
-        grupoNome: r.grupos_gestao?.nome ?? "—",
+        grupoNome: displayGroupName(r.grupos_gestao?.nome) || "—",
       })),
     });
     if (conflitos.length > 0) {

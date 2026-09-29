@@ -5,6 +5,7 @@ import {
   type MesComparativo,
 } from "@/components/ResultadosComparativoMensal";
 import { ResultadosTabs } from "@/components/ResultadosTabs";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export default async function ResultadosPage() {
   const supabase = await createClient();
@@ -103,21 +104,20 @@ export default async function ResultadosPage() {
     });
 
   return (
-    <div className="max-w-5xl">
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
-        Resultados
-      </h1>
-      <p className="mt-1 text-sm text-text-2">
-        Somente grupos ativos. &quot;Por grupo&quot; ranqueia por ROAS
-        (faturamento ÷ investido) — clique em Grupo, ROAS, Faturamento ou
-        Vendas pra ordenar por essa coluna, ou na linha pra abrir o
-        detalhamento do grupo. &quot;Por mês&quot; abre cada mês pra comparar
-        lado a lado como cada clínica performou naquele período.
-      </p>
+    <div className="mx-auto flex max-w-[960px] flex-col gap-8">
+      <PageHeader
+        titulo="Resultados"
+        ajuda={
+          <p>
+            Somente grupos ativos. &quot;Por grupo&quot; ranqueia por ROAS (faturamento ÷
+            investido) — clique em Grupo, ROAS, Faturamento ou Vendas pra ordenar por essa
+            coluna, ou na linha pra abrir o detalhamento do grupo. &quot;Por mês&quot; abre cada
+            mês pra comparar lado a lado como cada clínica performou naquele período.
+          </p>
+        }
+      />
 
-      <div className="mt-6">
-        <ResultadosTabs linhasRanking={linhasRanking} meses={meses} />
-      </div>
+      <ResultadosTabs linhasRanking={linhasRanking} meses={meses} />
     </div>
   );
 }

@@ -62,183 +62,187 @@
   --font-display: var(--font-dm-sans), system-ui, sans-serif;
 }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
+@layer base {
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Foco visível em tudo que é clicável: contorno dourado. */
+  :where(a, button, [role="button"], [role="radio"], [role="tab"], summary, input[type="checkbox"], input[type="radio"]):focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    transition:
+      border-color 150ms,
+      box-shadow 150ms;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201, 164, 92, 0.22);
+  }
+
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="range"] {
+    accent-color: var(--gold);
+  }
+
+  /* Sem setinhas nativas nos campos numéricos. */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  /* Ícone do seletor nativo de data/hora legível no escuro. */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.75) sepia(0.2);
+    cursor: pointer;
+  }
 }
 
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
+@layer components {
+  /* ---- Botões e campos ---------------------------------------------------- */
 
-/* Foco visível em tudo que é clicável: contorno dourado. */
-:where(a, button, [role="button"], [role="radio"], [role="tab"], summary, input[type="checkbox"], input[type="radio"]):focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
+  /* Ação principal da tela (no máximo um por página). */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 10px;
+    background: var(--gold);
+    color: var(--on-gold);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color 150ms;
+  }
 
-input:not([type="checkbox"]):not([type="radio"]),
-select,
-textarea {
-  transition:
-    border-color 150ms,
-    box-shadow 150ms;
-}
+  .btn-primary:hover {
+    background: var(--gold-hover);
+  }
 
-input:not([type="checkbox"]):not([type="radio"]):focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201, 164, 92, 0.22);
-}
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
 
-input[type="checkbox"],
-input[type="radio"],
-input[type="range"] {
-  accent-color: var(--gold);
-}
+  /* Botão secundário: borda `raised`, fundo transparente. */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid var(--raised);
+    background: transparent;
+    color: var(--text);
+    font-size: 14px;
+    white-space: nowrap;
+    transition:
+      background-color 150ms,
+      border-color 150ms;
+  }
 
-/* Sem setinhas nativas nos campos numéricos. */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+  .btn-secondary:hover {
+    background: var(--hover);
+    border-color: var(--muted);
+  }
 
-input[type="number"] {
-  -moz-appearance: textfield;
-}
+  .btn-secondary:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
 
-/* Ícone do seletor nativo de data/hora legível no escuro. */
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="time"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.75) sepia(0.2);
-  cursor: pointer;
-}
+  /* Campo de formulário padrão. */
+  .campo {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+  }
 
-/* ---- Botões e campos ---------------------------------------------------- */
+  textarea.campo {
+    height: auto;
+    padding: 8px 12px;
+    line-height: 1.5;
+  }
 
-/* Ação principal da tela (no máximo um por página). */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  height: 38px;
-  padding: 0 16px;
-  border-radius: 10px;
-  background: var(--gold);
-  color: var(--on-gold);
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  transition: background-color 150ms;
-}
+  .campo::placeholder {
+    color: var(--subtle);
+  }
 
-.btn-primary:hover {
-  background: var(--gold-hover);
-}
+  .campo:disabled {
+    opacity: 0.6;
+  }
 
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
+  /* Link de texto: dourado. */
+  .link {
+    color: var(--gold);
+    transition: color 150ms;
+  }
 
-/* Botão secundário: borda `raised`, fundo transparente. */
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  height: 38px;
-  padding: 0 16px;
-  border-radius: 10px;
-  border: 1px solid var(--raised);
-  background: transparent;
-  color: var(--text);
-  font-size: 14px;
-  white-space: nowrap;
-  transition:
-    background-color 150ms,
-    border-color 150ms;
-}
+  .link:hover {
+    color: var(--gold-hover);
+  }
 
-.btn-secondary:hover {
-  background: var(--hover);
-  border-color: var(--muted);
-}
+  /* Rótulo pequeno acima de campo ou métrica. */
+  .rotulo {
+    display: block;
+    font-size: 13px;
+    color: var(--subtle);
+  }
 
-.btn-secondary:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
+  /* ---- Agenda ------------------------------------------------------------- */
 
-/* Campo de formulário padrão. */
-.campo {
-  width: 100%;
-  height: 38px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--text);
-  font-size: 14px;
-}
+  /* Compromisso da clínica: hachura sutil sobre `surface`, deixando as linhas
+     da grade visíveis por baixo. */
+  .agenda-compromisso {
+    background-color: rgba(38, 37, 35, 0.55);
+    background-image: repeating-linear-gradient(
+      135deg,
+      rgba(189, 184, 175, 0.07) 0 6px,
+      transparent 6px 12px
+    );
+  }
 
-textarea.campo {
-  height: auto;
-  padding: 8px 12px;
-  line-height: 1.5;
-}
-
-.campo::placeholder {
-  color: var(--subtle);
-}
-
-.campo:disabled {
-  opacity: 0.6;
-}
-
-/* Link de texto: dourado. */
-.link {
-  color: var(--gold);
-  transition: color 150ms;
-}
-
-.link:hover {
-  color: var(--gold-hover);
-}
-
-/* Rótulo pequeno acima de campo ou métrica. */
-.rotulo {
-  display: block;
-  font-size: 13px;
-  color: var(--subtle);
-}
-
-/* ---- Agenda ------------------------------------------------------------- */
-
-/* Compromisso da clínica: hachura sutil sobre `surface`, deixando as linhas
-   da grade visíveis por baixo. */
-.agenda-compromisso {
-  background-color: rgba(38, 37, 35, 0.55);
-  background-image: repeating-linear-gradient(
-    135deg,
-    rgba(189, 184, 175, 0.07) 0 6px,
-    transparent 6px 12px
-  );
-}
-
-/* Linhas da grade (hora cheia e meia hora), numa camada própria acima dos
-   compromissos. 56px = 2 slots de 28px (ALTURA_LINHA). */
-.agenda-linhas {
-  background-image:
-    linear-gradient(to bottom, var(--line) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(47, 45, 42, 0.5) 1px, transparent 1px);
-  background-size:
-    100% 56px,
-    100% 28px;
+  /* Linhas da grade (hora cheia e meia hora), numa camada própria acima dos
+     compromissos. 56px = 2 slots de 28px (ALTURA_LINHA). */
+  .agenda-linhas {
+    background-image:
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(47, 45, 42, 0.5) 1px, transparent 1px);
+    background-size:
+      100% 56px,
+      100% 28px;
+  }
 }

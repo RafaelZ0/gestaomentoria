@@ -7,10 +7,8 @@ import {
   updateLancamento,
 } from "@/app/actions/financas";
 import { formatBRL, formatDate } from "@/lib/format";
+import { RowMenu } from "@/components/ui/RowMenu";
 import type { LancamentoFinanceiro } from "@/lib/database.types";
-
-const inputClass =
-  "w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold";
 
 export function LancamentosList({
   lancamentos,
@@ -22,23 +20,15 @@ export function LancamentosList({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="space-y-4">
-      {error && (
-        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error}
-        </div>
-      )}
+    <div className="flex flex-col">
+      {error && <p className="py-2 text-sm text-danger">{error}</p>}
 
-      <ul className="space-y-2">
-        {lancamentos.map((l) => (
-          <LancamentoRow key={l.id} lancamento={l} />
-        ))}
-        {lancamentos.length === 0 && (
-          <p className="text-sm text-text-2">
-            Nenhum lançamento registrado ainda.
-          </p>
-        )}
-      </ul>
+      {lancamentos.map((l) => (
+        <LancamentoRow key={l.id} lancamento={l} />
+      ))}
+      {lancamentos.length === 0 && (
+        <p className="py-2 text-[13.5px] text-muted">Nenhum lançamento registrado ainda.</p>
+      )}
 
       {open ? (
         <form
@@ -53,93 +43,59 @@ export function LancamentosList({
               }
             });
           }}
-          className="space-y-4 rounded-xl border border-line bg-surface p-6"
+          className="mt-2 flex flex-col gap-4 border-t border-line-soft pt-4"
         >
           <LancamentoFields />
           <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isPending}
-              className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
-            >
-              {isPending ? "Salvando…" : "Adicionar"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="btn-secondary"
-            >
+            <button type="button" onClick={() => setOpen(false)} className="btn-secondary">
               Cancelar
+            </button>
+            <button type="submit" disabled={isPending} className="btn-secondary">
+              {isPending ? "Salvando…" : "Adicionar"}
             </button>
           </div>
         </form>
       ) : (
-        <button
-          onClick={() => setOpen(true)}
-          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
-        >
-          + Novo lançamento
+        <button type="button" onClick={() => setOpen(true)} className="link mt-2 w-fit text-[13.5px]">
+          Novo lançamento
         </button>
       )}
     </div>
   );
 }
 
-function LancamentoFields({
-  defaultValues,
-}: {
-  defaultValues?: LancamentoFinanceiro;
-}) {
+function LancamentoFields({ defaultValues }: { defaultValues?: LancamentoFinanceiro }) {
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-2">Tipo</label>
-          <select
-            name="tipo"
-            defaultValue={defaultValues?.tipo ?? "RECEITA"}
-            className={inputClass}
-          >
+          <label className="rotulo mb-1.5">Tipo</label>
+          <select name="tipo" defaultValue={defaultValues?.tipo ?? "RECEITA"} className="campo">
             <option value="RECEITA">Receita</option>
             <option value="DESPESA">Despesa</option>
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-2">Data</label>
+          <label className="rotulo mb-1.5">Data</label>
           <input
             type="date"
             name="data"
-            defaultValue={
-              defaultValues?.data ?? new Date().toISOString().slice(0, 10)
-            }
-            className={inputClass}
+            defaultValue={defaultValues?.data ?? new Date().toISOString().slice(0, 10)}
+            className="campo"
           />
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-sm text-text-2">Descrição</label>
-        <input
-          name="descricao"
-          required
-          defaultValue={defaultValues?.descricao}
-          className={inputClass}
-        />
+        <label className="rotulo mb-1.5">Descrição</label>
+        <input name="descricao" required defaultValue={defaultValues?.descricao} className="campo" />
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-2">
-            Categoria (opcional)
-          </label>
-          <input
-            name="categoria"
-            defaultValue={defaultValues?.categoria ?? ""}
-            className={inputClass}
-          />
+          <label className="rotulo mb-1.5">Categoria (opcional)</label>
+          <input name="categoria" defaultValue={defaultValues?.categoria ?? ""} className="campo" />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-2">
-            Valor (R$)
-          </label>
+          <label className="rotulo mb-1.5">Valor (R$)</label>
           <input
             type="number"
             name="valor"
@@ -147,7 +103,7 @@ function LancamentoFields({
             min="0"
             required
             defaultValue={defaultValues?.valor}
-            className={`${inputClass} tabular-nums`}
+            className="campo tabular-nums"
           />
         </div>
       </div>
@@ -163,49 +119,42 @@ function LancamentoRow({ lancamento }: { lancamento: LancamentoFinanceiro }) {
   if (!editing) {
     const isReceita = lancamento.tipo === "RECEITA";
     return (
-      <li className="flex items-center justify-between rounded-lg border border-line bg-hover px-4 py-3 text-sm">
-        <div>
+      <div className="flex min-h-11 items-center justify-between gap-4 border-b border-line-soft py-1.5 text-[14px]">
+        <div className="min-w-0">
           <span className="text-text">{lancamento.descricao}</span>
-          <span className="ml-2 text-text-2">
+          <span className="ml-2 text-[13px] text-muted">
             {formatDate(lancamento.data)}
             {lancamento.categoria && <> · {lancamento.categoria}</>}
           </span>
         </div>
-        <div className="flex items-center gap-4">
-          <span
-            className={`tabular-nums font-medium ${
-              isReceita ? "text-ok" : "text-danger"
-            }`}
-          >
+        <div className="flex shrink-0 items-center gap-3">
+          <span className={`tabular-nums ${isReceita ? "text-ok" : "text-text-2"}`}>
             {isReceita ? "+" : "−"} {formatBRL(Number(lancamento.valor))}
           </span>
-          <button
-            onClick={() => setEditing(true)}
-            className="text-text-2 hover:text-text"
-          >
-            Editar
-          </button>
-          <button
-            disabled={isPending}
-            onClick={() =>
-              startTransition(() => removeLancamento(lancamento.id))
-            }
-            className="text-text-2 hover:text-danger"
-          >
-            Remover
-          </button>
+          <RowMenu
+            rotulo={`Mais opções de ${lancamento.descricao}`}
+            acoes={[
+              { label: "Editar", onSelect: () => setEditing(true) },
+              {
+                label: "Remover",
+                destrutiva: true,
+                confirmar: {
+                  titulo: "Remover lançamento?",
+                  texto: `${lancamento.descricao} · ${formatBRL(Number(lancamento.valor))}`,
+                  botao: "Remover",
+                },
+                onSelect: () => removeLancamento(lancamento.id),
+              },
+            ]}
+          />
         </div>
-      </li>
+      </div>
     );
   }
 
   return (
-    <li className="rounded-lg border border-line bg-hover px-4 py-3">
-      {error && (
-        <div className="mb-2 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error}
-        </div>
-      )}
+    <div className="border-b border-line-soft py-4">
+      {error && <p className="mb-2 text-sm text-danger">{error}</p>}
       <form
         action={(formData) => {
           setError(null);
@@ -218,26 +167,18 @@ function LancamentoRow({ lancamento }: { lancamento: LancamentoFinanceiro }) {
             }
           });
         }}
-        className="space-y-4"
+        className="flex flex-col gap-4"
       >
         <LancamentoFields defaultValues={lancamento} />
         <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={isPending}
-            className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
-          >
-            Salvar
-          </button>
-          <button
-            type="button"
-            onClick={() => setEditing(false)}
-            className="btn-secondary"
-          >
+          <button type="button" onClick={() => setEditing(false)} className="btn-secondary">
             Cancelar
+          </button>
+          <button type="submit" disabled={isPending} className="btn-secondary">
+            {isPending ? "Salvando…" : "Salvar"}
           </button>
         </div>
       </form>
-    </li>
+    </div>
   );
 }

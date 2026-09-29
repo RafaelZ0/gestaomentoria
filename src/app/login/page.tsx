@@ -34,7 +34,7 @@ export default async function LoginPage({
               name="email"
               type="email"
               required
-              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+              className="campo w-full"
             />
           </div>
           <div>
@@ -46,12 +46,12 @@ export default async function LoginPage({
               name="password"
               type="password"
               required
-              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+              className="campo w-full"
             />
           </div>
           <button
             type="submit"
-            className="w-full rounded-lg bg-gold px-3 py-2 font-medium text-on-gold transition-colors hover:bg-gold-hover"
+            className="btn-secondary w-full"
           >
             Entrar
           </button>

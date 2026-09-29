@@ -10,7 +10,7 @@ import {
 } from "@/lib/onboarding";
 
 const inputClass =
-  "w-full rounded-lg border border-line bg-bg px-4 py-3 text-lg text-text outline-none transition-colors placeholder:text-muted focus:border-gold disabled:opacity-50";
+  "campo w-full text-lg transition-colors placeholder:text-muted disabled:opacity-50";
 
 const PRECISOES: [string, string][] = [
   ["exato", "Exato"],

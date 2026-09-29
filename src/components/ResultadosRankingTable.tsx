@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatBRL } from "@/lib/format";
+import { displayGroupName, formatBRL } from "@/lib/format";
 
 export type LinhaRanking = {
   id: string;
@@ -53,11 +53,11 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
   }, [linhas, sortKey, sortDir]);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-line bg-surface">
-      <table className="w-full text-left text-sm">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[640px] text-left text-[14.5px]">
         <thead>
-          <tr className="border-b border-line text-text-2">
-            <th className="px-4 py-3 font-medium">#</th>
+          <tr className="border-b border-line text-[12.5px] text-subtle">
+            <th className="px-3 pb-2.5 pt-3 font-normal">#</th>
             <SortableHeader
               label="Grupo"
               sortKey="nome"
@@ -93,7 +93,7 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
               dir={sortDir}
               onSort={handleSort}
             />
-            <th className="px-4 py-3"></th>
+            <th className="px-3 py-3"></th>
           </tr>
         </thead>
         <tbody>
@@ -101,26 +101,26 @@ export function ResultadosRankingTable({ linhas }: { linhas: LinhaRanking[] }) {
             <tr
               key={l.id}
               onClick={() => router.push(`/grupos/${l.id}/resultados`)}
-              className="cursor-pointer border-b border-line last:border-0 hover:bg-hover"
+              className="cursor-pointer border-b border-line-soft transition-colors last:border-0 hover:bg-hover"
             >
-              <td className="px-4 py-3 tabular-nums text-text-2">{i + 1}</td>
-              <td className="px-4 py-3 font-medium text-text">{l.nome}</td>
-              <td className="px-4 py-3 tabular-nums text-text">
+              <td className="px-3 py-3 tabular-nums text-subtle">{i + 1}</td>
+              <td className="px-3 py-3 text-text">{displayGroupName(l.nome)}</td>
+              <td className="px-3 py-3 tabular-nums text-text">
                 {l.roas === null ? "—" : `${l.roas.toFixed(1)}x`}
               </td>
-              <td className="px-4 py-3 tabular-nums text-ok">
+              <td className="px-3 py-3 tabular-nums text-text">
                 {formatBRL(l.faturamento)}
               </td>
-              <td className="px-4 py-3 tabular-nums text-text">{l.vendas}</td>
-              <td className="px-4 py-3 tabular-nums text-text">
+              <td className="px-3 py-3 tabular-nums text-text">{l.vendas}</td>
+              <td className="px-3 py-3 tabular-nums text-text">
                 {l.ticketMedio === null ? "—" : formatBRL(l.ticketMedio)}
               </td>
-              <td className="px-4 py-3 text-right text-text-2">→</td>
+              <td className="px-3 py-3" />
             </tr>
           ))}
           {ordenadas.length === 0 && (
             <tr>
-              <td colSpan={7} className="px-4 py-8 text-center text-text-2">
+              <td colSpan={7} className="px-4 py-8 text-center text-muted">
                 Nenhum grupo ativo cadastrado ainda.
               </td>
             </tr>
@@ -146,7 +146,7 @@ function SortableHeader({
 }) {
   const active = current === sortKey;
   return (
-    <th className="px-4 py-3 font-medium">
+    <th className="px-3 pb-2.5 pt-3 font-normal">
       <button
         type="button"
         onClick={(e) => {
@@ -154,11 +154,11 @@ function SortableHeader({
           onSort(sortKey);
         }}
         className={`flex items-center gap-1 hover:text-text ${
-          active ? "text-text" : ""
+          active ? "text-text-2" : ""
         }`}
       >
         {label}
-        <span className="text-xs">{active ? (dir === "asc" ? "▲" : "▼") : ""}</span>
+        <span className="text-[10px]">{active ? (dir === "asc" ? "▲" : "▼") : ""}</span>
       </button>
     </th>
   );

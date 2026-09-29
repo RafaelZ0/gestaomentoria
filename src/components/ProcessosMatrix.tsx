@@ -3,6 +3,9 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { StatusBadge, trafegoPagoVariant } from "@/components/StatusBadge";
+import { StatusDot, sentenceCase } from "@/components/ui/StatusDot";
+import { Segmented } from "@/components/ui/Segmented";
+import { displayGroupName } from "@/lib/format";
 
 type Grupo = {
   id: string;
@@ -73,16 +76,16 @@ export function ProcessosMatrix({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-line bg-hover p-3">
+      <div className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="mb-1 block text-xs text-text-2">Processo</label>
+          <label className="rotulo mb-1.5">Processo</label>
           <select
             value={filtroProcesso}
             onChange={(e) => setFiltroProcesso(e.target.value)}
-            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
+            className="campo h-9 w-auto pr-8 text-[13.5px]"
           >
             <option value="">Todos</option>
-            <option value={TRAFEGO_PAGO_ID}>TRÁFEGO PAGO</option>
+            <option value={TRAFEGO_PAGO_ID}>Tráfego pago</option>
             {processos.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.nome}
@@ -94,15 +97,15 @@ export function ProcessosMatrix({
 
         {filtroProcesso === TRAFEGO_PAGO_ID ? (
           <div>
-            <label className="mb-1 block text-xs text-text-2">Status</label>
+            <label className="rotulo mb-1.5">Status</label>
             <select
               value={filtroTrafego}
               onChange={(e) => setFiltroTrafego(e.target.value)}
-              className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
+              className="campo h-9 w-auto pr-8 text-[13.5px]"
             >
               {TRAFEGO_OPCOES.map((op) => (
                 <option key={op} value={op}>
-                  {op}
+                  {sentenceCase(op)}
                 </option>
               ))}
             </select>
@@ -110,7 +113,7 @@ export function ProcessosMatrix({
         ) : (
           filtroProcesso && (
             <div>
-              <label className="mb-1 block text-xs text-text-2">
+              <label className="rotulo mb-1.5">
                 Condição
               </label>
               <select
@@ -118,7 +121,7 @@ export function ProcessosMatrix({
                 onChange={(e) =>
                   setFiltroCondicao(e.target.value as "fizeram" | "nao_fizeram")
                 }
-                className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
+                className="campo h-9 w-auto pr-8 text-[13.5px]"
               >
                 <option value="nao_fizeram">Não fizeram</option>
                 <option value="fizeram">Fizeram</option>
@@ -127,24 +130,21 @@ export function ProcessosMatrix({
           )
         )}
 
-        <div className="border-l border-line pl-4">
-          <label className="mb-1 block text-xs text-text-2">
-            Status do grupo
-          </label>
-          <select
-            value={filtroStatus}
-            onChange={(e) =>
-              setFiltroStatus(e.target.value as "todos" | "Ativo" | "Inativo")
-            }
-            className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text"
-          >
-            <option value="Ativo">Ativos</option>
-            <option value="Inativo">Inativos</option>
-            <option value="todos">Todos</option>
-          </select>
+        <div>
+          <span className="rotulo mb-1.5">Status do grupo</span>
+          <Segmented
+            rotulo="Status do grupo"
+            valor={filtroStatus}
+            onChange={setFiltroStatus}
+            opcoes={[
+              { valor: "Ativo", label: "Ativos" },
+              { valor: "Inativo", label: "Inativos" },
+              { valor: "todos", label: "Todos" },
+            ]}
+          />
         </div>
 
-        <p className="ml-auto text-sm text-text-2">
+        <p className="ml-auto pb-2 text-[13px] text-subtle">
           {gruposFiltrados.length} grupo{gruposFiltrados.length === 1 ? "" : "s"}
           {filtroProcesso === TRAFEGO_PAGO_ID && (
             <> com tráfego pago “{filtroTrafego}”</>
@@ -159,23 +159,23 @@ export function ProcessosMatrix({
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-line bg-surface">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-[14px]">
           <thead>
-            <tr className="border-b border-line text-text-2">
-              <th className="sticky left-0 z-10 bg-surface px-4 py-3 font-medium">
+            <tr className="border-b border-line text-[12.5px] text-subtle">
+              <th className="sticky left-0 z-10 bg-bg px-3 pb-2.5 pt-3 font-normal">
                 Grupo
               </th>
-              <th className="whitespace-nowrap px-4 py-3 text-center font-medium">
+              <th className="whitespace-nowrap px-3 pb-2.5 pt-3 text-center font-normal">
                 Tráfego pago
               </th>
               {processos.map((p) => (
                 <th
                   key={p.id}
-                  className="whitespace-nowrap px-4 py-3 text-center font-medium"
+                  className="whitespace-nowrap px-3 pb-2.5 pt-3 text-center font-normal"
                 >
                   <div>{p.nome}</div>
-                  <div className="mt-0.5 font-normal tabular-nums text-text-2">
+                  <div className="mt-0.5 tabular-nums text-muted">
                     {resumoPorProcesso.get(p.id) ?? 0}/{gruposFiltrados.length}
                   </div>
                 </th>
@@ -186,33 +186,33 @@ export function ProcessosMatrix({
             {gruposFiltrados.map((g) => (
               <tr
                 key={g.id}
-                className="group border-b border-line last:border-0 hover:bg-hover"
+                className="group border-b border-line-soft last:border-0 hover:bg-hover"
               >
-                <td className="sticky left-0 z-10 whitespace-nowrap bg-surface px-4 py-3 font-medium text-text group-hover:bg-hover">
+                <td className="sticky left-0 z-10 whitespace-nowrap bg-bg px-3 py-3 text-text group-hover:bg-hover">
                   <Link href={`/grupos/${g.id}`} prefetch={false} className="hover:text-gold">
-                    {g.nome}
+                    {displayGroupName(g.nome)}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="px-3 py-3 text-center text-[13px]">
                   {g.trafego_pago ? (
                     <StatusBadge
                       label={g.trafego_pago}
                       variant={trafegoPagoVariant(g.trafego_pago)}
                     />
                   ) : (
-                    <span className="text-text-2">—</span>
+                    <span className="text-muted">—</span>
                   )}
                 </td>
                 {processos.map((p) => {
                   const feito = feitoMap.get(`${g.id}:${p.id}`);
                   return (
-                    <td key={p.id} className="px-4 py-3 text-center">
+                    <td key={p.id} className="px-3 py-3 text-center text-[13px]">
                       {feito === undefined ? (
-                        <span className="text-text-2">—</span>
+                        <span className="text-muted">—</span>
                       ) : feito ? (
-                        <StatusBadge label="Feito" variant="ok" />
+                        <StatusDot tom="ok">Feito</StatusDot>
                       ) : (
-                        <StatusBadge label="Falta" variant="alert" />
+                        <span className="inline-flex items-center gap-2 text-muted"><span className="h-[7px] w-[7px] rounded-full bg-danger" />Falta</span>
                       )}
                     </td>
                   );
@@ -223,7 +223,7 @@ export function ProcessosMatrix({
               <tr>
                 <td
                   colSpan={processos.length + 2}
-                  className="px-4 py-8 text-center text-text-2"
+                  className="px-3 py-8 text-center text-muted"
                 >
                   Nenhum grupo encontrado com esse filtro.
                 </td>

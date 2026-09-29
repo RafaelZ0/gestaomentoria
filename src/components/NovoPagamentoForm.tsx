@@ -18,7 +18,7 @@ export function NovoPagamentoForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
+        className="btn-secondary"
       >
         + Registrar pagamento
       </button>
@@ -47,17 +47,17 @@ export function NovoPagamentoForm({
       )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-2">Data</label>
+          <label className="rotulo mb-1.5">Data</label>
           <input
             type="date"
             name="data"
             defaultValue={new Date().toISOString().slice(0, 10)}
             required
-            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+            className="campo w-full"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-text-2">Valor (R$)</label>
+          <label className="rotulo mb-1.5">Valor (R$)</label>
           <input
             type="number"
             name="valor"
@@ -65,22 +65,22 @@ export function NovoPagamentoForm({
             min="0"
             defaultValue={valorSugerido}
             required
-            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold tabular-nums"
+            className="campo w-full tabular-nums"
           />
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-sm text-text-2">Observação</label>
+        <label className="rotulo mb-1.5">Observação</label>
         <input
           name="observacao"
-          className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+          className="campo w-full"
         />
       </div>
       <div className="flex gap-2">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
+          className="btn-secondary"
         >
           {isPending ? "Salvando…" : "Registrar"}
         </button>

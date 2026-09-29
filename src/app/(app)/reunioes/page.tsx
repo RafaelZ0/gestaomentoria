@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { ReunioesGlobalList } from "@/components/ReunioesGlobalList";
 import { AgendarReuniaoGlobalForm } from "@/components/AgendarReuniaoGlobalForm";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export default async function ReunioesGlobaisPage() {
   const supabase = await createClient();
@@ -67,25 +68,20 @@ export default async function ReunioesGlobaisPage() {
   const gruposAtivos = (grupos ?? []).filter((g) => g.status === "Ativo");
 
   return (
-    <div className="max-w-5xl">
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-text">
-        Reuniões
-      </h1>
-      <p className="mt-1 text-sm text-text-2">
-        Todas as reuniões de todos os grupos — agendadas e já realizadas — num
-        só lugar.
-      </p>
+    <div className="mx-auto flex max-w-[960px] flex-col gap-9">
+      <PageHeader
+        titulo="Reuniões"
+        ajuda={
+          <p>
+            Todas as reuniões de todos os grupos — agendadas e já realizadas — num só lugar.
+          </p>
+        }
+        acoes={
+          <AgendarReuniaoGlobalForm grupos={gruposAtivos} responsaveis={responsaveis ?? []} />
+        }
+      />
 
-      <div className="mt-4">
-        <AgendarReuniaoGlobalForm
-          grupos={gruposAtivos}
-          responsaveis={responsaveis ?? []}
-        />
-      </div>
-
-      <div className="mt-6">
-        <ReunioesGlobalList reunioes={linhas} responsaveis={responsaveis ?? []} />
-      </div>
+      <ReunioesGlobalList reunioes={linhas} responsaveis={responsaveis ?? []} />
     </div>
   );
 }

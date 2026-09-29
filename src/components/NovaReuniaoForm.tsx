@@ -42,11 +42,8 @@ export function NovaReuniaoForm({
 
   if (!open) {
     return (
-      <button
-        onClick={() => setOpen(true)}
-        className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover"
-      >
-        + Nova reunião
+      <button type="button" onClick={() => setOpen(true)} className="btn-secondary w-fit">
+        Nova reunião
       </button>
     );
   }
@@ -64,23 +61,20 @@ export function NovaReuniaoForm({
           }
         });
       }}
-      className="space-y-4 rounded-xl border border-line bg-surface p-6"
+      className="flex flex-col gap-4 border-y border-line py-6"
     >
-      {error && (
-        <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      <h2 className="text-[15px] font-semibold text-text">Nova reunião</h2>
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm text-text-2">Data</label>
+          <label className="rotulo mb-1.5">Data</label>
           <input
             type="date"
             name="data"
             value={data}
             onChange={(e) => setData(e.target.value)}
-            className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+            className="campo w-full"
           />
         </div>
 
@@ -90,31 +84,31 @@ export function NovaReuniaoForm({
       {agendada && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm text-text-2">
+            <label className="rotulo mb-1.5">
               Horário (opcional)
             </label>
             <input
               type="time"
               name="hora"
-              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+              className="campo w-full"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-text-2">
+            <label className="rotulo mb-1.5">
               Link da reunião (opcional)
             </label>
             <input
               type="url"
               name="link_reuniao"
               placeholder="https://meet.google.com/..."
-              className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+              className="campo w-full"
             />
           </div>
         </div>
       )}
 
       {!agendada && (
-        <label className="flex items-center gap-3 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text">
+        <label className="flex items-center gap-3 text-sm text-text">
           <input
             type="checkbox"
             name="nao_compareceu"
@@ -127,7 +121,7 @@ export function NovaReuniaoForm({
       )}
 
       <div>
-        <label className="mb-1 block text-sm text-text-2">
+        <label className="rotulo mb-1.5">
           {agendada
             ? "Pauta / observação (opcional)"
             : naoCompareceu
@@ -138,7 +132,7 @@ export function NovaReuniaoForm({
           name="resumo"
           required={!agendada && !naoCompareceu}
           rows={agendada || naoCompareceu ? 2 : 4}
-          className="w-full rounded-lg border border-line bg-hover px-3 py-2 text-text outline-none focus:border-gold"
+          className="campo w-full"
         />
       </div>
 
@@ -157,37 +151,28 @@ export function NovaReuniaoForm({
           <p className="mb-2 text-sm text-text-2">
             Alguma entrega foi feita nesta reunião?
           </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setEntregaFoiFeita("sim")}
-              className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                entregaFoiFeita === "sim"
-                  ? "border-gold bg-gold text-on-gold"
-                  : "border-line text-text-2 hover:bg-hover"
-              }`}
-            >
-              Sim
-            </button>
-            <button
-              type="button"
-              onClick={() => setEntregaFoiFeita("nao")}
-              className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                entregaFoiFeita === "nao"
-                  ? "border-gold bg-gold text-on-gold"
-                  : "border-line text-text-2 hover:bg-hover"
-              }`}
-            >
-              Não
-            </button>
+          <div className="inline-flex gap-1 rounded-[10px] bg-surface p-[3px]">
+            {(["sim", "nao"] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                aria-pressed={entregaFoiFeita === v}
+                onClick={() => setEntregaFoiFeita(v)}
+                className={`h-[30px] rounded-lg px-4 text-[13.5px] transition-colors ${
+                  entregaFoiFeita === v ? "bg-raised text-text" : "text-muted hover:text-text"
+                }`}
+              >
+                {v === "sim" ? "Sim" : "Não"}
+              </button>
+            ))}
           </div>
 
           {entregaFoiFeita === "sim" && (
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 flex flex-col">
               {entregasPendentes.map((e) => (
                 <label
                   key={e.id}
-                  className="flex items-center gap-3 rounded-lg border border-line bg-hover px-3 py-2 text-sm text-text"
+                  className="flex min-h-10 items-center gap-3 border-b border-line-soft text-sm text-text last:border-b-0"
                 >
                   <input
                     type="checkbox"
@@ -204,19 +189,11 @@ export function NovaReuniaoForm({
       )}
 
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-on-gold hover:bg-gold-hover disabled:opacity-60"
-        >
-          {isPending ? "Salvando…" : agendada ? "Agendar reunião" : "Registrar reunião"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="btn-secondary"
-        >
+        <button type="button" onClick={() => setOpen(false)} className="btn-secondary">
           Cancelar
+        </button>
+        <button type="submit" disabled={isPending} className="btn-secondary">
+          {isPending ? "Salvando…" : agendada ? "Agendar reunião" : "Registrar reunião"}
         </button>
       </div>
     </form>
