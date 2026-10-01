@@ -4,7 +4,7 @@ import {
   calcularGruposParaAgendar,
   calcularGruposPorReuniao,
 } from "@/lib/agendaStatus";
-import { DIAS_PARA_AGENDAR } from "@/app/(app)/layout";
+import { DIAS_PARA_AGENDAR } from "@/lib/data/avisos";
 import { CalendarioAgenda, type ReuniaoDoDia } from "@/components/CalendarioAgenda";
 import type { ProximaReuniao } from "@/components/AgendaResumo";
 import { PageHeader } from "@/components/ui/PageHeader";

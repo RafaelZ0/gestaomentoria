@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BotaoAgendar } from "@/components/AgendamentoProvider";
 import { displayGroupName, formatDate } from "@/lib/format";
 import { DIAS_SEM_SINAL_DE_VIDA, type GrupoParaAgendar } from "@/lib/agendaStatus";
 
@@ -51,19 +52,20 @@ export function AgendaResumo({
           paraAgendar.slice(0, 5).map((g) => {
             const atrasado = g.diasSemReuniao === null || g.diasSemReuniao > DIAS_SEM_SINAL_DE_VIDA;
             return (
-              <Link
+              <div
                 key={g.id}
-                href={`/grupos/${g.id}/reunioes`}
-                prefetch={false}
                 className="flex items-baseline justify-between gap-2 rounded-lg px-2 py-1.5 text-[13.5px] hover:bg-hover"
               >
-                <span className="truncate text-text-2">{displayGroupName(g.nome)}</span>
-                <span
-                  className={`shrink-0 text-[12.5px] tabular-nums ${atrasado ? "text-warn" : "text-subtle"}`}
-                >
-                  {g.diasSemReuniao === null ? "nunca" : `${g.diasSemReuniao}d`}
+                <Link href={`/grupos/${g.id}/reunioes`} prefetch={false} className="min-w-0 truncate text-text-2 hover:text-text">
+                  {displayGroupName(g.nome)}
+                </Link>
+                <span className="flex shrink-0 items-baseline gap-2.5">
+                  <span className={`text-[12.5px] tabular-nums ${atrasado ? "text-warn" : "text-muted"}`}>
+                    {g.diasSemReuniao === null ? "nunca" : `${g.diasSemReuniao}d`}
+                  </span>
+                  <BotaoAgendar grupoId={g.id} className="link text-[12.5px]" />
                 </span>
-              </Link>
+              </div>
             );
           })
         )}

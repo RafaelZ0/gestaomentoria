@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { type LinhaRanking } from "@/components/ResultadosRankingTable";
 import {
@@ -160,6 +161,11 @@ export default async function ResultadosPage() {
             coluna, ou na linha pra abrir o detalhamento do grupo. &quot;Por mês&quot; abre cada
             mês pra comparar lado a lado como cada clínica performou naquele período.
           </p>
+        }
+        acoes={
+          <Link href="/resultados/lancar" prefetch={false} className="btn-primary">
+            Lançar resultados
+          </Link>
         }
       />
 

@@ -5,11 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
 import { Icon, type NomeIcone } from "@/components/ui/Icon";
-import {
-  AvisosPainel,
-  type NotificacaoAgendar,
-  type NotificacaoHoje,
-} from "@/components/AvisosPainel";
+import { AvisosPainel } from "@/components/AvisosPainel";
+import { totalAvisos as contarAvisos, type Avisos } from "@/lib/avisos";
 
 const NAV_ITEMS: { href: string; label: string; icone: NomeIcone }[] = [
   { href: "/grupos", label: "Grupos de gestão", icone: "grupos" },
@@ -52,25 +49,13 @@ function salvarRecolhida(valor: boolean) {
   window.dispatchEvent(new Event(EVENTO_RECOLHIDA));
 }
 
-export type GrupoSemReuniao = { id: string; nome: string; dias: number | null };
-
-export function Sidebar({
-  notifAgendar,
-  notifHoje,
-  semReuniao,
-  email,
-}: {
-  notifAgendar: NotificacaoAgendar[];
-  notifHoje: NotificacaoHoje[];
-  semReuniao: GrupoSemReuniao[];
-  email: string | null;
-}) {
+export function Sidebar({ avisos, email }: { avisos: Avisos; email: string | null }) {
   const pathname = usePathname();
   const recolhida = useSyncExternalStore(assinarRecolhida, lerRecolhida, () => false);
   const [gavetaAberta, setGavetaAberta] = useState(false);
   const [avisosAbertos, setAvisosAbertos] = useState(false);
   const [contaAberta, setContaAberta] = useState(false);
-  const totalAvisos = notifAgendar.length + notifHoje.length;
+  const totalAvisos = contarAvisos(avisos);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -241,45 +226,35 @@ export function Sidebar({
                 <div
                   role="dialog"
                   aria-label="Avisos"
-                  className="absolute left-0 top-full z-50 mt-1 max-h-[70vh] w-[min(360px,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-line bg-surface p-2 shadow-2xl min-[900px]:left-full min-[900px]:top-0 min-[900px]:ml-2 min-[900px]:mt-0"
+                  className={`absolute left-0 top-full z-50 mt-1 max-h-[75vh] w-[min(440px,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-line bg-surface p-2 shadow-2xl min-[900px]:fixed min-[900px]:top-4 min-[900px]:mt-0 min-[900px]:max-h-[calc(100vh-2rem)] ${r ? "min-[900px]:left-[84px]" : "min-[900px]:left-[284px]"}`}
                 >
-                  <AvisosPainel
-                    notifAgendar={notifAgendar}
-                    notifHoje={notifHoje}
-                    onNavegar={fecharTudo}
-                  />
+                  <AvisosPainel avisos={avisos} onNavegar={fecharTudo} />
                 </div>
               </>
             )}
           </div>
-        </nav>
 
-        {/* Sem reunião há +30 dias (mesma regra do "sem sinal de vida") */}
-        {semReuniao.length > 0 && (
-          <div className={`mt-[22px] flex min-h-0 flex-col ${soExpandida}`}>
-            <p className="px-2.5 pb-1.5 text-[13px] font-medium text-muted">
-              Sem reunião há +30 dias
-            </p>
-            <div className="flex min-h-0 flex-col gap-px overflow-y-auto">
-              {semReuniao.map((g) => (
-                <Link
-                  key={g.id}
-                  href={`/grupos/${g.id}`}
-                  prefetch={false}
-                  onClick={fecharTudo}
-                  className={`flex h-8 shrink-0 items-center justify-between gap-3 rounded-lg px-2.5 text-sm hover:bg-hover hover:text-text ${
-                    pathname === `/grupos/${g.id}` ? "bg-hover text-text" : "text-text-2"
-                  }`}
-                >
-                  <span className="truncate">{g.nome}</span>
-                  <span className="shrink-0 text-[12.5px] tabular-nums text-subtle">
-                    {g.dias === null ? "nunca" : `${g.dias}d`}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+          {/* Busca rápida (Ctrl/Cmd + K) */}
+          <ItemComDica rotulo="Buscar (Ctrl+K)" recolhida={r}>
+            <button
+              type="button"
+              onClick={() => {
+                fecharTudo();
+                window.dispatchEvent(new Event("abrir-busca-rapida"));
+              }}
+              aria-label="Buscar"
+              className={`flex h-[38px] w-full items-center gap-3 rounded-[10px] px-2.5 text-left text-[14.5px] text-text-2 transition-colors hover:bg-hover hover:text-text ${
+                r ? "min-[900px]:h-10 min-[900px]:w-10 min-[900px]:justify-center min-[900px]:px-0" : ""
+              }`}
+            >
+              <Icon nome="busca" />
+              <span className={`flex-1 ${soExpandida}`}>Buscar</span>
+              <kbd className={`rounded border border-line px-1.5 text-[11px] text-muted ${soExpandida}`}>
+                Ctrl K
+              </kbd>
+            </button>
+          </ItemComDica>
+        </nav>
 
         <div className="flex-1" />
 

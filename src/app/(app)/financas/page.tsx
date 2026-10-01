@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { formatBRL } from "@/lib/format";
+import { formatBRL, formatDate, plural } from "@/lib/format";
+import { getAvisos } from "@/lib/data/avisos";
+import { CobrarWhatsApp } from "@/components/CobrarWhatsApp";
 import { calcTabelaMensal } from "@/lib/finance";
 import { TabelaMensalFinancas } from "@/components/TabelaMensalFinancas";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -10,12 +12,14 @@ export default async function FinancasPage() {
   const supabase = await createClient();
 
   const [
+    avisos,
     { data: pagamentos },
     { data: grupos },
     { data: custosFixos },
     { data: lancamentos },
     { data: custosFixosMensaisItens },
   ] = await Promise.all([
+    getAvisos(),
     supabase.from("pagamentos").select("*"),
     supabase.from("grupos_gestao").select("*"),
     supabase.from("custos_fixos").select("*"),
@@ -131,6 +135,33 @@ export default async function FinancasPage() {
           <Dica>{formatBRL(valorClausulas)} em cláusulas</Dica>
         </Metric>
       </div>
+
+      {avisos.pagamento.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-[15px] font-semibold text-danger">
+            Em atraso · {plural(avisos.pagamento.length, "boleto", "boletos")}
+          </h2>
+          <div className="flex flex-col">
+            {avisos.pagamento.map((p) => (
+              <div
+                key={p.pagamentoId}
+                className="flex min-h-12 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-line-soft py-2 text-[14.5px] last:border-b-0"
+              >
+                <Link href={`/grupos/${p.grupoId}/pagamentos`} prefetch={false} className="text-text hover:text-gold">
+                  {p.grupoNome}
+                </Link>
+                <span className="flex items-center gap-5">
+                  <span className="text-[13.5px] tabular-nums text-muted">
+                    venceu {formatDate(p.vencimento)}
+                  </span>
+                  <span className="tabular-nums text-danger">{formatBRL(p.valor)}</span>
+                  <CobrarWhatsApp mentorados={p.mentorados} valor={p.valor} vencimento={p.vencimento} />
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="flex flex-col gap-2">
         <h2 className="text-[15px] font-semibold text-text">Por mês</h2>
