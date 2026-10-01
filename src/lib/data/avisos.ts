@@ -2,7 +2,13 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { calcularGruposParaAgendar, calcularGruposPorReuniao } from "@/lib/agendaStatus";
 import { displayGroupName } from "@/lib/format";
-import { mesAnteriorISO, type Avisos, type MentoradoContato } from "@/lib/avisos";
+import {
+  DIAS_AVISO_RENOVACAO,
+  diasAteData,
+  mesAnteriorISO,
+  type Avisos,
+  type MentoradoContato,
+} from "@/lib/avisos";
 
 // Passado esse número de dias sem reunião e sem nenhuma reunião futura já
 // agendada, avisa que está na hora de marcar a próxima — mais cedo que o
@@ -26,7 +32,7 @@ export const getAvisos = cache(async (): Promise<Avisos> => {
     { data: processosAtivos },
     { data: entregas },
   ] = await Promise.all([
-    supabase.from("grupos_gestao").select("id, nome, status, trafego_pago"),
+    supabase.from("grupos_gestao").select("id, nome, status, trafego_pago, data_fim_contrato"),
     supabase.from("reunioes").select("id, grupo_id, data, compareceu, hora"),
     supabase.from("reuniao_participantes").select("reuniao_id, mentorados(grupo_id)"),
     supabase
@@ -110,5 +116,16 @@ export const getAvisos = cache(async (): Promise<Avisos> => {
         pendentes: idsProcessos.size - (feitosPorGrupo.get(g.id)?.size ?? 0),
       }))
       .filter((g) => g.pendentes > 0),
+    // Sem data de fim de contrato, não calcula nada.
+    renovacao: ativos
+      .filter((g) => !!g.data_fim_contrato)
+      .map((g) => ({
+        grupoId: g.id,
+        grupoNome: displayGroupName(g.nome),
+        fim: g.data_fim_contrato!,
+        dias: diasAteData(g.data_fim_contrato!, hoje),
+      }))
+      .filter((g) => g.dias <= DIAS_AVISO_RENOVACAO)
+      .sort((a, b) => a.dias - b.dias),
   };
 });

@@ -8,6 +8,7 @@ import { AgendarReuniaoModal } from "@/components/AgendarReuniaoModal";
 import { StatusDot, tomStatusGrupo, type Tom } from "@/components/ui/StatusDot";
 import { ConfirmDialog, RowMenu } from "@/components/ui/RowMenu";
 import type { StatusSaude } from "@/lib/saude";
+import { DIAS_AVISO_RENOVACAO, diasAteData, textoRenovacao } from "@/lib/avisos";
 
 const SAUDE: Record<StatusSaude, { label: string; tom: Tom }> = {
   ok: { label: "Saudável", tom: "ok" },
@@ -26,7 +27,13 @@ export function GrupoCabecalho({
   pabloId,
   hoje,
 }: {
-  grupo: { id: string; nome: string; status: string; data_termino: string | null };
+  grupo: {
+    id: string;
+    nome: string;
+    status: string;
+    data_termino: string | null;
+    data_fim_contrato: string | null;
+  };
   saude: { status: StatusSaude; flags: string[] };
   responsaveis: { id: string; nome: string }[];
   pabloId: string | null;
@@ -38,6 +45,8 @@ export function GrupoCabecalho({
   const [isPending, startTransition] = useTransition();
   const ativo = grupo.status === "Ativo";
   const s = SAUDE[saude.status];
+  const diasRenovacao =
+    ativo && grupo.data_fim_contrato ? diasAteData(grupo.data_fim_contrato, hoje) : null;
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -57,6 +66,11 @@ export function GrupoCabecalho({
             {ativo && (
               <StatusDot tom={s.tom}>
                 {[s.label, ...saude.flags.map(minusculaInicial)].join(" · ")}
+              </StatusDot>
+            )}
+            {diasRenovacao !== null && diasRenovacao <= DIAS_AVISO_RENOVACAO && (
+              <StatusDot tom={diasRenovacao < 0 ? "danger" : "warn"}>
+                {textoRenovacao(diasRenovacao)}
               </StatusDot>
             )}
           </div>

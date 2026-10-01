@@ -166,6 +166,7 @@ export default async function GrupoOverviewPage({
             nome: grupo.nome,
             valor_mensal: String(Number(grupo.valor_mensal)),
             data_inicio: grupo.data_inicio,
+            data_fim_contrato: grupo.data_fim_contrato ?? "",
             observacoes: grupo.observacoes ?? "",
             trafego_pago: grupo.trafego_pago ?? "",
             trafego_pago_desde: grupo.trafego_pago_desde ?? "",
@@ -238,6 +239,15 @@ export default async function GrupoOverviewPage({
             <section className="flex flex-col">
               <h2 className="mb-1.5 text-[15px] font-semibold text-text">Cadastro</h2>
               <LinhaInfo rotulo="Início do contrato">{formatDate(grupo.data_inicio)}</LinhaInfo>
+              <LinhaInfo rotulo="Fim do contrato">
+                {grupo.data_fim_contrato ? (
+                  formatDate(grupo.data_fim_contrato)
+                ) : (
+                  <Link href={`${base}?editar=1`} prefetch={false} className="link">
+                    Definir
+                  </Link>
+                )}
+              </LinhaInfo>
               {grupo.data_termino && (
                 <LinhaInfo rotulo="Encerrado em">{formatDate(grupo.data_termino)}</LinhaInfo>
               )}

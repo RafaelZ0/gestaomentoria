@@ -53,6 +53,16 @@ export function useAgendamento(): AbrirAgendamento {
   return abrir;
 }
 
+// "Agendar reunião" sem grupo pré-escolhido (ação principal da página).
+export function BotaoNovoAgendamento() {
+  const abrir = useAgendamento();
+  return (
+    <button type="button" onClick={() => abrir()} className="btn-primary">
+      Agendar reunião
+    </button>
+  );
+}
+
 // Botão "Agendar" pronto pra listas (Avisos, Agenda, "quem precisa agendar").
 export function BotaoAgendar({
   grupoId,

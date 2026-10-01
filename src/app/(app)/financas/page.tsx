@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatBRL, formatDate, plural } from "@/lib/format";
 import { getAvisos } from "@/lib/data/avisos";
 import { CobrarWhatsApp } from "@/components/CobrarWhatsApp";
+import { PontoEquilibrio } from "@/components/PontoEquilibrio";
 import { calcTabelaMensal } from "@/lib/finance";
 import { TabelaMensalFinancas } from "@/components/TabelaMensalFinancas";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -134,6 +135,15 @@ export default async function FinancasPage() {
           {gruposCancelados}
           <Dica>{formatBRL(valorClausulas)} em cláusulas</Dica>
         </Metric>
+      </div>
+
+      <div className="border-b border-line pb-8">
+        <PontoEquilibrio
+          valoresMensaisAtivos={(grupos ?? [])
+            .filter((g) => g.status === "Ativo")
+            .map((g) => Number(g.valor_mensal))}
+          custosFixos={custosFixosMensais}
+        />
       </div>
 
       {avisos.pagamento.length > 0 && (

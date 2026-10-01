@@ -4,6 +4,7 @@ import { CustosFixosList } from "@/components/CustosFixosList";
 import { CustoHoraConfigForm } from "@/components/CustoHoraConfigForm";
 import { AjudaPopover, PageHeader } from "@/components/ui/PageHeader";
 import { Metric } from "@/components/ui/Metric";
+import { PontoEquilibrio } from "@/components/PontoEquilibrio";
 
 export default async function CustoHoraPage() {
   const supabase = await createClient();
@@ -79,6 +80,13 @@ export default async function CustoHoraPage() {
             Nenhum grupo ativo no momento — não dá para calcular o custo por grupo.
           </p>
         )}
+      </div>
+
+      <div className="border-b border-line pb-8">
+        <PontoEquilibrio
+          valoresMensaisAtivos={gruposAtivos.map((g) => Number(g.valor_mensal))}
+          custosFixos={totalCustosFixos}
+        />
       </div>
 
       <section className="flex flex-col gap-1">

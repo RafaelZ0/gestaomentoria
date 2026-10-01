@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { formatBRL, formatDate, formatMesAno, plural } from "@/lib/format";
-import { totalAvisos, type Avisos } from "@/lib/avisos";
+import { textoRenovacao, totalAvisos, type Avisos } from "@/lib/avisos";
 import { BotaoAgendar } from "@/components/AgendamentoProvider";
 import { CobrarWhatsApp } from "@/components/CobrarWhatsApp";
 
@@ -10,10 +10,10 @@ import { CobrarWhatsApp } from "@/components/CobrarWhatsApp";
 // direta (agendar, cobrar, lançar, fazer diagnóstico...).
 export function AvisosPainel({
   avisos,
-  onNavegar,
+  onNavegar = () => {},
 }: {
   avisos: Avisos;
-  onNavegar: () => void;
+  onNavegar?: () => void;
 }) {
   if (totalAvisos(avisos) === 0) {
     return <p className="px-3 py-4 text-sm text-muted">Nenhum aviso por enquanto.</p>;
@@ -115,6 +115,25 @@ export function AvisosPainel({
                 Fazer diagnóstico
               </Link>
             </div>
+          ))}
+        </Bloco>
+      )}
+
+      {avisos.renovacao.length > 0 && (
+        <Bloco titulo="Renovação · contratos terminando">
+          {avisos.renovacao.map((r) => (
+            <Link
+              key={r.grupoId}
+              href={`/grupos/${r.grupoId}`}
+              prefetch={false}
+              onClick={onNavegar}
+              className={linha}
+            >
+              <span className="font-medium text-text">{r.grupoNome}</span>
+              <span className={`text-[13px] ${r.dias < 0 ? "text-danger" : "text-warn"}`}>
+                {textoRenovacao(r.dias)} · {formatDate(r.fim).slice(0, 5)}
+              </span>
+            </Link>
           ))}
         </Bloco>
       )}

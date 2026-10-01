@@ -67,6 +67,7 @@ export function BuscaRapida({
       { id: "a-agendar", rotulo: "Agendar reunião", grupo: "Ações", executar: () => abrirAgendamento() },
       { id: "a-novo", rotulo: "Novo grupo", grupo: "Ações", executar: ir("/grupos/novo") },
       { id: "a-lancar", rotulo: "Lançar resultados", grupo: "Ações", executar: ir("/resultados/lancar") },
+      { id: "a-inicio", rotulo: "Ir para Início", grupo: "Ações", executar: ir("/inicio") },
       { id: "a-grupos", rotulo: "Ir para Grupos de gestão", grupo: "Ações", executar: ir("/grupos") },
       { id: "a-reunioes", rotulo: "Ir para Reuniões", grupo: "Ações", executar: ir("/reunioes") },
       { id: "a-agenda", rotulo: "Ir para Agenda", grupo: "Ações", executar: ir("/agenda") },

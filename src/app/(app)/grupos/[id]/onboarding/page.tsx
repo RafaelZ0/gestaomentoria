@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getGrupo } from "@/lib/data/grupo";
 import { OnboardingApp } from "@/components/onboarding/OnboardingApp";
 import { OnboardingInicio } from "@/components/onboarding/OnboardingInicio";
+import { LinhaDeBase } from "@/components/onboarding/LinhaDeBase";
 import type { OnboardingPrecisao, OnboardingValores } from "@/lib/onboarding";
 
 export default async function OnboardingPage({
@@ -47,12 +48,31 @@ export default async function OnboardingPage({
     );
   }
 
-  const { data: participantes } = onboarding.reuniao_id
-    ? await supabase
-        .from("reuniao_participantes")
-        .select("mentorado_id")
-        .eq("reuniao_id", onboarding.reuniao_id)
-    : { data: [] };
+  const [{ data: participantes }, { data: resultados }] = await Promise.all([
+    onboarding.reuniao_id
+      ? supabase
+          .from("reuniao_participantes")
+          .select("mentorado_id")
+          .eq("reuniao_id", onboarding.reuniao_id)
+      : Promise.resolve({ data: [] as { mentorado_id: string }[] }),
+    supabase
+      .from("resultados_grupo")
+      .select("data, leads, vendas_campanha_interna, vendas_trafego_pago, faturamento_campanha_interna, faturamento_trafego_pago")
+      .eq("grupo_id", id),
+  ]);
+
+  // Mês mais recente com lançamento (soma do mês) pra "Linha de base × hoje".
+  const porMes = new Map<string, { leads: number; vendas: number; faturamento: number }>();
+  for (const r of resultados ?? []) {
+    const mes = r.data.slice(0, 7);
+    const a = porMes.get(mes) ?? { leads: 0, vendas: 0, faturamento: 0 };
+    a.leads += r.leads;
+    a.vendas += r.vendas_campanha_interna + r.vendas_trafego_pago;
+    a.faturamento += Number(r.faturamento_campanha_interna) + Number(r.faturamento_trafego_pago);
+    porMes.set(mes, a);
+  }
+  const mesMaisRecente = [...porMes.keys()].sort().at(-1);
+  const ultimo = mesMaisRecente ? { mes: mesMaisRecente, ...porMes.get(mesMaisRecente)! } : null;
 
   const modoInicial =
     ver === "raio-x" || (ver !== "preencher" && onboarding.status === "concluido")
@@ -60,17 +80,26 @@ export default async function OnboardingPage({
       : "preencher";
 
   return (
-    <OnboardingApp
-      key={onboarding.id}
-      onboardingId={onboarding.id}
-      grupoId={id}
-      reuniaoId={onboarding.reuniao_id}
-      statusInicial={onboarding.status}
-      respostasIniciais={(onboarding.respostas ?? {}) as OnboardingValores}
-      precisaoIniciais={(onboarding.precisao ?? {}) as OnboardingPrecisao}
-      modoInicial={modoInicial}
-      mentorados={mentorados ?? []}
-      participantesIniciais={(participantes ?? []).map((p) => p.mentorado_id)}
-    />
+    <div className="flex flex-col gap-8">
+      <OnboardingApp
+        key={onboarding.id}
+        onboardingId={onboarding.id}
+        grupoId={id}
+        reuniaoId={onboarding.reuniao_id}
+        statusInicial={onboarding.status}
+        respostasIniciais={(onboarding.respostas ?? {}) as OnboardingValores}
+        precisaoIniciais={(onboarding.precisao ?? {}) as OnboardingPrecisao}
+        modoInicial={modoInicial}
+        mentorados={mentorados ?? []}
+        participantesIniciais={(participantes ?? []).map((p) => p.mentorado_id)}
+      />
+      {ultimo && (
+        <LinhaDeBase
+          respostas={(onboarding.respostas ?? {}) as OnboardingValores}
+          precisao={(onboarding.precisao ?? {}) as OnboardingPrecisao}
+          ultimo={ultimo}
+        />
+      )}
+    </div>
   );
 }

@@ -108,6 +108,7 @@ export async function atualizarGrupo(
     nome: string;
     valor_mensal: string;
     data_inicio: string;
+    data_fim_contrato: string;
     observacoes: string;
     trafego_pago: TrafegoPago | "";
     trafego_pago_desde: string;
@@ -120,6 +121,9 @@ export async function atualizarGrupo(
   if (!nome) return { ok: false, error: "O nome do grupo não pode ficar vazio." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dados.data_inicio)) {
     return { ok: false, error: "Informe a data de início do contrato." };
+  }
+  if (dados.data_fim_contrato && dados.data_fim_contrato < dados.data_inicio) {
+    return { ok: false, error: "O fim do contrato não pode ser antes do início." };
   }
 
   const numeroOuNull = (v: string) => {
@@ -144,6 +148,9 @@ export async function atualizarGrupo(
       nome,
       valor_mensal,
       data_inicio: dados.data_inicio,
+      data_fim_contrato: /^\d{4}-\d{2}-\d{2}$/.test(dados.data_fim_contrato)
+        ? dados.data_fim_contrato
+        : null,
       observacoes: dados.observacoes.trim() || null,
       trafego_pago: dados.trafego_pago || null,
       trafego_pago_desde: dados.trafego_pago_desde.trim() || null,

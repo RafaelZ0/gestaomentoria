@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { ResultadosList } from "@/components/ResultadosList";
 import { EvolucaoResultadosChart } from "@/components/EvolucaoResultadosChart";
+import { GerarRelatorio } from "@/components/GerarRelatorio";
 
 export default async function ResultadosPage({
   params,
@@ -41,6 +42,9 @@ export default async function ResultadosPage({
 
   return (
     <div className="flex flex-col gap-8">
+      <div className="flex justify-end">
+        <GerarRelatorio grupoId={id} meses={[...porMes.keys()].sort().reverse()} />
+      </div>
       <EvolucaoResultadosChart dados={evolucao} />
       <ResultadosList grupoId={id} resultados={resultados ?? []} />
     </div>

@@ -9,6 +9,7 @@ import { AvisosPainel } from "@/components/AvisosPainel";
 import { totalAvisos as contarAvisos, type Avisos } from "@/lib/avisos";
 
 const NAV_ITEMS: { href: string; label: string; icone: NomeIcone }[] = [
+  { href: "/inicio", label: "Início", icone: "inicio" },
   { href: "/grupos", label: "Grupos de gestão", icone: "grupos" },
   { href: "/reunioes", label: "Reuniões", icone: "reunioes" },
   { href: "/agenda", label: "Agenda", icone: "agenda" },

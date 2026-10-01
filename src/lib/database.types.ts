@@ -9,6 +9,8 @@ export type GrupoGestao = {
   data_inicio: string;
   status: StatusGrupo;
   data_termino: string | null;
+  // Fim previsto do contrato (renovações). data_termino é o cancelamento.
+  data_fim_contrato: string | null;
   trafego_pago: TrafegoPago | null;
   trafego_pago_desde: string | null;
   valor_mensal: number;

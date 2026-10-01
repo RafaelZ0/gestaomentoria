@@ -55,11 +55,25 @@
   --color-danger: var(--danger);
   --color-warn: var(--warn);
 
+  /* Só pro relatório impresso (fundo claro): versões escuras de ok/danger
+     com contraste sobre branco. */
+  --color-ok-impressao: #2f7a45;
+  --color-danger-impressao: #b4452b;
+
   --font-sans: var(--font-dm-sans), system-ui, sans-serif;
   --font-serif: var(--font-source-serif), Georgia, serif;
   /* Legado: .font-display agora é só a fonte de texto. Títulos de página usam
      font-serif (via PageHeader). */
   --font-display: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+@media print {
+  @page {
+    margin: 16mm;
+  }
+  body {
+    background: #fff !important;
+  }
 }
 
 @layer base {

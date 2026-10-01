@@ -18,7 +18,7 @@ export default async function LoginPage({
         {error && <p className="mt-5 text-sm text-danger">{error}</p>}
 
         <form action={login} className="mt-8 flex flex-col gap-4">
-          <input type="hidden" name="next" value={next ?? "/grupos"} />
+          <input type="hidden" name="next" value={next ?? "/inicio"} />
           <div>
             <label className="rotulo mb-1.5" htmlFor="email">
               E-mail

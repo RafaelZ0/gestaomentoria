@@ -9,6 +9,28 @@ const CAMINHOS = {
     </>
   ),
   mais: <path d="M12 5v14M5 12h14" />,
+  inicio: (
+    <>
+      <path d="M4 11.5L12 5l8 6.5" />
+      <path d="M6.5 10v9.5h11V10" />
+      <path d="M10 19.5v-5h4v5" />
+    </>
+  ),
+  linhaTempo: (
+    <>
+      <circle cx="6" cy="6" r="1.6" />
+      <circle cx="6" cy="12" r="1.6" />
+      <circle cx="6" cy="18" r="1.6" />
+      <path d="M6 7.6v2.8M6 13.6v2.8M10 6h10M10 12h10M10 18h7" />
+    </>
+  ),
+  pagamento: (
+    <>
+      <rect x="3.5" y="6" width="17" height="12" rx="2.5" />
+      <path d="M3.5 10h17M7 14.5h3" />
+    </>
+  ),
+  check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   grupos: (
     <>
       <circle cx="9" cy="8" r="3.2" />

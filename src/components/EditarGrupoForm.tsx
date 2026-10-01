@@ -10,6 +10,7 @@ type Dados = {
   nome: string;
   valor_mensal: string;
   data_inicio: string;
+  data_fim_contrato: string;
   observacoes: string;
   trafego_pago: TrafegoPago | "";
   trafego_pago_desde: string;
@@ -162,6 +163,15 @@ export function EditarGrupoForm({ grupoId, inicial }: { grupoId: string; inicial
               onChange={(e) => set("data_inicio", e.target.value)}
               className="campo"
               required
+            />
+          </Campo>
+          <Campo rotulo="Fim do contrato (para avisar da renovação)">
+            <input
+              type="date"
+              value={dados.data_fim_contrato}
+              min={dados.data_inicio || undefined}
+              onChange={(e) => set("data_fim_contrato", e.target.value)}
+              className="campo"
             />
           </Campo>
           <Campo rotulo="Observações">
