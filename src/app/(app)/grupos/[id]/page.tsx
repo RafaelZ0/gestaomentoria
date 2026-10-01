@@ -221,6 +221,7 @@ export default async function GrupoOverviewPage({
                   meta={metaRoas}
                   formatar={formatRoas}
                   melhorQuandoMaior
+                  editarHref={`${base}?editar=1`}
                 />
               </LinhaInfo>
               <LinhaInfo rotulo="Último CPL">
@@ -229,6 +230,7 @@ export default async function GrupoOverviewPage({
                   meta={metaCpl}
                   formatar={formatBRL}
                   melhorQuandoMaior={false}
+                  editarHref={`${base}?editar=1`}
                 />
               </LinhaInfo>
             </section>
@@ -270,7 +272,7 @@ function ResumoLink({ href, rotulo, valor }: { href: string; rotulo: string; val
       prefetch={false}
       className="group -mx-2 flex flex-col gap-1 rounded-lg px-2 py-1 hover:bg-hover"
     >
-      <span className="text-[13px] text-subtle">{rotulo}</span>
+      <span className="text-[13px] text-muted">{rotulo}</span>
       <span className="text-[15px] text-text">{valor}</span>
     </Link>
   );
@@ -281,28 +283,57 @@ function ValorComMeta({
   meta,
   formatar,
   melhorQuandoMaior,
+  editarHref,
 }: {
   realizado: number | null;
   meta: number | null;
   formatar: (v: number) => string;
   melhorQuandoMaior: boolean;
+  editarHref: string;
 }) {
+  if (meta === null || meta <= 0) {
+    return (
+      <>
+        {realizado === null ? "—" : formatar(realizado)}{" "}
+        <span className="text-subtle">·</span>{" "}
+        <Link href={editarHref} prefetch={false} className="link">
+          Definir meta
+        </Link>
+      </>
+    );
+  }
+
   const dentro =
-    realizado !== null && meta !== null
-      ? melhorQuandoMaior
-        ? realizado >= meta
-        : realizado <= meta
-      : null;
+    realizado !== null ? (melhorQuandoMaior ? realizado >= meta : realizado <= meta) : null;
+  // Progresso até a meta: ROAS = realizado ÷ meta; CPL (menor é melhor) =
+  // meta ÷ realizado. Calculado na hora, nunca gravado.
+  const progresso =
+    realizado === null || realizado <= 0
+      ? 0
+      : Math.min(1, melhorQuandoMaior ? realizado / meta : meta / realizado);
+
   return (
-    <>
-      {realizado === null ? "—" : formatar(realizado)}{" "}
-      <span className="text-subtle">· meta {meta === null ? "—" : formatar(meta)}</span>
-      {dentro !== null && (
-        <span className={dentro ? "text-ok" : "text-danger"}>
-          {" "}
-          · {dentro ? "dentro" : "fora"}
-        </span>
-      )}
-    </>
+    <span className="inline-flex flex-col items-end gap-1.5">
+      <span>
+        {realizado === null ? "—" : formatar(realizado)}{" "}
+        <span className="text-muted">· meta {formatar(meta)}</span>
+        {dentro !== null && (
+          <span className={dentro ? "text-ok" : "text-danger"}> · {dentro ? "dentro" : "fora"}</span>
+        )}
+      </span>
+      <span
+        className="block h-1 w-36 overflow-hidden rounded-full bg-raised"
+        role="progressbar"
+        aria-valuenow={Math.round(progresso * 100)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label="Progresso até a meta"
+      >
+        <span
+          className={`block h-full rounded-full ${dentro ? "bg-ok" : "bg-gold"}`}
+          style={{ width: `${Math.round(progresso * 100)}%` }}
+        />
+      </span>
+    </span>
   );
 }

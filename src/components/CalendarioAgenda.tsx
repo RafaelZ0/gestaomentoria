@@ -385,7 +385,7 @@ export function CalendarioAgenda({
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[13px] text-subtle">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[13px] text-muted">
           <span className="flex items-center gap-1.5">
             <span className="h-[7px] w-[7px] rounded-full bg-gold" />
             Reunião Dr. Pablo
@@ -414,7 +414,7 @@ export function CalendarioAgenda({
                   key={d}
                   className="border-b border-r border-line px-2 py-2.5 text-center last:border-r-0"
                 >
-                  <p className="text-xs text-subtle">
+                  <p className="text-[13px] text-muted">
                     {formatDiaSemanaCurto(d)}
                   </p>
                   <p

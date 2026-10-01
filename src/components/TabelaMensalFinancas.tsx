@@ -25,7 +25,7 @@ export function TabelaMensalFinancas({
   return (
     <div className="overflow-x-auto">
       <div className="min-w-[680px]">
-        <div className={`grid ${COLUNAS} gap-3 border-b border-line px-3 pb-2.5 pt-3 text-[12.5px] text-subtle`}>
+        <div className={`grid ${COLUNAS} gap-3 border-b border-line px-3 pb-2.5 pt-3 text-[13px] text-muted`}>
           <span>Mês</span>
           <span className="text-right">Entrada</span>
           <span className="text-right">Faturamento</span>
@@ -104,7 +104,7 @@ export function TabelaMensalFinancas({
                           Nenhum pagamento registrado neste mês.
                         </p>
                       )}
-                      <h4 className="mb-1 mt-5 text-[13px] text-subtle">Receitas avulsas</h4>
+                      <h4 className="mb-1 mt-5 text-[13px] text-muted">Receitas avulsas</h4>
                       <LancamentosList
                         lancamentos={lancamentosDoMes.filter((l) => l.tipo === "RECEITA")}
                       />
@@ -139,7 +139,7 @@ export function TabelaMensalFinancas({
                     <div className="mt-2">
                       <CustosFixosMensaisEditor ano={m.ano} mes={m.mes} itens={m.custosFixosItens} />
                     </div>
-                    <h4 className="mb-1 mt-5 text-[13px] text-subtle">Despesas avulsas</h4>
+                    <h4 className="mb-1 mt-5 text-[13px] text-muted">Despesas avulsas</h4>
                     <LancamentosList
                       lancamentos={lancamentosDoMes.filter((l) => l.tipo === "DESPESA")}
                     />

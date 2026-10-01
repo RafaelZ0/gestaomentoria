@@ -257,7 +257,7 @@ export function Sidebar({
         {/* Sem reunião há +30 dias (mesma regra do "sem sinal de vida") */}
         {semReuniao.length > 0 && (
           <div className={`mt-[22px] flex min-h-0 flex-col ${soExpandida}`}>
-            <p className="px-2.5 pb-1.5 text-xs font-medium text-subtle">
+            <p className="px-2.5 pb-1.5 text-[13px] font-medium text-muted">
               Sem reunião há +30 dias
             </p>
             <div className="flex min-h-0 flex-col gap-px overflow-y-auto">
@@ -294,7 +294,7 @@ export function Sidebar({
                   r ? "min-[900px]:bottom-0 min-[900px]:left-full min-[900px]:mb-0 min-[900px]:ml-2" : ""
                 }`}
               >
-                {email && <p className="truncate px-3 py-2 text-[13px] text-subtle">{email}</p>}
+                {email && <p className="truncate px-3 py-2 text-[13px] text-muted">{email}</p>}
                 <form action={logout}>
                   <button
                     type="submit"
@@ -323,7 +323,7 @@ export function Sidebar({
             </span>
             <span className={`flex min-w-0 flex-1 flex-col ${soExpandida}`}>
               <span className="text-sm text-text">Rafael</span>
-              <span className="text-xs text-subtle">Conta compartilhada</span>
+              <span className="text-[13px] text-muted">Conta compartilhada</span>
             </span>
             <span className={`text-subtle ${soExpandida}`}>
               <Icon nome="seletor" tamanho={16} traco={1.8} />

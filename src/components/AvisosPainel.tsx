@@ -34,7 +34,7 @@ export function AvisosPainel({
     <div className="space-y-3">
       {notifHoje.length > 0 && (
         <div>
-          <p className="px-3 pb-1 text-[13px] text-subtle">Reunião hoje</p>
+          <p className="px-3 pb-1 text-[13px] text-muted">Reunião hoje</p>
           {notifHoje.map((n) => (
             <Link
               key={n.reuniaoId}
@@ -55,7 +55,7 @@ export function AvisosPainel({
       )}
       {notifAgendar.length > 0 && (
         <div>
-          <p className="px-3 pb-1 text-[13px] text-subtle">Hora de agendar a próxima reunião</p>
+          <p className="px-3 pb-1 text-[13px] text-muted">Hora de agendar a próxima reunião</p>
           {notifAgendar.map((n) => (
             <Link
               key={n.id}

@@ -103,7 +103,7 @@ export function ReunioesGlobalList({
               </option>
             ))}
           </select>
-          <span className="text-[13px] text-subtle">
+          <span className="text-[13px] text-muted">
             {filtradas.length} reuni{filtradas.length === 1 ? "ão" : "ões"}
           </span>
         </div>
@@ -134,7 +134,7 @@ export function ReunioesGlobalList({
               <div key={mes} className="flex flex-col">
                 <div className="flex items-baseline justify-between border-b border-line pb-2">
                   <h3 className="text-[13.5px] font-medium text-text-2">{formatMesAno(ano, m)}</h3>
-                  <span className="text-[12.5px] text-subtle">
+                  <span className="text-[13px] text-muted">
                     {itens.length} reuni{itens.length === 1 ? "ão" : "ões"}
                   </span>
                 </div>
@@ -226,7 +226,7 @@ function ReuniaoGlobalItem({ reuniao: r }: { reuniao: LinhaReuniao }) {
           </div>
         )}
         {r.participantes.length > 0 && (
-          <p className="text-[13px] text-subtle">Participantes: {r.participantes.join(", ")}</p>
+          <p className="text-[13px] text-muted">Participantes: {r.participantes.join(", ")}</p>
         )}
       </div>
     </article>

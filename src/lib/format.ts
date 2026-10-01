@@ -59,6 +59,14 @@ export function plural(n: number, singular: string, pluralForm: string): string 
   return `${n} ${n === 1 ? singular : pluralForm}`;
 }
 
+// Nome de processo (tipo de entrega) como aparece na tela: sentence case
+// ("PLANILHA DE CONTROLE DE METAS" → "Planilha de controle de metas"). O
+// valor no banco não muda.
+export function displayProcessName(nome: string | null | undefined): string {
+  const baixo = (nome ?? "").trim().toLocaleLowerCase("pt-BR");
+  return baixo.charAt(0).toLocaleUpperCase("pt-BR") + baixo.slice(1);
+}
+
 const PARTICULAS = new Set(["e", "de", "da", "do", "das", "dos"]);
 
 // Nome do grupo como aparece na tela: sem o prefixo "GESTÃO " e em title

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { createReuniao } from "@/app/actions/reunioes";
+import { displayProcessName } from "@/lib/format";
 import { ResponsavelField } from "@/components/ResponsavelField";
 import { ParticipantesFields } from "@/components/ParticipantesFields";
 import type { Responsavel } from "@/lib/database.types";
@@ -180,7 +181,7 @@ export function NovaReuniaoForm({
                     value={e.id}
                     className="h-4 w-4"
                   />
-                  {e.nome}
+                  {displayProcessName(e.nome)}
                 </label>
               ))}
             </div>

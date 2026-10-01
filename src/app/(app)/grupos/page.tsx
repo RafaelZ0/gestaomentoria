@@ -3,7 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { calcSaudeGrupo, calcTendenciaRoas } from "@/lib/saude";
 import { GruposTable } from "@/components/GruposTable";
 import { GruposResumo } from "@/components/GruposResumo";
-import { calcularSemSinalDeVida } from "@/lib/agendaStatus";
+import {
+  calcularSemSinalDeVida,
+  calcularUltimaReuniaoPorGrupo,
+  diasDesde,
+} from "@/lib/agendaStatus";
 import { PageHeader } from "@/components/ui/PageHeader";
 
 export default async function GruposPage() {
@@ -53,18 +57,13 @@ export default async function GruposPage() {
     gruposPorReuniao.get(p.reuniao_id)?.add(grupoId);
   }
 
-  const ultimaReuniaoPorGrupo = new Map<string, string>();
-  for (const r of reunioes ?? []) {
-    const gruposEnvolvidos = gruposPorReuniao.get(r.id) ?? new Set([r.grupo_id]);
-    for (const gid of gruposEnvolvidos) {
-      const atual = ultimaReuniaoPorGrupo.get(gid);
-      if (!atual || r.data > atual) {
-        ultimaReuniaoPorGrupo.set(gid, r.data);
-      }
-    }
-  }
-
   const hoje = new Date();
+  const hojeISO = hoje.toISOString().slice(0, 10);
+  const ultimaReuniaoPorGrupo = calcularUltimaReuniaoPorGrupo(
+    reunioes ?? [],
+    gruposPorReuniao,
+    hojeISO
+  );
   const semSinalDeVida = calcularSemSinalDeVida(
     (grupos ?? []).filter((g) => g.status === "Ativo"),
     reunioes ?? [],
@@ -117,12 +116,7 @@ export default async function GruposPage() {
   const saudeGrupos = ativos
     .map((g) => {
       const ultima = ultimaReuniaoPorGrupo.get(g.id);
-      const diasSemReuniao = ultima
-        ? Math.floor(
-            (hoje.getTime() - new Date(ultima + "T00:00:00").getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-        : null;
+      const diasSemReuniao = ultima ? diasDesde(ultima, hojeISO) : null;
       const tendenciaRoas = calcTendenciaRoas(
         agregarPorMes(resultadosPorGrupo.get(g.id) ?? [])
       );
@@ -159,7 +153,16 @@ export default async function GruposPage() {
         saudeGrupos={saudeGrupos}
       />
 
-      <GruposTable grupos={grupos ?? []} />
+      <GruposTable
+        grupos={grupos ?? []}
+        diasSemReuniaoPorGrupo={Object.fromEntries(
+          (grupos ?? []).map((g) => {
+            const ultima = ultimaReuniaoPorGrupo.get(g.id);
+            return [g.id, ultima ? diasDesde(ultima, hojeISO) : null];
+          })
+        )}
+        saudePorGrupo={Object.fromEntries(saudeGrupos.map((s) => [s.id, s.status]))}
+      />
     </div>
   );
 }

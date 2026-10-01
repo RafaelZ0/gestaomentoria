@@ -95,7 +95,7 @@ export function RaioXResumoCard({
     <section className="flex flex-col gap-5 border-b border-line pb-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <span className="text-[13px] text-subtle">Raio-X da clínica · onboarding concluído</span>
+          <span className="text-[13px] text-muted">Raio-X da clínica · onboarding concluído</span>
           <span className="text-[20px] font-medium tracking-[-0.01em] text-text">
             {texto(v.clinica) || texto(v.aluno) || "Clínica"}
           </span>
@@ -115,7 +115,7 @@ export function RaioXResumoCard({
 
       {texto(v.sucesso) && (
         <blockquote className="border-l-2 border-gold pl-4">
-          <p className="text-[13px] text-subtle">Daqui a 90 dias, valeu a pena se...</p>
+          <p className="text-[13px] text-muted">Daqui a 90 dias, valeu a pena se...</p>
           <p className="mt-1 font-serif text-[19px] leading-snug text-text">“{texto(v.sucesso)}”</p>
         </blockquote>
       )}
@@ -140,7 +140,7 @@ export function RaioXResumoCard({
             ))}
           </ol>
           {pts.length > 4 && (
-            <p className="text-[13px] text-subtle">+{pts.length - 4} no raio-X completo</p>
+            <p className="text-[13px] text-muted">+{pts.length - 4} no raio-X completo</p>
           )}
         </div>
       )}

@@ -77,7 +77,7 @@ export default async function PagamentosPage({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[620px] text-left text-[14.5px]">
           <thead>
-            <tr className="border-b border-line text-[12.5px] text-subtle">
+            <tr className="border-b border-line text-[13px] text-muted">
               <th className="px-3 pb-2.5 pt-1 font-normal">Data</th>
               <th className="px-3 pb-2.5 pt-1 font-normal">Tipo</th>
               <th className="px-3 pb-2.5 pt-1 font-normal">Status</th>

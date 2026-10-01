@@ -13,7 +13,7 @@ export function Metric({
   const cor = tom === "danger" ? "text-danger" : tom === "warn" ? "text-warn" : tom === "ok" ? "text-ok" : "text-text";
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
-      <span className="text-[13px] text-subtle">{rotulo}</span>
+      <span className="text-[13px] text-muted">{rotulo}</span>
       <span
         className={`font-medium tabular-nums tracking-[-0.01em] ${cor} ${
           tamanho === "lg" ? "text-[28px] leading-tight" : "text-[22px] leading-tight"

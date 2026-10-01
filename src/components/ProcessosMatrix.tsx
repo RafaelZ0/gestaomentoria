@@ -5,7 +5,7 @@ import Link from "next/link";
 import { StatusBadge, trafegoPagoVariant } from "@/components/StatusBadge";
 import { StatusDot, sentenceCase } from "@/components/ui/StatusDot";
 import { Segmented } from "@/components/ui/Segmented";
-import { displayGroupName } from "@/lib/format";
+import { displayGroupName, displayProcessName } from "@/lib/format";
 
 type Grupo = {
   id: string;
@@ -88,7 +88,7 @@ export function ProcessosMatrix({
             <option value={TRAFEGO_PAGO_ID}>Tráfego pago</option>
             {processos.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.nome}
+                {displayProcessName(p.nome)}
                 {!p.ativo ? " (inativo)" : ""}
               </option>
             ))}
@@ -144,7 +144,7 @@ export function ProcessosMatrix({
           />
         </div>
 
-        <p className="ml-auto pb-2 text-[13px] text-subtle">
+        <p className="ml-auto pb-2 text-[13px] text-muted">
           {gruposFiltrados.length} grupo{gruposFiltrados.length === 1 ? "" : "s"}
           {filtroProcesso === TRAFEGO_PAGO_ID && (
             <> com tráfego pago “{filtroTrafego}”</>
@@ -153,7 +153,7 @@ export function ProcessosMatrix({
             <>
               {" "}
               {filtroCondicao === "fizeram" ? "fizeram" : "não fizeram"} “
-              {processoSelecionado.nome}”
+              {displayProcessName(processoSelecionado.nome)}”
             </>
           )}
         </p>
@@ -162,7 +162,7 @@ export function ProcessosMatrix({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-[14px]">
           <thead>
-            <tr className="border-b border-line text-[12.5px] text-subtle">
+            <tr className="border-b border-line text-[13px] text-muted">
               <th className="sticky left-0 z-10 bg-bg px-3 pb-2.5 pt-3 font-normal">
                 Grupo
               </th>
@@ -174,7 +174,7 @@ export function ProcessosMatrix({
                   key={p.id}
                   className="whitespace-nowrap px-3 pb-2.5 pt-3 text-center font-normal"
                 >
-                  <div>{p.nome}</div>
+                  <div>{displayProcessName(p.nome)}</div>
                   <div className="mt-0.5 tabular-nums text-muted">
                     {resumoPorProcesso.get(p.id) ?? 0}/{gruposFiltrados.length}
                   </div>

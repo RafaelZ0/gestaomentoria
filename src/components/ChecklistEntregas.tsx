@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { toggleEntrega, updateEntregaData } from "@/app/actions/entregas";
-import { formatDate } from "@/lib/format";
+import { displayProcessName, formatDate } from "@/lib/format";
 
 export interface EntregaItem {
   id: string;
@@ -80,7 +80,9 @@ export function ChecklistEntregas({
             key={e.id}
             className="flex min-h-12 items-center justify-between gap-4 border-b border-line-soft py-1.5 text-[14.5px]"
           >
-            <label className="flex cursor-pointer items-center gap-3 text-text">
+            {/* Destaque no que falta fazer: pendente com contorno dourado e
+                texto normal; feito fica discreto. */}
+            <label className="flex cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
                 checked={e.feito}
@@ -88,11 +90,25 @@ export function ChecklistEntregas({
                 onChange={(ev) =>
                   startTransition(() => toggleEntrega(grupoId, e.id, ev.target.checked))
                 }
-                className="h-4 w-4 shrink-0"
+                className="peer sr-only"
               />
-              <span className={e.feito ? "text-text-2" : ""}>{e.nome}</span>
+              <span
+                aria-hidden
+                className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border-[1.5px] transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold ${
+                  e.feito ? "border-raised bg-raised text-muted" : "border-gold hover:bg-gold/10"
+                }`}
+              >
+                {e.feito && (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12.5l4.5 4.5L19 7.5" />
+                  </svg>
+                )}
+              </span>
+              <span className={e.feito ? "text-muted" : "text-text"}>
+                {displayProcessName(e.nome)}
+              </span>
             </label>
-            <span className="shrink-0 text-[13.5px] tabular-nums text-muted">
+            <span className="shrink-0 text-[13.5px] tabular-nums">
               {e.feito ? (
                 editando ? (
                   <input
@@ -101,13 +117,13 @@ export function ChecklistEntregas({
                     onChange={(ev) => setDatas((d) => ({ ...d, [e.id]: ev.target.value }))}
                     className="campo h-8 w-40"
                   />
-                ) : e.data_feito ? (
-                  `Feito em ${formatDate(e.data_feito)}`
                 ) : (
-                  "Feito"
+                  <span className="text-subtle">
+                    {e.data_feito ? `Feito em ${formatDate(e.data_feito)}` : "Feito"}
+                  </span>
                 )
               ) : (
-                "—"
+                <span className="text-warn">Pendente</span>
               )}
             </span>
           </div>

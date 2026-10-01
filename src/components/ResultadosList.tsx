@@ -9,6 +9,8 @@ import {
 import { formatBRL, formatDate, formatMesAno } from "@/lib/format";
 import type { ResultadoGrupo } from "@/lib/database.types";
 import { Metric } from "@/components/ui/Metric";
+import { Tendencia } from "@/components/ui/Tendencia";
+import { roasDe, variacoesEntre, type MetricasMes } from "@/lib/tendencia";
 import { RowMenu } from "@/components/ui/RowMenu";
 
 const inputClass =
@@ -72,6 +74,16 @@ export function ResultadosList({
   }
   const meses = [...porMes.entries()].sort((a, b) => b[0].localeCompare(a[0]));
 
+  function metricasDoMes(doMes: ResultadoGrupo[]): MetricasMes {
+    const s = somar(doMes);
+    return {
+      investimento: s.investimento,
+      leads: s.leads,
+      vendas: s.vendasCampanha + s.vendasTrafego,
+      faturamento: s.faturamentoCampanha + s.faturamentoTrafego,
+    };
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-4 border-b border-line pb-7">
@@ -93,11 +105,12 @@ export function ResultadosList({
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-[14.5px]">
               <thead>
-                <tr className="border-b border-line text-[12.5px] text-subtle">
+                <tr className="border-b border-line text-[13px] text-muted">
                   <th className="px-3 pb-2.5 pt-3 font-normal">Mês</th>
                   <th className="px-3 pb-2.5 pt-3 font-normal">Investido</th>
                   <th className="px-3 pb-2.5 pt-3 font-normal">Leads</th>
                   <th className="px-3 pb-2.5 pt-3 font-normal">CPL</th>
+                  <th className="px-3 pb-2.5 pt-3 font-normal">ROAS</th>
                   <th className="px-3 pb-2.5 pt-3 font-normal">Vendas</th>
                   <th className="px-3 pb-2.5 pt-3 font-normal">Faturamento</th>
                   <th className="px-3 pb-2.5 pt-3 font-normal">Ticket médio</th>
@@ -105,12 +118,16 @@ export function ResultadosList({
                 </tr>
               </thead>
               <tbody>
-                {meses.map(([chave, doMes]) => {
+                {meses.map(([chave, doMes], i) => {
                   const [ano, mes] = chave.split("-").map(Number);
                   const s = somar(doMes);
                   const vendasMes = s.vendasCampanha + s.vendasTrafego;
                   const faturamentoMes = s.faturamentoCampanha + s.faturamentoTrafego;
                   const aberto = expandido === chave;
+                  const m = metricasDoMes(doMes);
+                  const roasMes = roasDe(m);
+                  // Comparado com o mês anterior que teve lançamento (próximo da lista).
+                  const v = variacoesEntre(m, meses[i + 1] ? metricasDoMes(meses[i + 1][1]) : null);
                   return (
                     <Fragment key={chave}>
                       <tr
@@ -123,9 +140,20 @@ export function ResultadosList({
                         <td className="px-3 py-3 tabular-nums text-text">{s.leads}</td>
                         <td className="px-3 py-3 tabular-nums text-text">
                           {calcCpl(s.investimento, s.leads)}
+                          <Tendencia v={v.cpl} melhorQuandoMaior={false} />
                         </td>
-                        <td className="px-3 py-3 tabular-nums text-text">{vendasMes}</td>
-                        <td className="px-3 py-3 tabular-nums text-text">{formatBRL(faturamentoMes)}</td>
+                        <td className="px-3 py-3 tabular-nums text-text">
+                          {roasMes === null ? "—" : `${roasMes.toFixed(1)}x`}
+                          <Tendencia v={v.roas} />
+                        </td>
+                        <td className="px-3 py-3 tabular-nums text-text">
+                          {vendasMes}
+                          <Tendencia v={v.vendas} />
+                        </td>
+                        <td className="px-3 py-3 tabular-nums text-text">
+                          {formatBRL(faturamentoMes)}
+                          <Tendencia v={v.faturamento} />
+                        </td>
                         <td className="px-3 py-3 tabular-nums text-text">
                           {calcTicketMedio(faturamentoMes, vendasMes)}
                         </td>
@@ -135,7 +163,7 @@ export function ResultadosList({
                       </tr>
                       {aberto && (
                         <tr className="border-b border-line-soft last:border-0">
-                          <td colSpan={8} className="px-3 pb-4">
+                          <td colSpan={9} className="px-3 pb-4">
                             <ul className="flex flex-col">
                               {doMes.map((r) => (
                                 <ResultadoRow key={r.id} grupoId={grupoId} resultado={r} />

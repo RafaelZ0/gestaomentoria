@@ -72,7 +72,7 @@ function GraficoLinha({
 
   return (
     <div className="flex flex-col">
-      <p className="text-[13px] text-subtle">{titulo}</p>
+      <p className="text-[13px] text-muted">{titulo}</p>
       {!temDado ? (
         <div className="flex h-[180px] items-center justify-center text-sm text-text-2">
           Sem dados suficientes

@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { calcDuracaoDias } from "@/lib/format";
+import { diasDesde } from "@/lib/agendaStatus";
 import { calcSaudeGrupo, calcTendenciaRoas } from "@/lib/saude";
 
 // Dedup via React cache(): layout.tsx e a page.tsx de cada aba do grupo
@@ -24,8 +24,12 @@ export const getSaudeGrupo = cache(async (id: string) => {
   const supabase = await createClient();
   const hoje = new Date().toISOString().slice(0, 10);
 
-  const [{ data: ultimaReuniao }, { data: entregas }, { data: resultados }] =
-    await Promise.all([
+  const [
+    { data: ultimaPropria },
+    { data: participacoes },
+    { data: entregas },
+    { data: resultados },
+  ] = await Promise.all([
       supabase
         .from("reunioes")
         .select("data")
@@ -34,6 +38,10 @@ export const getSaudeGrupo = cache(async (id: string) => {
         .order("data", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      supabase
+        .from("reuniao_participantes")
+        .select("reuniao_id, mentorados!inner(grupo_id)")
+        .eq("mentorados.grupo_id", id),
       supabase
         .from("entregas_grupo")
         .select("feito, tipos_entrega(ativo)")
@@ -44,7 +52,30 @@ export const getSaudeGrupo = cache(async (id: string) => {
         .eq("grupo_id", id),
     ]);
 
-  const diasSemReuniao = ultimaReuniao ? calcDuracaoDias(ultimaReuniao.data, null) : null;
+  // Mesma regra de "última reunião" do resto do sistema
+  // (calcularUltimaReuniaoPorGrupo): até hoje, própria ou como convidado.
+  const idsParticipacao = [
+    ...new Set(
+      ((participacoes ?? []) as unknown as { reuniao_id: string }[]).map((p) => p.reuniao_id)
+    ),
+  ];
+  const { data: ultimaComoConvidado } =
+    idsParticipacao.length > 0
+      ? await supabase
+          .from("reunioes")
+          .select("data")
+          .in("id", idsParticipacao)
+          .lte("data", hoje)
+          .order("data", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : { data: null };
+
+  const ultimaData = [ultimaPropria?.data, ultimaComoConvidado?.data]
+    .filter((d): d is string => !!d)
+    .sort()
+    .at(-1);
+  const diasSemReuniao = ultimaData ? diasDesde(ultimaData, hoje) : null;
 
   type EntregaRow = { feito: boolean; tipos_entrega: { ativo: boolean } | null };
   const processosIncompletos = ((entregas ?? []) as unknown as EntregaRow[]).filter(

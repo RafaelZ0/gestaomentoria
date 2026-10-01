@@ -22,7 +22,7 @@ export function AgendaResumo({
   return (
     <div className="flex w-full max-w-[240px] flex-col gap-6">
       <section className="flex flex-col">
-        <h3 className="px-2 pb-1.5 text-xs font-medium text-subtle">Próximas reuniões</h3>
+        <h3 className="px-2 pb-1.5 text-[13px] font-medium text-muted">Próximas reuniões</h3>
         {proximas.length === 0 ? (
           <p className="px-2 text-[13px] text-muted">Nenhuma.</p>
         ) : (
@@ -44,7 +44,7 @@ export function AgendaResumo({
       </section>
 
       <section className="flex flex-col">
-        <h3 className="px-2 pb-1.5 text-xs font-medium text-subtle">Quem ainda precisa agendar</h3>
+        <h3 className="px-2 pb-1.5 text-[13px] font-medium text-muted">Quem ainda precisa agendar</h3>
         {paraAgendar.length === 0 ? (
           <p className="px-2 text-[13px] text-muted">Todo mundo em dia.</p>
         ) : (

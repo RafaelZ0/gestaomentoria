@@ -41,7 +41,7 @@ export function GrupoCabecalho({
 
   return (
     <div className="flex flex-col gap-3.5">
-      <Link href="/grupos" prefetch={false} className="w-fit text-[13px] text-subtle hover:text-text">
+      <Link href="/grupos" prefetch={false} className="w-fit text-[13px] text-muted hover:text-text">
         Grupos de gestão
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-6">

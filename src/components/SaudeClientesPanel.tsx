@@ -22,7 +22,7 @@ export function SaudeClientesPanel({
 
   return (
     <div className="flex flex-col">
-      <div className="grid grid-cols-[1.4fr_1fr_2.4fr] gap-4 border-b border-line px-3 pb-2.5 pt-3 text-[12.5px] text-subtle">
+      <div className="grid grid-cols-[1.4fr_1fr_2.4fr] gap-4 border-b border-line px-3 pb-2.5 pt-3 text-[13px] text-muted">
         <span>Grupo</span>
         <span>Status</span>
         <span>Sinais</span>

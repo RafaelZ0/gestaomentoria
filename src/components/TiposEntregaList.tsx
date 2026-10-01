@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { createTipoEntrega, toggleTipoEntregaAtivo } from "@/app/actions/tiposEntrega";
-import { formatDate } from "@/lib/format";
+import { displayProcessName, formatDate } from "@/lib/format";
 import { StatusDot } from "@/components/ui/StatusDot";
 import { RowMenu } from "@/components/ui/RowMenu";
 import type { TipoEntrega } from "@/lib/database.types";
@@ -43,7 +43,7 @@ export function TiposEntregaList({ tipos }: { tipos: TipoEntrega[] }) {
       {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="flex flex-col">
-        <div className={`grid ${COLUNAS} gap-3 border-b border-line px-3 pb-2.5 pt-1 text-[12.5px] text-subtle`}>
+        <div className={`grid ${COLUNAS} gap-3 border-b border-line px-3 pb-2.5 pt-1 text-[13px] text-muted`}>
           <span>Nome</span>
           <span>Ativo desde</span>
           <span>Status</span>
@@ -78,7 +78,7 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
     <div
       className={`grid ${COLUNAS} min-h-12 items-center gap-3 border-b border-line-soft px-3 py-1.5 text-[14.5px] last:border-b-0`}
     >
-      <span className={tipo.ativo ? "text-text" : "text-muted"}>{tipo.nome}</span>
+      <span className={tipo.ativo ? "text-text" : "text-muted"}>{displayProcessName(tipo.nome)}</span>
       <span className="text-[13.5px] tabular-nums text-text-2">
         {editandoData ? (
           <input
@@ -124,7 +124,7 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
         </span>
       ) : (
         <RowMenu
-          rotulo={`Mais opções de ${tipo.nome}`}
+          rotulo={`Mais opções de ${displayProcessName(tipo.nome)}`}
           acoes={[
             { label: "Editar data", onSelect: () => setEditandoData(true) },
             tipo.ativo
@@ -132,7 +132,7 @@ function TipoRow({ tipo }: { tipo: TipoEntrega }) {
                   label: "Desativar",
                   destrutiva: true,
                   confirmar: {
-                    titulo: `Desativar “${tipo.nome}”?`,
+                    titulo: `Desativar “${displayProcessName(tipo.nome)}”?`,
                     texto: "O processo sai do checklist dos grupos. O histórico já registrado não é apagado.",
                     botao: "Desativar",
                   },

@@ -294,7 +294,7 @@ export function ReuniaoItem({
         </div>
       )}
       {participantes.length > 0 && (
-        <p className="mt-2 text-[13px] text-subtle">
+        <p className="mt-2 text-[13px] text-muted">
           Participantes:{" "}
           {participantes
             .map((p) => p.nome + (p.deOutroGrupo && p.grupoNome ? ` (${displayGroupName(p.grupoNome)})` : ""))

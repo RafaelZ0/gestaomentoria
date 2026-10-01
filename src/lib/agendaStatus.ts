@@ -45,34 +45,52 @@ export interface GrupoSemSinal {
   dias: number | null;
 }
 
-// "Sem sinal de vida": grupos ativos cuja reunião mais recente (qualquer
-// data, própria ou como participante) foi há mais de 30 dias, ou que nunca
-// tiveram reunião. Do maior atraso pro menor (nunca = primeiro). Usado nas
-// métricas de Grupos de gestão e na seção da barra lateral.
+// Regra única de "última reunião" (Visão geral do grupo, saúde do cliente,
+// lista de grupos, "sem sinal de vida" e barra lateral): a reunião mais
+// recente até hoje — reuniões só agendadas não contam —, própria ou em que
+// um mentorado do grupo participou como convidado.
+export function calcularUltimaReuniaoPorGrupo(
+  reunioes: { id: string; grupo_id: string; data: string }[],
+  gruposPorReuniao: Map<string, Set<string>>,
+  hojeISO: string = new Date().toISOString().slice(0, 10)
+): Map<string, string> {
+  const ultima = new Map<string, string>();
+  for (const r of reunioes) {
+    if (r.data > hojeISO) continue;
+    const gruposEnvolvidos = gruposPorReuniao.get(r.id) ?? new Set([r.grupo_id]);
+    for (const gid of gruposEnvolvidos) {
+      const atual = ultima.get(gid);
+      if (!atual || r.data > atual) ultima.set(gid, r.data);
+    }
+  }
+  return ultima;
+}
+
+export function diasDesde(dataISO: string, hojeISO: string): number {
+  return diasEntre(dataISO, hojeISO);
+}
+
+// "Sem sinal de vida": grupos ativos cuja última reunião (regra acima) foi
+// há mais de 30 dias, ou que nunca tiveram reunião. Do maior atraso pro
+// menor (nunca = primeiro). Usado nas métricas de Grupos de gestão e na
+// seção da barra lateral.
 export function calcularSemSinalDeVida(
   gruposAtivos: { id: string; nome: string }[],
   reunioes: { id: string; grupo_id: string; data: string }[],
   gruposPorReuniao: Map<string, Set<string>>,
   hoje: Date = new Date()
 ): GrupoSemSinal[] {
-  const ultimaReuniaoPorGrupo = new Map<string, string>();
-  for (const r of reunioes) {
-    const gruposEnvolvidos = gruposPorReuniao.get(r.id) ?? new Set([r.grupo_id]);
-    for (const gid of gruposEnvolvidos) {
-      const atual = ultimaReuniaoPorGrupo.get(gid);
-      if (!atual || r.data > atual) ultimaReuniaoPorGrupo.set(gid, r.data);
-    }
-  }
+  const hojeISO = hoje.toISOString().slice(0, 10);
+  const ultimaReuniaoPorGrupo = calcularUltimaReuniaoPorGrupo(
+    reunioes,
+    gruposPorReuniao,
+    hojeISO
+  );
 
   return gruposAtivos
     .map((g) => {
       const ultima = ultimaReuniaoPorGrupo.get(g.id);
-      const dias = ultima
-        ? Math.floor(
-            (hoje.getTime() - new Date(ultima + "T00:00:00").getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-        : null;
+      const dias = ultima ? diasDesde(ultima, hojeISO) : null;
       return { id: g.id, nome: g.nome, dias };
     })
     .filter((g) => g.dias === null || g.dias > DIAS_SEM_SINAL_DE_VIDA)

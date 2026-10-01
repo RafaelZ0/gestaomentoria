@@ -219,7 +219,7 @@
   .rotulo {
     display: block;
     font-size: 13px;
-    color: var(--subtle);
+    color: var(--muted);
   }
 
   /* ---- Agenda ------------------------------------------------------------- */
